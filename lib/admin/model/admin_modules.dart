@@ -1,0 +1,87 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dashboard/admin/model/field_types/field_type_base.dart';
+import 'package:flutter/material.dart';
+
+export "field_types/field_type_base.dart";
+export "field_types/actions.dart";
+export "field_types/image_url.dart";
+export "field_types/location.dart";
+export "field_types/date.dart";
+export "field_types/ref.dart";
+export "field_types/number.dart";
+export "field_types/boolean.dart";
+export "field_types/text.dart";
+export "field_types/defecto.dart";
+export "field_types/memo.dart";
+
+class Module {
+  String name;
+  String title;
+  IconData icon;
+  String collection;
+  String orderBy;
+  Function getFilter;
+  Function onSave;
+  Function onRemove;
+  int rowsPerPage;
+  bool canAdd;
+  bool canEdit;
+  bool canRemove;
+
+  List<ColumnModule> columns;
+  Module(
+      {this.name,
+      this.collection,
+      this.getFilter,
+      this.title,
+      this.icon,
+      this.columns,
+      this.orderBy,
+      this.rowsPerPage = 10,
+      this.canAdd = true,
+      this.canEdit = true,
+      this.canRemove = true,
+      this.onSave,
+      this.onRemove}) {
+    if (this.getFilter == null) {
+      this.getFilter = () => Map<String, dynamic>();
+    }
+  }
+}
+
+class ColumnModule {
+  String label;
+  String field;
+  FieldType type;
+  bool editable;
+  bool showOnEdit;
+  bool showOnNew;
+  bool listable;
+  bool clickToDetail;
+  bool filter;
+  bool mandatory;
+
+  ColumnModule(
+      {this.label,
+      this.field,
+      this.type,
+      this.editable = true,
+      this.listable = true,
+      this.clickToDetail = true,
+      this.filter = false,
+      this.mandatory = false,
+      this.showOnEdit = true,
+      this.showOnNew = true});
+
+  getListContent(DocumentSnapshot _object) => type.getListContent(_object, this);
+  getEditContent(value, Function onValidate, Function onChange) => type.getEditContent(value, this, onValidate, onChange);
+  getFilterContent(value, Function onFilter) => type.getFilterContent(value, this, onFilter);
+}
+
+class Menu {
+  String label;
+  IconData iconData;
+  Widget child;
+
+  Menu({this.label, this.iconData, this.child});
+}

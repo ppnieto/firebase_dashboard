@@ -12,6 +12,15 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_icons: ^1.1.0
+  sweetsheet: ^0.2.0
+  spinner_input: ^0.1.2
+  firebase_core: any
+  firebase_storage: any
+  cloud_firestore: any
+  firebase_auth: ^1.0.0
+  #intl: any
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
