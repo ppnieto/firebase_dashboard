@@ -26,7 +26,9 @@ class AdminScreenState extends State<AdminScreen> {
   Map<String, dynamic> filtro = {};
 
   CollectionReference getCollection() {
-    String collection = widget.collection == null ? widget.module.collection : widget.collection.path;
+    String collection = widget.collection == null
+        ? widget.module.collection
+        : widget.collection.path;
     return FirebaseFirestore.instance.collection(collection);
   }
 
@@ -34,8 +36,12 @@ class AdminScreenState extends State<AdminScreen> {
     Query result = query;
     if (filtro != null) {
       for (MapEntry filterEntry in filtro.entries) {
-        if (filterEntry.value != null && filterEntry.value.toString().isNotEmpty) {
-          print("   add filter " + filterEntry.key + " = " + filterEntry.value.toString());
+        if (filterEntry.value != null &&
+            filterEntry.value.toString().isNotEmpty) {
+          print("   add filter " +
+              filterEntry.key +
+              " = " +
+              filterEntry.value.toString());
           result = result.where(filterEntry.key, isEqualTo: filterEntry.value);
         }
       }
@@ -59,11 +65,16 @@ class AdminScreenState extends State<AdminScreen> {
         return ListView(children: [
           PaginatedDataTable(
               rowsPerPage: widget.module.rowsPerPage,
-              columns: widget.module.columns.where((element) => element.listable).map((column) {
+              columns: widget.module.columns
+                      .where((element) => element.listable)
+                      .map((column) {
                     return DataColumn(label: Text(column.label));
                   }).toList() +
-                  (widget.module.canRemove ? [DataColumn(label: Container())] : []),
-              source: MyDataTableSource(snapshot, widget.module, context, (index) {
+                  (widget.module.canRemove
+                      ? [DataColumn(label: Container())]
+                      : []),
+              source:
+                  MyDataTableSource(snapshot, widget.module, context, (index) {
                 setState(() {
                   detalle = snapshot.data.docs[index];
                   updateData = detalle.data();
@@ -77,7 +88,10 @@ class AdminScreenState extends State<AdminScreen> {
 
   getEditField(ColumnModule column) {
     return Padding(
-        padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 5 : 20),
+        padding: EdgeInsets.all(
+            MediaQuery.of(context).size.width < responsiveDashboardWidth
+                ? 5
+                : 20),
         child: column.getEditContent(updateData[column.field], null, (value) {
           setState(() {
             updateData[column.field] = value;
@@ -121,9 +135,14 @@ class AdminScreenState extends State<AdminScreen> {
   getDetail() => SingleChildScrollView(
         child: Card(
           elevation: 2,
-          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth ? EdgeInsets.fromLTRB(64, 32, 64, 64) : EdgeInsets.all(5),
+          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth
+              ? EdgeInsets.fromLTRB(64, 32, 64, 64)
+              : EdgeInsets.all(5),
           child: Padding(
-            padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 32.0 : 5),
+            padding: EdgeInsets.all(
+                MediaQuery.of(context).size.width < responsiveDashboardWidth
+                    ? 32.0
+                    : 5),
             child: Container(
                 //padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                 child: Builder(
@@ -131,7 +150,8 @@ class AdminScreenState extends State<AdminScreen> {
                         key: _formKey,
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: widget.module.columns.map<Widget>((column) {
+                            children:
+                                widget.module.columns.map<Widget>((column) {
                               if (column.showOnEdit) {
                                 return getEditField(column);
                               } else {
@@ -149,30 +169,38 @@ class AdminScreenState extends State<AdminScreen> {
           child: Padding(
             padding: const EdgeInsets.all(32.0),
             child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 16.0, horizontal: 16.0),
                 child: Builder(
                     builder: (context) => Form(
                         key: _formKey,
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: widget.module.columns.map<Widget>((column) {
-                                  if (column.showOnNew) {
-                                    return getEditField(column);
-                                  } else {
-                                    return Container();
-                                  }
-                                }).toList() +
-                                [])))),
+                            children:
+                                widget.module.columns.map<Widget>((column) {
+                                      if (column.showOnNew) {
+                                        return getEditField(column);
+                                      } else {
+                                        return Container();
+                                      }
+                                    }).toList() +
+                                    [])))),
           ),
         ),
       );
 
   getTitle() {
-    return Text(widget.module.title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold));
+    return Text(widget.module.title,
+        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold));
   }
 
-  getConfirmar() =>
-      Center(child: Padding(padding: EdgeInsets.all(40), child: Column(children: [Text("¿Está seguro que desea realizar la operación?"), TextButton(onPressed: () {}, child: Text("SI"))])));
+  getConfirmar() => Center(
+      child: Padding(
+          padding: EdgeInsets.all(40),
+          child: Column(children: [
+            Text("¿Está seguro que desea realizar la operación?"),
+            TextButton(onPressed: () {}, child: Text("SI"))
+          ])));
 
   @override
   Widget build(BuildContext context) {
@@ -230,7 +258,7 @@ class AdminScreenState extends State<AdminScreen> {
           tipo == TipoPantalla.detalle && widget.module.canRemove
               ? IconButton(
                   padding: EdgeInsets.all(0),
-                  icon: Icon(FontAwesome.remove),
+                  icon: Icon(Icons.delete),
                   onPressed: () async {
                     doBorrar(context, detalle.reference, () {
                       setState(() {
@@ -256,7 +284,8 @@ class AdminScreenState extends State<AdminScreen> {
                     filtro[columnModule.field] = "";
                   }
                   return Row(children: [
-                    columnModule.getFilterContent(filtro[columnModule.field], (val) {
+                    columnModule.getFilterContent(filtro[columnModule.field],
+                        (val) {
                       print("val = ");
                       print(val);
                       setState(() {
@@ -320,7 +349,9 @@ class MyDataTableSource extends DataTableSource {
 
     return DataRow.byIndex(
         index: index,
-        cells: module.columns.where((element) => element.listable).map<DataCell>((column) {
+        cells: module.columns
+                .where((element) => element.listable)
+                .map<DataCell>((column) {
               return DataCell(column.getListContent(_object),
                   onTap: column.clickToDetail && module.canEdit
                       ? () {
@@ -333,7 +364,8 @@ class MyDataTableSource extends DataTableSource {
                     DataCell(RaisedButton.icon(
                       color: Colors.blue,
                       icon: Icon(FontAwesome.remove, color: Colors.white),
-                      label: Text("Borrar", style: TextStyle(color: Colors.white)),
+                      label:
+                          Text("Borrar", style: TextStyle(color: Colors.white)),
                       onPressed: () {
                         doBorrar(context, _object.reference, () {
                           if (module.onRemove != null) {

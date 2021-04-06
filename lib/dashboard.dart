@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 final int responsiveDashboardWidth = 1000;
 
 class DashboardMainScreen extends StatefulWidget {
-  final List<Menu> menus;
+  final List<MenuBase> menus;
   final List<Widget> actions;
   final String title;
   DashboardMainScreen({this.menus, this.actions, this.title});
@@ -15,7 +15,8 @@ class DashboardMainScreen extends StatefulWidget {
   DashboardMainScreenState createState() => DashboardMainScreenState();
 }
 
-class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTickerProviderStateMixin {
+class DashboardMainScreenState extends State<DashboardMainScreen>
+    with SingleTickerProviderStateMixin {
   TabController tabController;
   int active = 0;
   List<Widget> mainContents;
@@ -23,8 +24,13 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
   @override
   void initState() {
     super.initState();
-    mainContents = widget.menus.map((menu) => menu.child).toList();
-    tabController = new TabController(vsync: this, length: mainContents.length, initialIndex: 0)
+    mainContents = widget.menus.map((menu) {
+      if (menu is Menu) return menu.child;
+      if (menu is MenuGroup) return Container();
+      //return menu.child;
+    }).toList();
+    tabController = new TabController(
+        vsync: this, length: mainContents.length, initialIndex: 0)
       ..addListener(() {
         setState(() {
           active = tabController.index;
@@ -38,7 +44,9 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
     super.dispose();
   }
 
-  getMenuItem(bool drawerStatus, String text, IconData iconData, int idx, bool ident) => FlatButton(
+  getMenuItem(bool drawerStatus, String text, IconData iconData, int idx,
+          bool ident) =>
+      FlatButton(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
         color: tabController.index == idx ? Colors.grey[100] : Colors.white,
         onPressed: () {
@@ -70,21 +78,26 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: MediaQuery.of(context).size.width < responsiveDashboardWidth ? true : false,
-        title: Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(left: 32),
-            child: Text(
-              widget.title,
-              style: TextStyle(
-                fontSize: 24,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'HelveticaNeue',
+        automaticallyImplyLeading:
+            MediaQuery.of(context).size.width < responsiveDashboardWidth
+                ? true
+                : false,
+        title: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(left: 32),
+                child: Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'HelveticaNeue',
+                  ),
+                ),
               ),
-            ),
-          ),
-        ]),
+            ]),
         actions: widget.actions,
         //backgroundColor: ColorConstants.blue,
         // automaticallyImplyLeading: false,
@@ -95,10 +108,17 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
               ? Container()
               : Card(
                   elevation: 2.0,
-                  child: Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height, width: 300, color: Colors.white, child: listDrawerItems(false)),
+                  child: Container(
+                      margin: EdgeInsets.all(0),
+                      height: MediaQuery.of(context).size.height,
+                      width: 300,
+                      color: Colors.white,
+                      child: listDrawerItems(false)),
                 ),
           Container(
-            width: MediaQuery.of(context).size.width < responsiveDashboardWidth ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.width - 310,
+            width: MediaQuery.of(context).size.width < responsiveDashboardWidth
+                ? MediaQuery.of(context).size.width
+                : MediaQuery.of(context).size.width - 310,
             child: TabBarView(
               physics: NeverScrollableScrollPhysics(),
               controller: tabController,
@@ -107,7 +127,9 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
           )
         ],
       ),
-      drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: listDrawerItems(true))),
+      drawer: Padding(
+          padding: EdgeInsets.only(top: 56),
+          child: Drawer(child: listDrawerItems(true))),
     );
   }
 
