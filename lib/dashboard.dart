@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 final int responsiveDashboardWidth = 1000;
 
 class DashboardMainScreen extends StatefulWidget {
-  final List<Menu> menus;
+  final List<MenuBase> menus;
   final List<Widget> actions;
   final String title;
   DashboardMainScreen({this.menus, this.actions, this.title});
@@ -24,7 +24,11 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
   @override
   void initState() {
     super.initState();
-    mainContents = widget.menus.map((menu) => menu.child).toList();
+    mainContents = widget.menus.map((menu) {
+      if (menu is Menu) return menu.child;
+      if (menu is MenuGroup) return Container();
+      //return menu.child;
+    }).toList();
     tabController = new TabController(
         vsync: this, length: mainContents.length, initialIndex: 0)
       ..addListener(() {
