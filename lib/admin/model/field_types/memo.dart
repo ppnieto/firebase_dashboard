@@ -1,11 +1,24 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:dashboard/admin/model/admin_modules.dart';
 
 class FieldTypeMemo extends FieldType {
   int maxLines;
-  FieldTypeMemo({this.maxLines = 4});
+  double listWidth;
+  FieldTypeMemo({this.maxLines = 4, this.listWidth});
+
   @override
-  getEditContent(value, ColumnModule column, Function onValidate, Function onChange) {
+  getListContent(
+          DocumentSnapshot _object, ColumnModule column) =>
+      listWidth != null
+          ? Container(
+              width: this.listWidth,
+              child: super.getListContent(_object, column))
+          : super.getListContent(_object, column);
+
+  @override
+  getEditContent(
+      value, ColumnModule column, Function onValidate, Function onChange) {
     return TextFormField(
         style: TextStyle(
             //fontFamily: 'HelveticaNeue',

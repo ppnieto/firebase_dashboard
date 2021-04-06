@@ -7,10 +7,13 @@ export "field_types/actions.dart";
 export "field_types/image_url.dart";
 export "field_types/location.dart";
 export "field_types/date.dart";
+export "field_types/currency.dart";
 export "field_types/ref.dart";
+export "field_types/datetime.dart";
 export "field_types/number.dart";
 export "field_types/boolean.dart";
 export "field_types/text.dart";
+export "field_types/ref_childs.dart";
 export "field_types/defecto.dart";
 export "field_types/memo.dart";
 
@@ -21,6 +24,7 @@ class Module {
   String collection;
   String orderBy;
   Function getFilter;
+  String reverseOrderBy;
   Function onSave;
   Function onRemove;
   int rowsPerPage;
@@ -33,6 +37,7 @@ class Module {
       {this.name,
       this.collection,
       this.getFilter,
+      this.reverseOrderBy,
       this.title,
       this.icon,
       this.columns,
@@ -73,15 +78,41 @@ class ColumnModule {
       this.showOnEdit = true,
       this.showOnNew = true});
 
-  getListContent(DocumentSnapshot _object) => type.getListContent(_object, this);
-  getEditContent(value, Function onValidate, Function onChange) => type.getEditContent(value, this, onValidate, onChange);
-  getFilterContent(value, Function onFilter) => type.getFilterContent(value, this, onFilter);
+  getListContent(DocumentSnapshot _object) =>
+      type.getListContent(_object, this);
+  getEditContent(value, Function onValidate, Function onChange) =>
+      type.getEditContent(value, this, onValidate, onChange);
+  getFilterContent(value, Function onFilter) =>
+      type.getFilterContent(value, this, onFilter);
 }
 
-class Menu {
+abstract class MenuBase {
   String label;
   IconData iconData;
+  String role;
+  int idx;
+  MenuBase({this.label, this.iconData, this.role});
+
+  @override
+  int get hashCode {
+    return label.hashCode;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return super == other;
+  }
+}
+
+class Menu extends MenuBase {
   Widget child;
 
-  Menu({this.label, this.iconData, this.child});
+  Menu({this.child, String label, IconData iconData, String role})
+      : super(label: label, iconData: iconData, role: role);
+}
+
+class MenuGroup extends MenuBase {
+  List<Menu> children;
+  MenuGroup({this.children, String label, IconData iconData, String role})
+      : super(label: label, iconData: iconData, role: role);
 }
