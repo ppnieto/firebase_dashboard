@@ -1,5 +1,6 @@
 library dashboard;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dashboard/admin/model/admin_modules.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,8 @@ class DashboardMainScreen extends StatefulWidget {
   final List<MenuBase> menus;
   final List<Widget> actions;
   final String title;
-  DashboardMainScreen({this.menus, this.actions, this.title});
+  final DocumentSnapshot docUser;
+  DashboardMainScreen({this.menus, this.actions, this.title, this.docUser});
 
   @override
   DashboardMainScreenState createState() => DashboardMainScreenState();
@@ -20,15 +22,14 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
   TabController tabController;
   int active = 0;
   List<Widget> mainContents;
+  Map<int, int> indexes = {};
 
   @override
   void initState() {
     super.initState();
-    mainContents = widget.menus.map((menu) {
-      if (menu is Menu) return menu.child;
-      if (menu is MenuGroup) return Container();
-      //return menu.child;
-    }).toList();
+
+    mainContents = getMainContents();
+
     tabController = new TabController(
         vsync: this, length: mainContents.length, initialIndex: 0)
       ..addListener(() {
@@ -36,6 +37,28 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
           active = tabController.index;
         });
       });
+  }
+
+  List<Widget> getMainContents() {
+    List<Widget> result = [];
+
+    addMenu(MenuBase menu) {
+      if (menu is Menu) {
+        // update idx
+        indexes[menu.hashCode] = result.length;
+        result.add(menu.child);
+      }
+      if (menu is MenuGroup) {
+        for (var child in menu.children) {
+          addMenu(child);
+        }
+      }
+    }
+
+    for (final menu in widget.menus) {
+      addMenu(menu);
+    }
+    return result;
   }
 
   @override
@@ -133,11 +156,47 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
     );
   }
 
-  Widget listDrawerItems(bool drawerStatus) {
+  Widget listDrawerItemsOLD(bool drawerStatus) {
     return ListView(
         children: widget.menus.map<Widget>((menu) {
       int idx = widget.menus.indexOf(menu);
       return getMenuItem(drawerStatus, menu.label, menu.iconData, idx, false);
+    }).toList());
+  }
+
+  Widget listDrawerItems(bool drawerStatus) {
+    var menus = widget.menus;
+    return ListView(
+        children: menus.map<Widget>((menu) {
+      bool hasRole = true;
+
+      if (menu.role != null) {
+        // si tiene restricción de rol
+        if (widget.docUser != null &&
+            widget.docUser.data().containsKey('roles') &&
+            widget.docUser['roles'].contains(menu.role) == false)
+          hasRole = false;
+      }
+
+      if (menu is Menu) {
+        return hasRole
+            ? getMenuItem(drawerStatus, menu.label, menu.iconData,
+                indexes[menu.hashCode], false)
+            : Container();
+      }
+      if (menu is MenuGroup) {
+        return hasRole
+            ? ExpansionTile(
+                initiallyExpanded: true,
+                title: Text(menu.label),
+                leading: Icon(menu.iconData),
+                children: menu.children.map<Widget>((submenu) {
+                  return getMenuItem(drawerStatus, submenu.label,
+                      submenu.iconData, indexes[submenu.hashCode], true);
+                }).toList())
+            : Container();
+      }
+      return Container();
     }).toList());
   }
 }

@@ -6,9 +6,9 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:sweetsheet/sweetsheet.dart';
 
 class AdminScreen extends StatefulWidget {
-  Module module;
-  bool showScaffoldBack;
-  CollectionReference collection;
+  final Module module;
+  final bool showScaffoldBack;
+  final CollectionReference collection;
 
   AdminScreen({this.module, this.showScaffoldBack = false, this.collection});
 
@@ -299,10 +299,6 @@ class AdminScreenState extends State<AdminScreen> {
               getActions(),
         ),
         body: content);
-    /*
-
-    return Padding(
-        padding: EdgeInsets.all(20), child: Card(child: Padding(padding: EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [getTitle(), content]))));*/
   }
 }
 

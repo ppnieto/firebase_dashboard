@@ -11,8 +11,8 @@ class LoginScreen extends StatelessWidget {
 
   final Function(LoginMethod, String, String) onEntrar;
 
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   LoginScreen({
     Key key,
@@ -21,13 +21,6 @@ class LoginScreen extends StatelessWidget {
     this.logoURL,
     this.imageURL,
   }) : super(key: key);
-
-  void showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red[300],
-        duration: Duration(seconds: 2)));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,16 +150,53 @@ class _LoginDesktop extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(vertical: 30.0, horizontal: 25.0),
             constraints: BoxConstraints(
-              maxWidth: 800,
+              maxWidth: 1000,
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
+                color: Colors.white, borderRadius: BorderRadius.circular(5.0)),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(color: Colors.red),
-                Container(color: Colors.blue)
+                Stack(
+                  children: [
+                    Container(
+                      width: 400,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        image: parent.imageURL != null
+                            ? DecorationImage(
+                                image: NetworkImage(parent.imageURL),
+                                fit: BoxFit.cover)
+                            : null,
+                      ),
+                    ),
+                    Container(
+                      width: 400,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            colors: [
+                              Colors.black.withOpacity(0.2),
+                              Colors.transparent
+                            ],
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter),
+                      ),
+                    ),
+                    parent.logoURL != null
+                        ? Positioned(
+                            child: Image.network(parent.logoURL),
+                            left: 10.0,
+                            right: 10.0,
+                            top: 10.0,
+                          )
+                        : SizedBox.shrink()
+                  ],
+                ),
+                Expanded(
+                    child: _LoginMobile(
+                  parent: parent,
+                )),
               ],
             )),
       ),
