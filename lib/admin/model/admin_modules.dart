@@ -16,6 +16,7 @@ export "field_types/text.dart";
 export "field_types/ref_childs.dart";
 export "field_types/defecto.dart";
 export "field_types/memo.dart";
+export "field_types/qr.dart";
 
 class Module {
   String name;

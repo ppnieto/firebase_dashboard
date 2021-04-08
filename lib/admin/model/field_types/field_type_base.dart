@@ -3,8 +3,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 abstract class FieldType {
-  getListContent(DocumentSnapshot _object, ColumnModule column) => Text(_object.data().containsKey(column.field) && _object[column.field] != null ? _object[column.field].toString() : "-");
-  getEditContent(value, ColumnModule column, Function onValidate, Function onChange) {
+  BuildContext context;
+
+  setContext(BuildContext context) {
+    this.context = context;
+  }
+
+  getListContent(DocumentSnapshot _object, ColumnModule column) => Text(
+      _object.data().containsKey(column.field) && _object[column.field] != null
+          ? _object[column.field].toString()
+          : "-");
+  getEditContent(
+      value, ColumnModule column, Function onValidate, Function onChange) {
     return Text("No implementado para tipo " + this.toString());
   }
 

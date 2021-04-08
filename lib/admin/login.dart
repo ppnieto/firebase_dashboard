@@ -8,6 +8,7 @@ class LoginScreen extends StatelessWidget {
   final String title;
   final String logoURL;
   final String imageURL;
+  final bool allowReminder;
 
   final Function(LoginMethod, String, String) onEntrar;
 
@@ -18,6 +19,7 @@ class LoginScreen extends StatelessWidget {
     Key key,
     @required this.title,
     @required this.onEntrar,
+    this.allowReminder = false,
     this.logoURL,
     this.imageURL,
   }) : super(key: key);
@@ -64,6 +66,9 @@ class _LoginMobile extends StatelessWidget {
                           textAlign: TextAlign.center),
                       SizedBox(height: 50),
                       Text('Usuario'),
+                      SizedBox(
+                        height: 10,
+                      ),
                       TextField(
                         decoration:
                             InputDecoration(suffixIcon: Icon(Icons.person)),
@@ -72,6 +77,9 @@ class _LoginMobile extends StatelessWidget {
                       ),
                       SizedBox(height: 20),
                       Text('Contraseña'),
+                      SizedBox(
+                        height: 10,
+                      ),
                       TextField(
                           obscureText: true,
                           decoration:
@@ -79,49 +87,35 @@ class _LoginMobile extends StatelessWidget {
                           //decoration: InputDecoration(labelText: "contraseña"),
                           controller: parent.passwordController),
                       SizedBox(height: 10),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(),
-                            TextButton(
-                              child: Text("Olvidé mi contraseña"),
-                              onPressed: () {},
-                            )
-                          ]),
+                      parent.allowReminder
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                  Container(),
+                                  TextButton(
+                                    child: Text("Olvidé mi contraseña"),
+                                    onPressed: () {},
+                                  )
+                                ])
+                          : SizedBox.shrink(),
                       SizedBox(height: 40),
                       TextButtonTheme(
                           data: TextButtonThemeData(
                               style: TextButton.styleFrom(
-                                  minimumSize: Size(300, 50),
-                                  padding: EdgeInsets.only(
-                                      top: 15, bottom: 15, left: 30, right: 30),
-                                  primary: Colors.white,
-                                  backgroundColor: Colors.blue)),
+                            minimumSize: Size(300, 50),
+                            padding: EdgeInsets.only(
+                                top: 15, bottom: 15, left: 30, right: 30),
+                            primary: Colors.white,
+                            backgroundColor: Theme.of(context).primaryColor,
+                          )),
                           child: TextButton(
                               child: Text("Entrar",
                                   style: TextStyle(fontSize: 18)),
                               onPressed: () async {
-                                if (parent.emailController.text.isEmpty ||
-                                    parent.passwordController.text.isEmpty) {
-                                  print("error");
-                                } else {
-                                  parent.onEntrar(
-                                      LoginMethod.loginPassword,
-                                      parent.emailController.text,
-                                      parent.passwordController.text);
-                                  /*
-                                  auth.User user =
-                                      await _auth.signInWithEmailAndPassword(
-                                          parent.emailController.text,
-                                          parent.passwordController.text);
-                                  if (user != null) {
-                                    onUserLogged();
-                                  } else {
-                                    parent.showError(context,
-                                        'Error en la identificación del usuario');
-                                  }
-                                  */
-                                }
+                                parent.onEntrar(
+                                    LoginMethod.loginPassword,
+                                    parent.emailController.text,
+                                    parent.passwordController.text);
                               })),
                       Expanded(child: Container()),
                       TextButton.icon(

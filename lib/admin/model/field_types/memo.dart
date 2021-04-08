@@ -24,7 +24,7 @@ class FieldTypeMemo extends FieldType {
             //fontFamily: 'HelveticaNeue',
             ),
         initialValue: value,
-        maxLines: 4,
+        maxLines: this.maxLines,
         decoration: InputDecoration(
           labelText: column.label,
         ),

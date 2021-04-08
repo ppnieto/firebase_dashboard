@@ -11,7 +11,8 @@ class FieldTypeDate extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     final f = new DateFormat(this.format);
-    if (_object.data().containsKey(column.field) && _object.data()[column.field] != null) {
+    if (_object.data().containsKey(column.field) &&
+        _object.data()[column.field] != null) {
       return Text(f.format(_object.data()[column.field].toDate()));
     } else {
       return Text("-");
@@ -19,7 +20,8 @@ class FieldTypeDate extends FieldType {
   }
 
   @override
-  getEditContent(value, ColumnModule column, Function onValidate, Function onChange) {
+  getEditContent(
+      value, ColumnModule column, Function onValidate, Function onChange) {
     final f = new DateFormat(this.format);
     TextEditingController txt = TextEditingController();
     DateTime dateTime;
@@ -33,6 +35,9 @@ class FieldTypeDate extends FieldType {
     return Row(children: [
       Expanded(
           child: TextFormField(
+        decoration: InputDecoration(
+          labelText: column.label,
+        ),
         controller: txt,
         enabled: column.editable,
         validator: (val) {

@@ -348,6 +348,8 @@ class MyDataTableSource extends DataTableSource {
         cells: module.columns
                 .where((element) => element.listable)
                 .map<DataCell>((column) {
+              // set context
+              column.type.setContext(context);
               return DataCell(column.getListContent(_object),
                   onTap: column.clickToDetail && module.canEdit
                       ? () {
@@ -358,7 +360,7 @@ class MyDataTableSource extends DataTableSource {
             (module.canRemove
                 ? [
                     DataCell(RaisedButton.icon(
-                      color: Colors.blue,
+                      color: Theme.of(context).primaryColor,
                       icon: Icon(FontAwesome.remove, color: Colors.white),
                       label:
                           Text("Borrar", style: TextStyle(color: Colors.white)),

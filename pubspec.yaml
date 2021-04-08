@@ -19,6 +19,7 @@ dependencies:
   firebase_storage: any
   cloud_firestore: any  
   intl: any
+  uuid: ^2.2.2
 
 dev_dependencies:
   flutter_test:
