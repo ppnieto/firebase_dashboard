@@ -16,10 +16,15 @@ dependencies:
   sweetsheet: ^0.2.0
   spinner_input: ^0.1.2
   firebase_core: any
-  firebase_storage: any
-  cloud_firestore: any  
+  firebase_storage: ^8.0.3
+  cloud_firestore: any
   intl: any
-  uuid: ^2.2.2
+  uuid: any
+  google_maps_flutter: any
+  google_maps_flutter_web: any
+  package_info_plus: any
+  universal_html: ^2.0.8
+  shared_preferences: ^2.0.5
 
 dev_dependencies:
   flutter_test:

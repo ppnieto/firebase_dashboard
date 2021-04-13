@@ -86,7 +86,8 @@ class AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  getEditField(ColumnModule column) {
+  getEditField(ColumnModule column) {    
+    column.type.setContext(context);
     return Padding(
         padding: EdgeInsets.all(
             MediaQuery.of(context).size.width < responsiveDashboardWidth

@@ -1,6 +1,8 @@
 import 'package:dashboard/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum LoginMethod { loginPassword, google, facebook, apple, twitter }
 
@@ -9,25 +11,46 @@ class LoginScreen extends StatelessWidget {
   final String logoURL;
   final String imageURL;
   final bool allowReminder;
+  final bool useGoogle;
+  final bool remindCredentials;
 
   final Function(LoginMethod, String, String) onEntrar;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  LoginScreen({
-    Key key,
-    @required this.title,
-    @required this.onEntrar,
-    this.allowReminder = false,
-    this.logoURL,
-    this.imageURL,
-  }) : super(key: key);
+  LoginScreen(
+      {Key key,
+      @required this.title,
+      @required this.onEntrar,
+      this.allowReminder = false,
+      this.logoURL,
+      this.imageURL,
+      this.remindCredentials = false,
+      this.useGoogle = true})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(220, 220, 220, 1),
+      bottomNavigationBar: Container(
+          height: 30,
+          color: Colors.transparent,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+                child: FutureBuilder(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return SizedBox.shrink();
+                    return Text(snapshot.data.version,
+                        style: TextStyle(color: Colors.grey));
+                  },
+                )),
+          )),
       body: Responsive(
         mobile: _LoginMobile(parent: this),
         desktop: _LoginDesktop(parent: this),
@@ -36,10 +59,47 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-class _LoginMobile extends StatelessWidget {
+class _LoginMobile extends StatefulWidget {
   final LoginScreen parent;
 
   const _LoginMobile({Key key, @required this.parent}) : super(key: key);
+
+  @override
+  __LoginMobileState createState() => __LoginMobileState();
+}
+
+class __LoginMobileState extends State<_LoginMobile> {
+  bool recordarCredenciales = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    SharedPreferences.getInstance().then((SharedPreferences prefs) {
+      bool recordar = prefs.getBool('recordarCredenciales') ?? false;
+      if (recordar) {
+        String userName = prefs.getString("userName");
+        String password = prefs.getString("password");
+        widget.parent.emailController.text = userName;
+        widget.parent.passwordController.text = password;
+        setState(() {
+          recordarCredenciales = true;
+        });
+      }
+    });
+  }
+
+  setPreferences() {
+    if (recordarCredenciales) {
+      String userName = widget.parent.emailController.text;
+      String password = widget.parent.passwordController.text;
+      SharedPreferences.getInstance().then((SharedPreferences prefs) {
+        prefs.setBool('recordarCredenciales', true);
+        prefs.setString('userName', userName);
+        prefs.setString('password', password);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +120,7 @@ class _LoginMobile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: 20),
-                      Text(parent.title,
+                      Text(widget.parent.title,
                           style: TextStyle(
                               fontSize: 28, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center),
@@ -73,7 +133,7 @@ class _LoginMobile extends StatelessWidget {
                         decoration:
                             InputDecoration(suffixIcon: Icon(Icons.person)),
                         //decoration: InputDecoration(labelText: "email"),
-                        controller: parent.emailController,
+                        controller: widget.parent.emailController,
                       ),
                       SizedBox(height: 20),
                       Text('Contraseña'),
@@ -85,9 +145,26 @@ class _LoginMobile extends StatelessWidget {
                           decoration:
                               InputDecoration(suffixIcon: Icon(Icons.lock)),
                           //decoration: InputDecoration(labelText: "contraseña"),
-                          controller: parent.passwordController),
+                          controller: widget.parent.passwordController),
                       SizedBox(height: 10),
-                      parent.allowReminder
+                      widget.parent.remindCredentials
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                  SizedBox(),
+                                  Expanded(
+                                    child: CheckboxListTile(
+                                        title: Text("Recordar credenciales"),
+                                        value: recordarCredenciales,
+                                        onChanged: (val) {
+                                          setState(() {
+                                            recordarCredenciales = val;
+                                          });
+                                        }),
+                                  )
+                                ])
+                          : SizedBox.shrink(),
+                      widget.parent.allowReminder
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -112,18 +189,22 @@ class _LoginMobile extends StatelessWidget {
                               child: Text("Entrar",
                                   style: TextStyle(fontSize: 18)),
                               onPressed: () async {
-                                parent.onEntrar(
+                                this.setPreferences();
+                                widget.parent.onEntrar(
                                     LoginMethod.loginPassword,
-                                    parent.emailController.text,
-                                    parent.passwordController.text);
+                                    widget.parent.emailController.text,
+                                    widget.parent.passwordController.text);
                               })),
                       Expanded(child: Container()),
-                      TextButton.icon(
-                          onPressed: () {
-                            parent.onEntrar(LoginMethod.google, "", "");
-                          },
-                          icon: Icon(FontAwesome.google),
-                          label: Text("Entrar usando Google")),
+                      widget.parent.useGoogle
+                          ? TextButton.icon(
+                              onPressed: () {
+                                widget.parent
+                                    .onEntrar(LoginMethod.google, "", "");
+                              },
+                              icon: Icon(FontAwesome.google),
+                              label: Text("Entrar usando Google"))
+                          : SizedBox.shrink(),
                     ]))));
   }
 }
