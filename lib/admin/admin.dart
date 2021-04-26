@@ -24,6 +24,7 @@ class AdminScreenState extends State<AdminScreen> {
   Map<String, dynamic> updateData;
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic> filtro = {};
+  final scrollController = ScrollController();
 
   CollectionReference getCollection() {
     String collection = widget.collection == null
@@ -58,12 +59,39 @@ class AdminScreenState extends State<AdminScreen> {
       query = query.orderBy(widget.module.orderBy);
     }
 
+    if (widget.module.reverseOrderBy != null) {
+      query = query.orderBy(widget.module.reverseOrderBy, descending: true);
+    }
+
     return StreamBuilder(
       stream: query.snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) return Container();
-        return ListView(children: [
+
+        List<DocumentSnapshot> docs = List.from(snapshot.data.docs);
+        if (widget.module.sortBy != null) {
+          docs.sort((a, b) {
+            if (a == null || a.data()[widget.module.sortBy] == null) return -1;
+            if (b == null || b.data()[widget.module.sortBy] == null) return 1;
+            return a
+                .data()[widget.module.sortBy]
+                .compareTo(b.data()[widget.module.sortBy]);
+          });
+        }
+        if (widget.module.reverseSortBy != null) {
+          docs.sort((a, b) {
+            return b
+                .data()[widget.module.reverseSortBy]
+                .compareTo(a.data()[widget.module.reverseSortBy]);
+          });
+        }
+        return ListView(controller: scrollController, children: [
           PaginatedDataTable(
+              onPageChanged: (page) {
+                print("onpagechanged... ${page}");
+                scrollController.animateTo(0,
+                    duration: Duration(milliseconds: 250), curve: Curves.ease);
+              },
               rowsPerPage: widget.module.rowsPerPage,
               columns: widget.module.columns
                       .where((element) => element.listable)
@@ -73,10 +101,9 @@ class AdminScreenState extends State<AdminScreen> {
                   (widget.module.canRemove
                       ? [DataColumn(label: Container())]
                       : []),
-              source:
-                  MyDataTableSource(snapshot, widget.module, context, (index) {
+              source: MyDataTableSource(docs, widget.module, context, (index) {
                 setState(() {
-                  detalle = snapshot.data.docs[index];
+                  detalle = docs[index];
                   updateData = detalle.data();
                   tipo = TipoPantalla.detalle;
                 });
@@ -86,7 +113,7 @@ class AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  getEditField(ColumnModule column) {    
+  getEditField(ColumnModule column) {
     column.type.setContext(context);
     return Padding(
         padding: EdgeInsets.all(
@@ -334,15 +361,15 @@ doBorrar(BuildContext context, DocumentReference ref, Function postDelete) {
 }
 
 class MyDataTableSource extends DataTableSource {
-  AsyncSnapshot<QuerySnapshot> data;
+  List<DocumentSnapshot> docs;
   BuildContext context;
   Module module;
   Function onTap;
   int indexSelected = 3;
-  MyDataTableSource(this.data, this.module, this.context, this.onTap);
+  MyDataTableSource(this.docs, this.module, this.context, this.onTap);
   @override
   DataRow getRow(int index) {
-    QueryDocumentSnapshot _object = data.data.docs[index];
+    QueryDocumentSnapshot _object = docs[index];
 
     return DataRow.byIndex(
         index: index,
@@ -381,7 +408,7 @@ class MyDataTableSource extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get rowCount => data.data.docs.length;
+  int get rowCount => docs.length;
 
   @override
   int get selectedRowCount => 0;

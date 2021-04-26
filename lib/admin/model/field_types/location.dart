@@ -12,6 +12,9 @@ class FieldTypeLocation extends FieldType {
   getEditContent(
       value, ColumnModule column, Function onValidate, Function onChange) {
     GeoPoint position;
+    if (value == null) {
+      value = GeoPoint(0, 0);
+    }
     if (value is GeoPoint) {
       position = value;
     } else {

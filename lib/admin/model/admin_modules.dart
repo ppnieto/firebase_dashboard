@@ -25,8 +25,10 @@ class Module {
   IconData icon;
   String collection;
   String orderBy;
+  String sortBy;
   Function getFilter;
   String reverseOrderBy;
+  String reverseSortBy;
   Function onSave;
   Function onRemove;
   int rowsPerPage;
@@ -39,11 +41,13 @@ class Module {
       {this.name,
       this.collection,
       this.getFilter,
-      this.reverseOrderBy,
       this.title,
       this.icon,
       this.columns,
       this.orderBy,
+      this.reverseOrderBy,
+      this.sortBy,
+      this.reverseSortBy,
       this.rowsPerPage = 10,
       this.canAdd = true,
       this.canEdit = true,
