@@ -5,20 +5,24 @@ import 'package:flutter/material.dart';
 class FieldTypeText extends FieldType {
   final RegExp regexp;
   final bool nullable;
-  FieldTypeText({this.nullable, this.regexp});
+  final Function showTextFunction;
+  FieldTypeText({this.nullable, this.regexp, this.showTextFunction});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     if (_object.data().containsKey(column.field)) {
       if (_object.data()[column.field] != null) {
-        return Text(_object[column.field].toString());
+        return Text(showTextFunction == null
+            ? _object[column.field].toString()
+            : showTextFunction(_object[column.field]));
       }
     }
     return Text("-");
   }
 
   @override
-  getEditContent(value, ColumnModule column, Function onValidate, Function onChange) {
+  getEditContent(
+      value, ColumnModule column, Function onValidate, Function onChange) {
     return TextFormField(
         initialValue: value,
         decoration: InputDecoration(
