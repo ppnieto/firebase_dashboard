@@ -1,5 +1,6 @@
 import 'package:dashboard/admin/model/admin_modules.dart';
 import 'package:dashboard/dashboard.dart';
+import 'package:dashboard/my_data_table.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -24,7 +25,6 @@ class AdminScreenState extends State<AdminScreen> {
   Map<String, dynamic> updateData;
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic> filtro = {};
-  final scrollController = ScrollController();
 
   CollectionReference getCollection() {
     String collection = widget.collection == null
@@ -49,8 +49,9 @@ class AdminScreenState extends State<AdminScreen> {
     }
     return result;
   }
-
+/*
   getList() {
+    
     Query query = getCollection();
     query = addFilters(filtro, query);
     query = addFilters(widget.module.getFilter(), query);
@@ -84,8 +85,9 @@ class AdminScreenState extends State<AdminScreen> {
                 .data()[widget.module.reverseSortBy]
                 .compareTo(a.data()[widget.module.reverseSortBy]);
           });
-        }
-        return ListView(controller: scrollController, children: [
+        }*/
+
+  /*
           PaginatedDataTable(
               onPageChanged: (page) {
                 print("onpagechanged... ${page}");
@@ -108,10 +110,11 @@ class AdminScreenState extends State<AdminScreen> {
                   tipo = TipoPantalla.detalle;
                 });
               }))
+              
         ]);
       },
     );
-  }
+  }*/
 
   getEditField(ColumnModule column) {
     column.type.setContext(context);
@@ -234,7 +237,7 @@ class AdminScreenState extends State<AdminScreen> {
   Widget build(BuildContext context) {
     Widget content;
     if (tipo == TipoPantalla.listado) {
-      content = getList();
+      content = MyDataTable(module: widget.module);
     } else if (tipo == TipoPantalla.detalle) {
       content = getDetail();
     } else if (tipo == TipoPantalla.nuevo) {
@@ -358,58 +361,4 @@ doBorrar(BuildContext context, DocumentReference ref, Function postDelete) {
       title: 'Cancelar',
     ),
   );
-}
-
-class MyDataTableSource extends DataTableSource {
-  List<DocumentSnapshot> docs;
-  BuildContext context;
-  Module module;
-  Function onTap;
-  int indexSelected = 3;
-  MyDataTableSource(this.docs, this.module, this.context, this.onTap);
-  @override
-  DataRow getRow(int index) {
-    QueryDocumentSnapshot _object = docs[index];
-
-    return DataRow.byIndex(
-        index: index,
-        cells: module.columns
-                .where((element) => element.listable)
-                .map<DataCell>((column) {
-              // set context
-              column.type.setContext(context);
-              return DataCell(column.getListContent(_object),
-                  onTap: column.clickToDetail && module.canEdit
-                      ? () {
-                          this.onTap(index);
-                        }
-                      : null);
-            }).toList() +
-            (module.canRemove
-                ? [
-                    DataCell(RaisedButton.icon(
-                      color: Theme.of(context).primaryColor,
-                      icon: Icon(FontAwesome.remove, color: Colors.white),
-                      label:
-                          Text("Borrar", style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        doBorrar(context, _object.reference, () {
-                          if (module.onRemove != null) {
-                            module.onRemove(_object);
-                          }
-                        });
-                      },
-                    ))
-                  ]
-                : []));
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => docs.length;
-
-  @override
-  int get selectedRowCount => 0;
 }
