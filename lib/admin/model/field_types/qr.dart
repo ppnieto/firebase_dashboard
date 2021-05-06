@@ -13,16 +13,24 @@ class FieldTypeQR extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    return IconButton(
-        icon: Icon(FontAwesome.qrcode),
-        onPressed: () => onListTap(_object, column));
+    String code = _object.data()[column.field];
+    return code.isEmpty
+        ? SizedBox.shrink()
+        : IconButton(
+            icon: Icon(FontAwesome.qrcode),
+            onPressed: () => onListTap(_object, column));
   }
 
   @override
   getEditContent(
       value, ColumnModule column, Function onValidate, Function onChange) {
     TextEditingController qr = TextEditingController();
+/*
     qr.text = value;
+    if (qr.text.isEmpty) {
+      var uuid = new Uuid(options: {'grng': UuidUtil.cryptoRNG});
+      qr.text = uuid.v4();
+    }*/
 
     return Row(children: [
       Expanded(
@@ -38,7 +46,6 @@ class FieldTypeQR extends FieldType {
           icon: Icon(FontAwesome.refresh),
           onPressed: () {
             var uuid = new Uuid(options: {'grng': UuidUtil.cryptoRNG});
-
             String nuevo = uuid.v4();
             qr.text = nuevo;
             onChange(nuevo);

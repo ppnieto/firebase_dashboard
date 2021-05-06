@@ -11,7 +11,15 @@ class DashboardMainScreen extends StatefulWidget {
   final List<Widget> actions;
   final String title;
   final DocumentSnapshot docUser;
-  DashboardMainScreen({this.menus, this.actions, this.title, this.docUser});
+  final Widget sideBar;
+  final double sideBarWidth;
+  DashboardMainScreen(
+      {this.menus,
+      this.actions,
+      this.title,
+      this.docUser,
+      this.sideBar,
+      this.sideBarWidth = 100});
 
   @override
   DashboardMainScreenState createState() => DashboardMainScreenState();
@@ -19,6 +27,7 @@ class DashboardMainScreen extends StatefulWidget {
 
 class DashboardMainScreenState extends State<DashboardMainScreen>
     with SingleTickerProviderStateMixin {
+  bool isSidebar = false;
   TabController tabController;
   int active = 0;
   List<Widget> mainContents;
@@ -116,14 +125,22 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
                     fontSize: 24,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'HelveticaNeue',
                   ),
                 ),
               ),
             ]),
-        actions: widget.actions,
-        //backgroundColor: ColorConstants.blue,
-        // automaticallyImplyLeading: false,
+        actions: widget.actions +
+            (widget.sideBar != null
+                ? [
+                    IconButton(
+                        icon: Icon(Icons.view_sidebar),
+                        onPressed: () {
+                          setState(() {
+                            isSidebar = !isSidebar;
+                          });
+                        })
+                  ]
+                : []),
       ),
       body: Row(
         children: <Widget>[
@@ -139,15 +156,19 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
                       child: listDrawerItems(false)),
                 ),
           Container(
-            width: MediaQuery.of(context).size.width < responsiveDashboardWidth
-                ? MediaQuery.of(context).size.width
-                : MediaQuery.of(context).size.width - 310,
+            width: (MediaQuery.of(context).size.width < responsiveDashboardWidth
+                    ? MediaQuery.of(context).size.width
+                    : MediaQuery.of(context).size.width - 310) -
+                (isSidebar ? widget.sideBarWidth : 0),
             child: TabBarView(
               physics: NeverScrollableScrollPhysics(),
               controller: tabController,
               children: mainContents,
             ),
-          )
+          ),
+          isSidebar
+              ? Container(width: widget.sideBarWidth, child: widget.sideBar)
+              : SizedBox.shrink(),
         ],
       ),
       drawer: Padding(

@@ -13,8 +13,8 @@ abstract class FieldType {
       _object.data().containsKey(column.field) && _object[column.field] != null
           ? _object[column.field].toString()
           : "-");
-  getEditContent(
-      value, ColumnModule column, Function onValidate, Function onChange) {
+  getEditContent(Map<String, dynamic> values, ColumnModule column,
+      Function onValidate, Function onChange) {
     return Text("No implementado para tipo " + this.toString());
   }
 

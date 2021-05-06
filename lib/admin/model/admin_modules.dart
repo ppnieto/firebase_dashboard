@@ -18,18 +18,21 @@ export "field_types/defecto.dart";
 export "field_types/memo.dart";
 export "field_types/qr.dart";
 export "field_types/rating.dart";
+export "field_types/select.dart";
 
 class Module {
   String name;
   String title;
   IconData icon;
   String collection;
+  Function getQueryCollection;
   String orderBy;
-  String sortBy;
-  Function getFilter;
+  //String sortBy;
+  Function addFilter;
   String reverseOrderBy;
-  String reverseSortBy;
+  //String reverseSortBy;
   Function onSave;
+  Function onUpdated;
   Function onRemove;
   int rowsPerPage;
   bool canAdd;
@@ -37,27 +40,26 @@ class Module {
   bool canRemove;
 
   List<ColumnModule> columns;
-  Module(
-      {this.name,
-      this.collection,
-      this.getFilter,
-      this.title,
-      this.icon,
-      this.columns,
-      this.orderBy,
-      this.reverseOrderBy,
-      this.sortBy,
-      this.reverseSortBy,
-      this.rowsPerPage = 10,
-      this.canAdd = true,
-      this.canEdit = true,
-      this.canRemove = true,
-      this.onSave,
-      this.onRemove}) {
-    if (this.getFilter == null) {
-      this.getFilter = () => Map<String, dynamic>();
-    }
-  }
+  Module({
+    this.name,
+    this.collection,
+    this.getQueryCollection,
+    this.addFilter,
+    this.title,
+    this.icon,
+    this.columns,
+    this.orderBy,
+    this.reverseOrderBy,
+    //this.sortBy,
+    //this.reverseSortBy,
+    this.rowsPerPage = 10,
+    this.canAdd = true,
+    this.canEdit = true,
+    this.canRemove = true,
+    this.onSave,
+    this.onUpdated,
+    this.onRemove,
+  });
 }
 
 class ColumnModule {

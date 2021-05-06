@@ -1,21 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:dashboard/admin/model/admin_modules.dart';
+import 'package:flutter/scheduler.dart';
 
 class FieldTypeRef extends FieldType {
-  final String collection;
+  String collection;
   final String refLabel;
   final Function getFilter;
-  final bool nullable;
+  final dynamic initialValue;
+  final Function getQueryCollection;
 
   FieldTypeRef(
-      {this.collection, this.refLabel, this.getFilter, this.nullable = false});
+      {this.collection,
+      this.refLabel,
+      this.getFilter,
+      this.initialValue,
+      this.getQueryCollection});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    if (_object.data()[column.field] != null) {
+    var _data = _object.data()[column.field];
+
+    if (_data != null && _data is DocumentReference) {
+      DocumentReference ref = _data;
       return StreamBuilder(
-        stream: _object.data()[column.field].snapshots(),
+        stream: ref.snapshots(),
         builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
           if (snapshot.data.data() != null &&
@@ -30,13 +39,28 @@ class FieldTypeRef extends FieldType {
     }
   }
 
-  @override
-  getEditContent(
-      value, ColumnModule column, Function onValidate, Function onChange) {
-    // tmp quitar
-    //if (value is String) value = null;
+  CollectionReference _getCollection() {
+    if (getQueryCollection != null) {
+      return getQueryCollection();
+    } else {
+      return FirebaseFirestore.instance.collection(collection);
+    }
+  }
 
-    Query query = FirebaseFirestore.instance.collection(this.collection);
+  @override
+  getEditContent(Map<String, dynamic> values, ColumnModule column,
+      Function onValidate, Function onChange) {
+    var value = values[column.field];
+
+    if (value == null) {
+      value = initialValue ?? "-";
+      values[column.field] = value;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        onChange(value);
+      });
+    }
+
+    Query query = _getCollection();
     Map<String, dynamic> filters = getFilter != null ? getFilter() : {};
     if (filters != null) {
       for (MapEntry entry in filters.entries) {
@@ -47,20 +71,19 @@ class FieldTypeRef extends FieldType {
         stream: query.snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
+          /*
           if (snapshot.data.docs
               .where((element) => element.reference == value)
               .isEmpty) {
             value = null;
-          }
+          }*/
 
-          List<DropdownMenuItem> getIfNullable() => this.nullable
-              ? [
-                  DropdownMenuItem<DocumentReference>(
-                      value: null,
-                      child: Text("< sin asignar >",
-                          style: TextStyle(color: Colors.red)))
-                ]
-              : [];
+          List<DropdownMenuItem> getIfNullable() => [
+                DropdownMenuItem(
+                    value: "-",
+                    child: Text("<sin asignar>",
+                        style: TextStyle(color: Colors.red)))
+              ];
 
           return Row(children: [
             Text(column.label),
@@ -72,15 +95,24 @@ class FieldTypeRef extends FieldType {
                   isExpanded: true,
                   items: getIfNullable() +
                       snapshot.data.docs.map((object) {
+                        print(object.reference);
                         return DropdownMenuItem<DocumentReference>(
                             value: object.reference,
                             child: Text(object.data()[this.refLabel]));
                       }).toList(),
                   onChanged: (val) {
-                    if (onChange != null) onChange(val);
+                    if (onChange != null) {
+                      onChange(val);
+                    }
+                  },
+                  onSaved: (val) {
+                    if (val == "-") val = null;
+                    print("save ${val}");
+                    values[column.field] = val;
                   },
                   validator: (value) {
-                    if (column.mandatory && value == null)
+                    if (column.mandatory &&
+                        (value == null || value == "" || value == "-"))
                       return "Campo obligatorio";
                     return null;
                   },

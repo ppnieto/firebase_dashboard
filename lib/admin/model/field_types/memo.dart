@@ -17,8 +17,9 @@ class FieldTypeMemo extends FieldType {
           : super.getListContent(_object, column);
 
   @override
-  getEditContent(
-      value, ColumnModule column, Function onValidate, Function onChange) {
+  getEditContent(Map<String, dynamic> values, ColumnModule column,
+      Function onValidate, Function onChange) {
+    var value = values[column.field];
     return TextFormField(
         style: TextStyle(
             //fontFamily: 'HelveticaNeue',

@@ -20,8 +20,9 @@ class FieldTypeDate extends FieldType {
   }
 
   @override
-  getEditContent(
-      value, ColumnModule column, Function onValidate, Function onChange) {
+  getEditContent(Map<String, dynamic> values, ColumnModule column,
+      Function onValidate, Function onChange) {
+    var value = values[column.field];
     final f = new DateFormat(this.format);
     TextEditingController txt = TextEditingController();
     DateTime dateTime;

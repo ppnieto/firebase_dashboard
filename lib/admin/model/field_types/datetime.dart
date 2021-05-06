@@ -20,18 +20,22 @@ class FieldTypeDateTime extends FieldType {
   }
 
   @override
-  getEditContent(
-      value, ColumnModule column, Function onValidate, Function onChange) {
-    print(value);
+  getEditContent(Map<String, dynamic> values, ColumnModule column,
+      Function onValidate, Function onChange) {
+    var value = values[column.field];
     return DateTimePicker(
         type: DateTimePickerType.dateTimeSeparate,
         dateMask: 'dd/MM/yyyy',
-        initialValue: value.toDate().toString(),
+        initialValue: value == null
+            ? DateTime.now().toString()
+            : value.toDate().toString(),
         firstDate: DateTime(2020),
         lastDate: DateTime(2100),
         icon: Icon(Icons.event),
         dateLabelText: 'Fecha',
         timeLabelText: "Hora",
+
+        /*
         selectableDayPredicate: (date) {
           // Disable weekend days to select from the calendar
           if (date.weekday == 6 || date.weekday == 7) {
@@ -40,6 +44,7 @@ class FieldTypeDateTime extends FieldType {
 
           return true;
         },
+        */
         onChanged: (val) => print(val),
         validator: (val) {
           print(val);

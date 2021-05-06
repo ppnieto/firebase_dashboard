@@ -26,11 +26,15 @@ class AdminScreenState extends State<AdminScreen> {
   Map<String, dynamic> filtro = {};
   final scrollController = ScrollController();
 
-  CollectionReference getCollection() {
-    String collection = widget.collection == null
-        ? widget.module.collection
-        : widget.collection.path;
-    return FirebaseFirestore.instance.collection(collection);
+  CollectionReference _getCollection() {
+    if (widget?.module?.getQueryCollection != null) {
+      return widget.module.getQueryCollection();
+    } else {
+      String collection = widget?.collection ??
+          widget.module?.collection ??
+          widget.collection?.path;
+      return FirebaseFirestore.instance.collection(collection);
+    }
   }
 
   Query addFilters(Map<String, dynamic> filtro, Query query) {
@@ -51,9 +55,13 @@ class AdminScreenState extends State<AdminScreen> {
   }
 
   getList() {
-    Query query = getCollection();
+    Query query = _getCollection();
     query = addFilters(filtro, query);
-    query = addFilters(widget.module.getFilter(), query);
+    if (widget.module.addFilter != null) {
+      query = widget.module.addFilter(query);
+    }
+
+    //query = addFilters(widget.module.getFilter(), query);
 
     if (widget.module.orderBy != null) {
       query = query.orderBy(widget.module.orderBy);
@@ -63,12 +71,14 @@ class AdminScreenState extends State<AdminScreen> {
       query = query.orderBy(widget.module.reverseOrderBy, descending: true);
     }
 
+    print("query ${query}");
     return StreamBuilder(
       stream: query.snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) return Container();
 
         List<DocumentSnapshot> docs = List.from(snapshot.data.docs);
+        /*
         if (widget.module.sortBy != null) {
           docs.sort((a, b) {
             if (a == null || a.data()[widget.module.sortBy] == null) return -1;
@@ -85,6 +95,7 @@ class AdminScreenState extends State<AdminScreen> {
                 .compareTo(a.data()[widget.module.reverseSortBy]);
           });
         }
+        */
         return ListView(controller: scrollController, children: [
           PaginatedDataTable(
               onPageChanged: (page) {
@@ -115,46 +126,64 @@ class AdminScreenState extends State<AdminScreen> {
 
   getEditField(ColumnModule column) {
     column.type.setContext(context);
+
     return Padding(
         padding: EdgeInsets.all(
             MediaQuery.of(context).size.width < responsiveDashboardWidth
                 ? 5
                 : 20),
-        child: column.getEditContent(updateData[column.field], null, (value) {
+        child: column.getEditContent(updateData, null, (value) {
           setState(() {
             updateData[column.field] = value;
           });
         }));
   }
 
-  doGuardar() {
+  doGuardar() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 
+      bool doUpdate = true;
       if (widget.module.onSave != null) {
-        widget.module.onSave(tipo == TipoPantalla.nuevo, this.updateData);
+        doUpdate = await widget.module
+            .onSave(tipo == TipoPantalla.nuevo, this.updateData);
       }
 
-      if (tipo == TipoPantalla.detalle) {
-        detalle.reference.update(this.updateData).then((value) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Elemento guardado con éxito'),
-            duration: Duration(seconds: 2),
-          ));
-          setState(() {
-            this.tipo = TipoPantalla.listado;
+      if (doUpdate) {
+        if (tipo == TipoPantalla.detalle) {
+          print("update ${updateData}");
+          detalle.reference.update(this.updateData).then((value) {
+            if (widget.module.onUpdated != null)
+              widget.module.onUpdated(false, detalle.reference);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Elemento guardado con éxito'),
+              duration: Duration(seconds: 2),
+            ));
+            setState(() {
+              this.tipo = TipoPantalla.listado;
+            });
           });
-        });
-      }
-      if (tipo == TipoPantalla.nuevo) {
-        getCollection().add(this.updateData).then((value) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Elemento guardado con éxito'),
-            duration: Duration(seconds: 2),
-          ));
-          setState(() {
-            this.tipo = TipoPantalla.listado;
+        }
+        if (tipo == TipoPantalla.nuevo) {
+          _getCollection().add(this.updateData).then((value) {
+            if (widget.module.onUpdated != null)
+              widget.module.onUpdated(true, value);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Elemento guardado con éxito'),
+              duration: Duration(seconds: 2),
+            ));
+            setState(() {
+              this.tipo = TipoPantalla.listado;
+            });
           });
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Elemento guardado con éxito'),
+          duration: Duration(seconds: 2),
+        ));
+        setState(() {
+          this.tipo = TipoPantalla.listado;
         });
       }
     }
@@ -387,7 +416,18 @@ class MyDataTableSource extends DataTableSource {
             }).toList() +
             (module.canRemove
                 ? [
-                    DataCell(RaisedButton.icon(
+                    DataCell(
+                      IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          doBorrar(context, _object.reference, () {
+                            if (module.onRemove != null) {
+                              module.onRemove(_object);
+                            }
+                          });
+                        },
+                      )
+                      /*  RaisedButton.icon(
                       color: Theme.of(context).primaryColor,
                       icon: Icon(FontAwesome.remove, color: Colors.white),
                       label:
@@ -399,7 +439,9 @@ class MyDataTableSource extends DataTableSource {
                           }
                         });
                       },
-                    ))
+                    )*/
+                      ,
+                    )
                   ]
                 : []));
   }
