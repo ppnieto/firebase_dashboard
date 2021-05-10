@@ -26,9 +26,11 @@ class FieldTypeText extends FieldType {
     var value = values[column.field];
     return TextFormField(
         initialValue: value,
+        enabled: column.editable,
         decoration: InputDecoration(
-          labelText: column.label,
-        ),
+            labelText: column.label,
+            filled: !column.editable,
+            fillColor: Colors.grey[100]),
         validator: (value) {
           if (regexp != null) {
             if (!regexp.hasMatch(value)) {

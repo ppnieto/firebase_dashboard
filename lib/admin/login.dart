@@ -32,8 +32,8 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    emailController.text = "ppnieto+01@gmail.com";
-    passwordController.text = "111111";
+    //emailController.text = "ppnieto+01@gmail.com";
+    //passwordController.text = "111111";
 
     return Scaffold(
       backgroundColor: Color.fromRGBO(220, 220, 220, 1),

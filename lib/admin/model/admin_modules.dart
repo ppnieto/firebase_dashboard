@@ -27,10 +27,8 @@ class Module {
   String collection;
   Function getQueryCollection;
   String orderBy;
-  //String sortBy;
   Function addFilter;
   String reverseOrderBy;
-  //String reverseSortBy;
   Function onSave;
   Function onUpdated;
   Function onRemove;

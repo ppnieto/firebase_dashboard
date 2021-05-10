@@ -80,7 +80,9 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
           bool ident) =>
       FlatButton(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
-        color: tabController.index == idx ? Colors.grey[100] : Colors.white,
+        color: tabController.index == idx
+            ? Theme.of(context).accentColor
+            : Theme.of(context).canvasColor,
         onPressed: () {
           tabController.animateTo(idx);
           drawerStatus ? Navigator.pop(context) : print("");
@@ -90,16 +92,20 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData),
+              Icon(iconData,
+                  color: tabController.index == idx
+                      ? Theme.of(context).accentIconTheme.color
+                      : Theme.of(context).primaryColor),
               SizedBox(
                 width: 8,
               ),
               Text(
                 text,
                 style: TextStyle(
-                  fontSize: 18,
-                  fontFamily: 'HelveticaNeue',
-                ),
+                    fontSize: 18,
+                    color: tabController.index == idx
+                        ? Theme.of(context).accentIconTheme.color
+                        : Theme.of(context).primaryColor),
               ),
             ]),
           ),
@@ -152,7 +158,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
                       margin: EdgeInsets.all(0),
                       height: MediaQuery.of(context).size.height,
                       width: 300,
-                      color: Colors.white,
+                      color: Theme.of(context).canvasColor,
                       child: listDrawerItems(false)),
                 ),
           Container(
@@ -175,14 +181,6 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
           padding: EdgeInsets.only(top: 56),
           child: Drawer(child: listDrawerItems(true))),
     );
-  }
-
-  Widget listDrawerItemsOLD(bool drawerStatus) {
-    return ListView(
-        children: widget.menus.map<Widget>((menu) {
-      int idx = widget.menus.indexOf(menu);
-      return getMenuItem(drawerStatus, menu.label, menu.iconData, idx, false);
-    }).toList());
   }
 
   Widget listDrawerItems(bool drawerStatus) {

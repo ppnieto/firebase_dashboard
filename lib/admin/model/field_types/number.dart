@@ -10,7 +10,8 @@ class FieldTypeNumber extends FieldType {
 
   @override
   getEditContent(
-      value, ColumnModule column, Function onValidate, Function onChange) {
+      values, ColumnModule column, Function onValidate, Function onChange) {
+    var value = values[column.field];
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Text(column.label),
       SizedBox(width: 20),

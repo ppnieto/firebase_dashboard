@@ -23,14 +23,17 @@ class FieldTypeQR extends FieldType {
 
   @override
   getEditContent(
-      value, ColumnModule column, Function onValidate, Function onChange) {
+      values, ColumnModule column, Function onValidate, Function onChange) {
     TextEditingController qr = TextEditingController();
-/*
+    var value = values[column.field];
+
     qr.text = value;
+    /*
     if (qr.text.isEmpty) {
       var uuid = new Uuid(options: {'grng': UuidUtil.cryptoRNG});
       qr.text = uuid.v4();
-    }*/
+    }
+    */
 
     return Row(children: [
       Expanded(
@@ -47,6 +50,7 @@ class FieldTypeQR extends FieldType {
           onPressed: () {
             var uuid = new Uuid(options: {'grng': UuidUtil.cryptoRNG});
             String nuevo = uuid.v4();
+            print(nuevo);
             qr.text = nuevo;
             onChange(nuevo);
           })

@@ -17,17 +17,23 @@ class FieldTypeActions extends FieldType {
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     return Row(
         children: actions.map((action) {
-      return RaisedButton.icon(
-          icon: Icon(action.iconData, color: Colors.white),
-          color: context != null
-              ? Theme.of(this.context).primaryColor
-              : Colors.blue,
-          label: Text(action.title, style: TextStyle(color: Colors.white)),
-          onPressed: () {
-            if (action.onTap != null) {
-              action.onTap(_object, context);
-            }
-          });
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4),
+        child: RaisedButton.icon(
+            icon: Icon(action.iconData, color: Colors.white),
+            color: context != null
+                ? Theme.of(this.context).primaryColor
+                : Colors.blue,
+            label: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(action.title, style: TextStyle(color: Colors.white)),
+            ),
+            onPressed: () {
+              if (action.onTap != null) {
+                action.onTap(_object, context);
+              }
+            }),
+      );
     }).toList());
   }
 }

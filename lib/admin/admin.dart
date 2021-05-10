@@ -30,7 +30,7 @@ class AdminScreenState extends State<AdminScreen> {
     if (widget?.module?.getQueryCollection != null) {
       return widget.module.getQueryCollection();
     } else {
-      String collection = widget?.collection ??
+      String collection = widget?.collection?.path ??
           widget.module?.collection ??
           widget.collection?.path;
       return FirebaseFirestore.instance.collection(collection);

@@ -7,11 +7,15 @@ class FieldTypeBoolean extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     bool value = _object.data()[column.field] ?? false;
-    return Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank);
+    return Icon(
+        value ? Icons.check_box_outlined : Icons.check_box_outline_blank);
   }
 
   @override
-  getEditContent(value, ColumnModule column, Function onValidate, Function onChange) {
+  getEditContent(
+      values, ColumnModule column, Function onValidate, Function onChange) {
+    var value = values[column.field];
+
     {
       return CheckboxListTile(
           title: Text(
