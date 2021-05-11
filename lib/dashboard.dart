@@ -13,13 +13,16 @@ class DashboardMainScreen extends StatefulWidget {
   final DocumentSnapshot docUser;
   final Widget sideBar;
   final double sideBarWidth;
+  final IconData sideBarIcon;
+
   DashboardMainScreen(
       {this.menus,
       this.actions,
       this.title,
       this.docUser,
       this.sideBar,
-      this.sideBarWidth = 100});
+      this.sideBarWidth = 100,
+      this.sideBarIcon = Icons.view_sidebar});
 
   @override
   DashboardMainScreenState createState() => DashboardMainScreenState();
@@ -76,42 +79,6 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
     super.dispose();
   }
 
-  getMenuItem(bool drawerStatus, String text, IconData iconData, int idx,
-          bool ident) =>
-      FlatButton(
-        padding: EdgeInsets.only(left: ident ? 50 : 20),
-        color: tabController.index == idx
-            ? Theme.of(context).accentColor
-            : Theme.of(context).canvasColor,
-        onPressed: () {
-          tabController.animateTo(idx);
-          drawerStatus ? Navigator.pop(context) : print("");
-        },
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Container(
-            padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
-            child: Row(children: [
-              Icon(iconData,
-                  color: tabController.index == idx
-                      ? Theme.of(context).accentIconTheme.color
-                      : Theme.of(context).primaryColor),
-              SizedBox(
-                width: 8,
-              ),
-              Text(
-                text,
-                style: TextStyle(
-                    fontSize: 18,
-                    color: tabController.index == idx
-                        ? Theme.of(context).accentIconTheme.color
-                        : Theme.of(context).primaryColor),
-              ),
-            ]),
-          ),
-        ),
-      );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,7 +106,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
             (widget.sideBar != null
                 ? [
                     IconButton(
-                        icon: Icon(Icons.view_sidebar),
+                        icon: Icon(widget.sideBarIcon),
                         onPressed: () {
                           setState(() {
                             isSidebar = !isSidebar;
@@ -159,7 +126,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
                       height: MediaQuery.of(context).size.height,
                       width: 300,
                       color: Theme.of(context).canvasColor,
-                      child: listDrawerItems(false)),
+                      child: listDrawerItems(context, false)),
                 ),
           Container(
             width: (MediaQuery.of(context).size.width < responsiveDashboardWidth
@@ -179,11 +146,11 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
       ),
       drawer: Padding(
           padding: EdgeInsets.only(top: 56),
-          child: Drawer(child: listDrawerItems(true))),
+          child: Drawer(child: listDrawerItems(context, true))),
     );
   }
 
-  Widget listDrawerItems(bool drawerStatus) {
+  Widget listDrawerItems(BuildContext context, bool drawerStatus) {
     var menus = widget.menus;
     return ListView(
         children: menus.map<Widget>((menu) {
@@ -197,25 +164,33 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
           hasRole = false;
       }
 
-      if (menu is Menu) {
-        return hasRole
-            ? getMenuItem(drawerStatus, menu.label, menu.iconData,
-                indexes[menu.hashCode], false)
-            : Container();
-      }
+      bool isSelected = tabController.index == indexes[menu.hashCode];
       if (menu is MenuGroup) {
         return hasRole
             ? ExpansionTile(
                 initiallyExpanded: true,
-                title: Text(menu.label),
+                childrenPadding: EdgeInsets.only(left: 24),
+                title: Text(menu.label,
+                    style: TextStyle(
+                        fontSize: 18, color: Theme.of(context).primaryColor)),
                 leading: Icon(menu.iconData),
                 children: menu.children.map<Widget>((submenu) {
-                  return getMenuItem(drawerStatus, submenu.label,
-                      submenu.iconData, indexes[submenu.hashCode], true);
+                  bool isSelected =
+                      tabController.index == indexes[submenu.hashCode];
+                  return submenu.build(context, isSelected, () {
+                    tabController.animateTo(indexes[submenu.hashCode]);
+                    if (drawerStatus) Navigator.pop(context);
+                  });
                 }).toList())
             : Container();
+      } else {
+        return hasRole
+            ? menu.build(context, isSelected, () {
+                tabController.animateTo(indexes[menu.hashCode]);
+                if (drawerStatus) Navigator.pop(context);
+              })
+            : Container();
       }
-      return Container();
     }).toList());
   }
 }

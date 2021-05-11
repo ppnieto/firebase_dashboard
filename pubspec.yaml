@@ -17,6 +17,7 @@ dependencies:
   flutter_spinbox: ^0.5.0
   firebase_core: any
   firebase_storage: ^8.0.3
+  firebase_auth: any
   cloud_firestore: any
   intl: any
   uuid: any
@@ -26,6 +27,8 @@ dependencies:
   universal_html: ^2.0.8
   shared_preferences: ^2.0.5
   date_time_picker: ^2.0.0
+  badges: ^1.2.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

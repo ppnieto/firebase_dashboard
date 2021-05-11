@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dashboard/admin/model/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
@@ -108,17 +109,117 @@ abstract class MenuBase {
   bool operator ==(Object other) {
     return super == other;
   }
+
+  Widget build(BuildContext context, bool isSelected, Function press) {
+    return Text("No implemetado para MenuBase");
+  }
 }
 
 class Menu extends MenuBase {
   Widget child;
 
-  Menu({this.child, String label, IconData iconData, String role})
-      : super(label: label, iconData: iconData, role: role);
+  Menu({
+    this.child,
+    String label,
+    IconData iconData,
+    String role,
+  }) : super(label: label, iconData: iconData, role: role);
+
+  @override
+  build(BuildContext context, bool isSelected, Function press) {
+    bool ident = false;
+
+    return InkWell(
+      onTap: press,
+      child: Container(
+        padding: EdgeInsets.only(left: ident ? 50 : 20),
+        color: isSelected
+            ? Theme.of(context).accentColor
+            : Theme.of(context).canvasColor,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
+            child: Row(children: [
+              Icon(iconData,
+                  color: isSelected
+                      ? Theme.of(context).accentIconTheme.color
+                      : Theme.of(context).primaryColor),
+              SizedBox(
+                width: 8,
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                    fontSize: 18,
+                    color: isSelected
+                        ? Theme.of(context).accentIconTheme.color
+                        : Theme.of(context).primaryColor),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class MenuGroup extends MenuBase {
-  List<Menu> children;
+  List<MenuBase> children;
   MenuGroup({this.children, String label, IconData iconData, String role})
       : super(label: label, iconData: iconData, role: role);
+}
+
+class MenuInfo extends Menu {
+  final Widget child;
+  final Function info;
+
+  MenuInfo(
+      {this.child,
+      String label,
+      IconData iconData,
+      String role,
+      @required this.info})
+      : super(label: label, iconData: iconData, role: role);
+
+  @override
+  build(BuildContext context, bool isSelected, Function press) {
+    bool ident = false;
+
+    return InkWell(
+      onTap: press,
+      child: Container(
+        padding: EdgeInsets.only(left: ident ? 50 : 20),
+        color: isSelected
+            ? Theme.of(context).accentColor
+            : Theme.of(context).canvasColor,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
+            child: Row(children: [
+              Icon(iconData,
+                  color: isSelected
+                      ? Theme.of(context).accentIconTheme.color
+                      : Theme.of(context).primaryColor),
+              SizedBox(
+                width: 8,
+              ),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: isSelected
+                          ? Theme.of(context).accentIconTheme.color
+                          : Theme.of(context).primaryColor),
+                ),
+              ),
+              this.info()
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
 }

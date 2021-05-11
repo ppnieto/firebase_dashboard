@@ -14,6 +14,10 @@ class LoginScreen extends StatelessWidget {
   final bool useGoogle;
   final bool remindCredentials;
 
+  // para depuracion, meter los datos directamente desde fuera
+  final String userName;
+  final String password;
+
   final Function(LoginMethod, String, String) onEntrar;
 
   final TextEditingController emailController = TextEditingController();
@@ -27,13 +31,15 @@ class LoginScreen extends StatelessWidget {
       this.logoURL,
       this.imageURL,
       this.remindCredentials = false,
-      this.useGoogle = true})
+      this.useGoogle = true,
+      this.userName = "",
+      this.password = ""})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    //emailController.text = "ppnieto+01@gmail.com";
-    //passwordController.text = "111111";
+    emailController.text = this.userName;
+    passwordController.text = this.password;
 
     return Scaffold(
       backgroundColor: Color.fromRGBO(220, 220, 220, 1),
