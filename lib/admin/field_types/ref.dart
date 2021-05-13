@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dashboard/admin/model/admin_modules.dart';
+import 'package:dashboard/admin/admin_modules.dart';
 import 'package:flutter/scheduler.dart';
 
 class FieldTypeRef extends FieldType {
@@ -9,7 +9,8 @@ class FieldTypeRef extends FieldType {
   final Function getFilter;
   final dynamic initialValue;
   final Function getQueryCollection;
-
+  DocumentSnapshot object;
+  ColumnModule column;
   FieldTypeRef(
       {this.collection,
       this.refLabel,
@@ -17,8 +18,13 @@ class FieldTypeRef extends FieldType {
       this.initialValue,
       this.getQueryCollection});
 
+  Widget getListWidget(String content, {TextStyle style}) =>
+      Text(content, style: style);
+
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
+    this.object = _object;
+    this.column = column;
     var _data = _object.data()[column.field];
 
     if (_data != null && _data is DocumentReference) {
@@ -29,22 +35,35 @@ class FieldTypeRef extends FieldType {
           if (!snapshot.hasData) return Container();
           if (snapshot.data.data() != null &&
               snapshot.data.data().containsKey(this.refLabel)) {
-            return Text(snapshot.data.data()[this.refLabel] ?? "-");
+            return getListWidget(snapshot.data.data()[this.refLabel] ?? "-");
           } else
-            return Text("<no existe>", style: TextStyle(color: Colors.red));
+            return getListWidget("<no existe>",
+                style: TextStyle(color: Colors.red));
         },
       );
     } else {
-      return Text("<sin asignar>", style: TextStyle(color: Colors.red));
+      return getListWidget("<sin asignar>",
+          style: TextStyle(color: Colors.red));
     }
   }
 
-  CollectionReference _getCollection() {
+  CollectionReference getCollection() {
     if (getQueryCollection != null) {
       return getQueryCollection();
     } else {
       return FirebaseFirestore.instance.collection(collection);
     }
+  }
+
+  Query _getQuery() {
+    Query query = getCollection();
+    Map<String, dynamic> filters = getFilter != null ? getFilter() : {};
+    if (filters != null) {
+      for (MapEntry entry in filters.entries) {
+        query = query.where(entry.key, isEqualTo: entry.value);
+      }
+    }
+    return query;
   }
 
   @override
@@ -60,15 +79,8 @@ class FieldTypeRef extends FieldType {
       });
     }
 
-    Query query = _getCollection();
-    Map<String, dynamic> filters = getFilter != null ? getFilter() : {};
-    if (filters != null) {
-      for (MapEntry entry in filters.entries) {
-        query = query.where(entry.key, isEqualTo: entry.value);
-      }
-    }
     return StreamBuilder(
-        stream: query.snapshots(),
+        stream: _getQuery().snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
           /*
@@ -124,8 +136,7 @@ class FieldTypeRef extends FieldType {
   @override
   getFilterContent(value, ColumnModule column, Function onFilter) {
     return StreamBuilder(
-        stream:
-            FirebaseFirestore.instance.collection(this.collection).snapshots(),
+        stream: _getQuery().snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
           return Row(children: [

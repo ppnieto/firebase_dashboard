@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dashboard/admin/model/admin_modules.dart';
+import 'package:dashboard/admin/admin_modules.dart';
 import 'package:flutter_spinbox/material.dart';
 
 class FieldTypeNumber extends FieldType {

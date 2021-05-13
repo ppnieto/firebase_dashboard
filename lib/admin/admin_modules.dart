@@ -1,6 +1,5 @@
-import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/model/field_types/field_type_base.dart';
+import 'package:dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 
 export "field_types/field_type_base.dart";
@@ -10,6 +9,7 @@ export "field_types/location.dart";
 export "field_types/date.dart";
 export "field_types/currency.dart";
 export "field_types/ref.dart";
+export "field_types/inline_ref.dart";
 export "field_types/datetime.dart";
 export "field_types/number.dart";
 export "field_types/boolean.dart";

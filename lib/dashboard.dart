@@ -1,7 +1,7 @@
 library dashboard;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/model/admin_modules.dart';
+import 'package:dashboard/admin/admin_modules.dart';
 import 'package:flutter/material.dart';
 
 final int responsiveDashboardWidth = 1000;
