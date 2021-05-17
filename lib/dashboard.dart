@@ -1,6 +1,5 @@
 library dashboard;
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dashboard/admin/model/admin_modules.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +9,7 @@ class DashboardMainScreen extends StatefulWidget {
   final List<MenuBase> menus;
   final List<Widget> actions;
   final String title;
-  final DocumentSnapshot docUser;
+  final Function getRolesFunction;
   final Widget sideBar;
   final double sideBarWidth;
   final IconData sideBarIcon;
@@ -19,7 +18,7 @@ class DashboardMainScreen extends StatefulWidget {
       {this.menus,
       this.actions,
       this.title,
-      this.docUser,
+      this.getRolesFunction,
       this.sideBar,
       this.sideBarWidth = 100,
       this.sideBarIcon = Icons.view_sidebar});
@@ -35,6 +34,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
   int active = 0;
   List<Widget> mainContents;
   Map<int, int> indexes = {};
+  int initialIndex = 0;
 
   @override
   void initState() {
@@ -43,7 +43,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
     mainContents = getMainContents();
 
     tabController = new TabController(
-        vsync: this, length: mainContents.length, initialIndex: 0)
+        vsync: this, length: mainContents.length, initialIndex: initialIndex)
       ..addListener(() {
         setState(() {
           active = tabController.index;
@@ -55,6 +55,16 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
     List<Widget> result = [];
 
     addMenu(MenuBase menu) {
+      bool hasRole = true;
+      if (menu.role != null) {
+        // si tiene restricción de rol
+        List<String> roles = widget.getRolesFunction();
+        if (roles == null)
+          hasRole = false;
+        else if (roles.contains(menu.role) == false) hasRole = false;
+      }
+      if (!hasRole) return;
+
       if (menu is Menu) {
         // update idx
         indexes[menu.hashCode] = result.length;
@@ -91,7 +101,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Container(
-                margin: EdgeInsets.only(left: 32),
+                //margin: EdgeInsets.only(left: 32),
                 child: Text(
                   widget.title,
                   style: TextStyle(
@@ -158,10 +168,10 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
 
       if (menu.role != null) {
         // si tiene restricción de rol
-        if (widget.docUser != null &&
-            widget.docUser.data().containsKey('roles') &&
-            widget.docUser['roles'].contains(menu.role) == false)
+        List<String> roles = widget.getRolesFunction();
+        if (roles == null)
           hasRole = false;
+        else if (roles.contains(menu.role) == false) hasRole = false;
       }
 
       bool isSelected = tabController.index == indexes[menu.hashCode];

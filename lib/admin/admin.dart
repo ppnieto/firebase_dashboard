@@ -61,8 +61,6 @@ class AdminScreenState extends State<AdminScreen> {
       query = widget.module.addFilter(query);
     }
 
-    //query = addFilters(widget.module.getFilter(), query);
-
     if (widget.module.orderBy != null) {
       query = query.orderBy(widget.module.orderBy);
     }
@@ -96,6 +94,11 @@ class AdminScreenState extends State<AdminScreen> {
           });
         }
         */
+
+        if (widget.module.doFilter != null) {
+          docs = widget.module.doFilter(docs);
+        }
+
         return ListView(controller: scrollController, children: [
           PaginatedDataTable(
               onPageChanged: (page) {
@@ -135,6 +138,7 @@ class AdminScreenState extends State<AdminScreen> {
         child: column.getEditContent(updateData, null, (value) {
           setState(() {
             updateData[column.field] = value;
+            print("actualizamos campo ${column.field} => ${value}");
           });
         }));
   }
@@ -143,48 +147,71 @@ class AdminScreenState extends State<AdminScreen> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 
-      bool doUpdate = true;
-      if (widget.module.onSave != null) {
-        doUpdate = await widget.module
-            .onSave(tipo == TipoPantalla.nuevo, this.updateData);
+      // ñapa para guardar el documentref /values/null como nulo!!!
+      for (var entry in this.updateData.entries) {
+        if (entry.value is DocumentReference) {
+          DocumentReference tmp = entry.value;
+          if (tmp.path == FieldTypeRef.nullValue.path) {
+            this.updateData[entry.key] = null;
+          }
+        }
       }
 
-      if (doUpdate) {
-        if (tipo == TipoPantalla.detalle) {
-          print("update ${updateData}");
-          detalle.reference.update(this.updateData).then((value) {
-            if (widget.module.onUpdated != null)
-              widget.module.onUpdated(false, detalle.reference);
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Elemento guardado con éxito'),
-              duration: Duration(seconds: 2),
-            ));
-            setState(() {
-              this.tipo = TipoPantalla.listado;
+      bool isNew = tipo == TipoPantalla.nuevo;
+
+      String msgValidation;
+      print("update ${updateData}");
+
+      if (widget.module.validation != null) {
+        msgValidation = await widget.module.validation(isNew, this.updateData);
+      }
+
+      bool doUpdate = true;
+      if (widget.module.onSave != null) {
+        doUpdate =
+            widget.module.onSave(tipo == TipoPantalla.nuevo, this.updateData);
+      }
+      if (msgValidation == null) {
+        if (doUpdate) {
+          if (!isNew) {
+            detalle.reference.update(this.updateData).then((value) {
+              if (widget.module.onUpdated != null)
+                widget.module.onUpdated(isNew, detalle.reference);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('Elemento guardado con éxito'),
+                duration: Duration(seconds: 2),
+              ));
+              setState(() {
+                this.tipo = TipoPantalla.listado;
+              });
             });
-          });
-        }
-        if (tipo == TipoPantalla.nuevo) {
-          _getCollection().add(this.updateData).then((value) {
-            if (widget.module.onUpdated != null)
-              widget.module.onUpdated(true, value);
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Elemento guardado con éxito'),
-              duration: Duration(seconds: 2),
-            ));
-            setState(() {
-              this.tipo = TipoPantalla.listado;
+          } else if (tipo == TipoPantalla.nuevo) {
+            _getCollection().add(this.updateData).then((value) {
+              if (widget.module.onUpdated != null)
+                widget.module.onUpdated(isNew, value);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('Elemento guardado con éxito'),
+                duration: Duration(seconds: 2),
+              ));
+              setState(() {
+                this.tipo = TipoPantalla.listado;
+              });
             });
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Elemento guardado con éxito'),
+            duration: Duration(seconds: 2),
+          ));
+          setState(() {
+            this.tipo = TipoPantalla.listado;
           });
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Elemento guardado con éxito'),
+          content: Text(msgValidation),
           duration: Duration(seconds: 2),
         ));
-        setState(() {
-          this.tipo = TipoPantalla.listado;
-        });
       }
     }
   }
@@ -418,7 +445,8 @@ class MyDataTableSource extends DataTableSource {
                 ? [
                     DataCell(
                       IconButton(
-                        icon: Icon(Icons.delete),
+                        icon: Icon(Icons.delete,
+                            color: Theme.of(context).accentColor),
                         onPressed: () {
                           doBorrar(context, _object.reference, () {
                             if (module.onRemove != null) {

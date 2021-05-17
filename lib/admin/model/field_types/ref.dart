@@ -10,6 +10,9 @@ class FieldTypeRef extends FieldType {
   final dynamic initialValue;
   final Function getQueryCollection;
 
+  static final DocumentReference nullValue =
+      FirebaseFirestore.instance.doc("/values/null");
+
   FieldTypeRef(
       {this.collection,
       this.refLabel,
@@ -53,7 +56,7 @@ class FieldTypeRef extends FieldType {
     var value = values[column.field];
 
     if (value == null) {
-      value = initialValue ?? "-";
+      value = initialValue ?? nullValue;
       values[column.field] = value;
       SchedulerBinding.instance.addPostFrameCallback((_) {
         onChange(value);
@@ -71,16 +74,10 @@ class FieldTypeRef extends FieldType {
         stream: query.snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
-          /*
-          if (snapshot.data.docs
-              .where((element) => element.reference == value)
-              .isEmpty) {
-            value = null;
-          }*/
 
-          List<DropdownMenuItem> getIfNullable() => [
-                DropdownMenuItem(
-                    value: "-",
+          List<DropdownMenuItem<DocumentReference>> getIfNullable() => [
+                DropdownMenuItem<DocumentReference>(
+                    value: nullValue, // "-",
                     child: Text("<sin asignar>",
                         style: TextStyle(color: Colors.red)))
               ];
@@ -90,12 +87,11 @@ class FieldTypeRef extends FieldType {
             SizedBox(width: 10),
             Container(
                 width: 300,
-                child: DropdownButtonFormField(
+                child: DropdownButtonFormField<DocumentReference>(
                   value: value,
                   isExpanded: true,
                   items: getIfNullable() +
                       snapshot.data.docs.map((object) {
-                        print(object.reference);
                         return DropdownMenuItem<DocumentReference>(
                             value: object.reference,
                             child: Text(object.data()[this.refLabel]));
@@ -106,13 +102,17 @@ class FieldTypeRef extends FieldType {
                     }
                   },
                   onSaved: (val) {
-                    if (val == "-") val = null;
-                    print("save ${val}");
+                    //if (val.path == nullValue.path) val = null;
+                    onChange(val);
+                    /*
                     values[column.field] = val;
+                    print("onSaved ref");
+                    print(values);
+                    */
                   },
                   validator: (value) {
                     if (column.mandatory &&
-                        (value == null || value == "" || value == "-"))
+                        (value == null || value.path == nullValue.path))
                       return "Campo obligatorio";
                     return null;
                   },

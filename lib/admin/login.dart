@@ -211,8 +211,11 @@ class __LoginMobileState extends State<_LoginMobile> {
                                 widget.parent
                                     .onEntrar(LoginMethod.google, "", "");
                               },
-                              icon: Icon(FontAwesome.google),
-                              label: Text("Entrar usando Google"))
+                              icon: Icon(FontAwesome.google,
+                                  color: Theme.of(context).accentColor),
+                              label: Text("Entrar usando Google",
+                                  style: TextStyle(
+                                      color: Theme.of(context).accentColor)))
                           : SizedBox.shrink(),
                     ]))));
   }

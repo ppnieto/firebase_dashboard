@@ -58,7 +58,7 @@ class FieldTypeDate extends FieldType {
         icon: Icon(FontAwesome.calendar),
         onPressed: () async {
           /*
-          final DateTime picked = await showDatePicker(context: GlobalModel().navigatorKey.currentContext, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);
+          final DateTime picked = await showDatePicker(context: GlobalModel.instance.navigatorKey.currentContext, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);
           if (picked != null) {
             txt.text = f.format(picked);
             onChange(Timestamp.fromDate(picked));

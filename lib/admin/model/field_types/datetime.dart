@@ -8,6 +8,9 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:intl/intl.dart';
 
 class FieldTypeDateTime extends FieldType {
+  final bool showTime;
+
+  FieldTypeDateTime({this.showTime = true});
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     final f = new DateFormat('dd/MM/yyyy HH:mm');
@@ -24,7 +27,9 @@ class FieldTypeDateTime extends FieldType {
       Function onValidate, Function onChange) {
     var value = values[column.field];
     return DateTimePicker(
-        type: DateTimePickerType.dateTimeSeparate,
+        type: showTime
+            ? DateTimePickerType.dateTimeSeparate
+            : DateTimePickerType.date,
         dateMask: 'dd/MM/yyyy',
         initialValue: value == null
             ? DateTime.now().toString()
@@ -34,17 +39,6 @@ class FieldTypeDateTime extends FieldType {
         icon: Icon(Icons.event),
         dateLabelText: 'Fecha',
         timeLabelText: "Hora",
-
-        /*
-        selectableDayPredicate: (date) {
-          // Disable weekend days to select from the calendar
-          if (date.weekday == 6 || date.weekday == 7) {
-            return false;
-          }
-
-          return true;
-        },
-        */
         onChanged: (val) => print(val),
         validator: (val) {
           print(val);
@@ -53,7 +47,9 @@ class FieldTypeDateTime extends FieldType {
         onSaved: (val) {
           print("on saved");
           print(val);
-          DateTime tmp = new DateFormat('yyyy-MM-dd HH:mm').parse(val);
+          DateTime tmp = showTime
+              ? new DateFormat('yyyy-MM-dd HH:mm').parse(val)
+              : new DateFormat('yyyy-MM-dd').parse(val);
           onChange(Timestamp.fromDate(tmp));
         });
   }

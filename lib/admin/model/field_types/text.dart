@@ -6,7 +6,12 @@ class FieldTypeText extends FieldType {
   final RegExp regexp;
   final bool nullable;
   final Function showTextFunction;
-  FieldTypeText({this.nullable, this.regexp, this.showTextFunction});
+  final bool obscureText;
+  FieldTypeText(
+      {this.nullable,
+      this.regexp,
+      this.showTextFunction,
+      this.obscureText = false});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
@@ -27,6 +32,9 @@ class FieldTypeText extends FieldType {
     return TextFormField(
         initialValue: value,
         enabled: column.editable,
+        obscureText: this.obscureText,
+        enableSuggestions: this.obscureText,
+        autocorrect: this.obscureText,
         decoration: InputDecoration(
             labelText: column.label,
             filled: !column.editable,

@@ -6,7 +6,7 @@ class FieldTypeNumber extends FieldType {
   final double maxValue;
   final double minValue;
   final double step;
-  FieldTypeNumber({this.maxValue = 100, this.minValue = 0, this.step});
+  FieldTypeNumber({this.maxValue = 100, this.minValue = 0, this.step = 1});
 
   @override
   getEditContent(

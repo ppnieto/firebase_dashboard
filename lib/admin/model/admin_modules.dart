@@ -1,4 +1,3 @@
-import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dashboard/admin/model/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +19,7 @@ export "field_types/memo.dart";
 export "field_types/qr.dart";
 export "field_types/rating.dart";
 export "field_types/select.dart";
+export "field_types/tags.dart";
 
 class Module {
   String name;
@@ -27,12 +27,15 @@ class Module {
   IconData icon;
   String collection;
   Function getQueryCollection;
+  Function doFilter;
   String orderBy;
   Function addFilter;
   String reverseOrderBy;
   Function onSave;
   Function onUpdated;
   Function onRemove;
+  Future<String> Function(bool isNew, Map<String, dynamic> updateData)
+      validation;
   int rowsPerPage;
   bool canAdd;
   bool canEdit;
@@ -44,6 +47,7 @@ class Module {
     this.collection,
     this.getQueryCollection,
     this.addFilter,
+    this.doFilter,
     this.title,
     this.icon,
     this.columns,
@@ -58,6 +62,7 @@ class Module {
     this.onSave,
     this.onUpdated,
     this.onRemove,
+    this.validation,
   });
 }
 
@@ -73,17 +78,18 @@ class ColumnModule {
   bool filter;
   bool mandatory;
 
-  ColumnModule(
-      {this.label,
-      this.field,
-      this.type,
-      this.editable = true,
-      this.listable = true,
-      this.clickToDetail = true,
-      this.filter = false,
-      this.mandatory = false,
-      this.showOnEdit = true,
-      this.showOnNew = true});
+  ColumnModule({
+    this.label,
+    this.field,
+    this.type,
+    this.editable = true,
+    this.listable = true,
+    this.clickToDetail = true,
+    this.filter = false,
+    this.mandatory = false,
+    this.showOnEdit = true,
+    this.showOnNew = true,
+  });
 
   getListContent(DocumentSnapshot _object) =>
       type.getListContent(_object, this);
@@ -143,7 +149,7 @@ class Menu extends MenuBase {
             child: Row(children: [
               Icon(iconData,
                   color: isSelected
-                      ? Theme.of(context).accentIconTheme.color
+                      ? Theme.of(context).canvasColor
                       : Theme.of(context).primaryColor),
               SizedBox(
                 width: 8,
@@ -153,7 +159,7 @@ class Menu extends MenuBase {
                 style: TextStyle(
                     fontSize: 18,
                     color: isSelected
-                        ? Theme.of(context).accentIconTheme.color
+                        ? Theme.of(context).canvasColor
                         : Theme.of(context).primaryColor),
               ),
             ]),
