@@ -9,15 +9,12 @@ class FieldTypeRef extends FieldType {
   final Function getFilter;
   final dynamic initialValue;
   final Function getQueryCollection;
-<<<<<<< HEAD:lib/admin/model/field_types/ref.dart
 
   static final DocumentReference nullValue =
       FirebaseFirestore.instance.doc("/values/null");
 
-=======
   DocumentSnapshot object;
   ColumnModule column;
->>>>>>> a8ae2489b53e5fda16ef1a81496723e17c3428cb:lib/admin/field_types/ref.dart
   FieldTypeRef(
       {this.collection,
       this.refLabel,

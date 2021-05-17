@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/model/admin_modules.dart';
-import 'package:dashboard/admin/model/field_types/field_type_base.dart';
+import 'package:dashboard/admin/admin_modules.dart';
+import 'package:dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 
