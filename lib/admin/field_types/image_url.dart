@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dashboard/admin/model/admin_modules.dart';
+import 'package:dashboard/admin/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import "package:universal_html/html.dart" as html;
 

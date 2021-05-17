@@ -1,4 +1,4 @@
-import 'package:dashboard/admin/model/admin_modules.dart';
+import 'package:dashboard/admin/admin_modules.dart';
 import 'package:dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -454,21 +454,7 @@ class MyDataTableSource extends DataTableSource {
                             }
                           });
                         },
-                      )
-                      /*  RaisedButton.icon(
-                      color: Theme.of(context).primaryColor,
-                      icon: Icon(FontAwesome.remove, color: Colors.white),
-                      label:
-                          Text("Borrar", style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        doBorrar(context, _object.reference, () {
-                          if (module.onRemove != null) {
-                            module.onRemove(_object);
-                          }
-                        });
-                      },
-                    )*/
-                      ,
+                      ),
                     )
                   ]
                 : []));

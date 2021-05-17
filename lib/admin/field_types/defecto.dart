@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/model/admin_modules.dart';
-import 'package:dashboard/admin/model/field_types/field_type_base.dart';
+import 'package:dashboard/admin/admin_modules.dart';
+import 'package:dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeDefecto extends FieldType {
@@ -23,7 +23,8 @@ class FieldTypeDefecto extends FieldType {
   }
 
   @override
-  getEditContent(value, ColumnModule column, Function onValidate, Function onChange) {
+  getEditContent(
+      value, ColumnModule column, Function onValidate, Function onChange) {
     return Container();
   }
 

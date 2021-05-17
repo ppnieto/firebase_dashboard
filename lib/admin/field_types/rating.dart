@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dashboard/admin/model/admin_modules.dart';
+import 'package:dashboard/admin/admin_modules.dart';
 
 class FieldTypeRating extends FieldType {
   final int startCount;
