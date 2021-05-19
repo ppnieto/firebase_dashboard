@@ -4,11 +4,12 @@ import 'package:dashboard/admin/admin_modules.dart';
 import 'package:flutter/scheduler.dart';
 
 class FieldTypeRef extends FieldType {
-  String collection;
+  final String collection;
   final String refLabel;
   final Function getFilter;
   final dynamic initialValue;
   final Function getQueryCollection;
+  final Function getStream;
 
   static final DocumentReference nullValue =
       FirebaseFirestore.instance.doc("/values/null");
@@ -20,7 +21,8 @@ class FieldTypeRef extends FieldType {
       this.refLabel,
       this.getFilter,
       this.initialValue,
-      this.getQueryCollection});
+      this.getQueryCollection,
+      this.getStream});
 
   Widget getListWidget(String content, {TextStyle style}) =>
       Text(content, style: style);
@@ -84,9 +86,15 @@ class FieldTypeRef extends FieldType {
     }
 
     return StreamBuilder(
-        stream: _getQuery().snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        stream: getStream == null ? _getQuery().snapshots() : getStream(),
+        builder: (context, snapshot) {
           if (!snapshot.hasData) return Container();
+
+          List list = snapshot.data is QuerySnapshot
+              ? snapshot.data.docs
+              : snapshot.data;
+
+          print(list);
 
           List<DropdownMenuItem<DocumentReference>> getIfNullable() => [
                 DropdownMenuItem<DocumentReference>(
@@ -104,7 +112,7 @@ class FieldTypeRef extends FieldType {
                   value: value,
                   isExpanded: true,
                   items: getIfNullable() +
-                      snapshot.data.docs.map((object) {
+                      list.map((object) {
                         return DropdownMenuItem<DocumentReference>(
                             value: object.reference,
                             child: Text(object.data()[this.refLabel]));
@@ -118,6 +126,7 @@ class FieldTypeRef extends FieldType {
                     onChange(val);
                   },
                   validator: (value) {
+                    print("validamos campo...");
                     if (column.mandatory &&
                         (value == null || value.path == nullValue.path))
                       return "Campo obligatorio";

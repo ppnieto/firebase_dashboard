@@ -105,6 +105,7 @@ class FieldTypeMultiref extends FieldType {
             items: snapshot.data.docs
                 .map((e) =>
                     MultiSelectItem(e.reference, e.data()[this.refLabel]))
+                .toSet()
                 .toList(),
             listType: MultiSelectListType.CHIP,
             onConfirm: (values) {
