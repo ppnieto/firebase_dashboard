@@ -115,13 +115,7 @@ class FieldTypeRef extends FieldType {
                     }
                   },
                   onSaved: (val) {
-                    //if (val.path == nullValue.path) val = null;
                     onChange(val);
-                    /*
-                    values[column.field] = val;
-                    print("onSaved ref");
-                    print(values);
-                    */
                   },
                   validator: (value) {
                     if (column.mandatory &&

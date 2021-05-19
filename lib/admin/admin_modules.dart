@@ -9,6 +9,7 @@ export "field_types/location.dart";
 export "field_types/date.dart";
 export "field_types/currency.dart";
 export "field_types/ref.dart";
+export "field_types/multiref.dart";
 export "field_types/inline_ref.dart";
 export "field_types/datetime.dart";
 export "field_types/number.dart";
