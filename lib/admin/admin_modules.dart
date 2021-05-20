@@ -9,7 +9,6 @@ export "field_types/location.dart";
 export "field_types/date.dart";
 export "field_types/currency.dart";
 export "field_types/ref.dart";
-export "field_types/multiref.dart";
 export "field_types/inline_ref.dart";
 export "field_types/datetime.dart";
 export "field_types/number.dart";
@@ -42,30 +41,31 @@ class Module {
   bool canAdd;
   bool canEdit;
   bool canRemove;
+  List<IconButton> Function(DocumentSnapshot object) getActions;
 
   List<ColumnModule> columns;
-  Module({
-    this.name,
-    this.collection,
-    this.getQueryCollection,
-    this.addFilter,
-    this.doFilter,
-    this.title,
-    this.icon,
-    this.columns,
-    this.orderBy,
-    this.reverseOrderBy,
-    //this.sortBy,
-    //this.reverseSortBy,
-    this.rowsPerPage = 10,
-    this.canAdd = true,
-    this.canEdit = true,
-    this.canRemove = true,
-    this.onSave,
-    this.onUpdated,
-    this.onRemove,
-    this.validation,
-  });
+  Module(
+      {this.name,
+      this.collection,
+      this.getQueryCollection,
+      this.addFilter,
+      this.doFilter,
+      this.title,
+      this.icon,
+      this.columns,
+      this.orderBy,
+      this.reverseOrderBy,
+      //this.sortBy,
+      //this.reverseSortBy,
+      this.rowsPerPage = 10,
+      this.canAdd = true,
+      this.canEdit = true,
+      this.canRemove = true,
+      this.onSave,
+      this.onUpdated,
+      this.onRemove,
+      this.validation,
+      this.getActions});
 }
 
 class ColumnModule {

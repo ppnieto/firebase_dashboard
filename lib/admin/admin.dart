@@ -112,7 +112,7 @@ class AdminScreenState extends State<AdminScreen> {
                       .map((column) {
                     return DataColumn(label: Text(column.label));
                   }).toList() +
-                  (widget.module.canRemove
+                  (widget.module.canRemove || widget.module.getActions != null
                       ? [DataColumn(label: Container())]
                       : []),
               source: MyDataTableSource(docs, widget.module, context, (index) {
@@ -441,20 +441,31 @@ class MyDataTableSource extends DataTableSource {
                         }
                       : null);
             }).toList() +
-            (module.canRemove
+            (module.canRemove || module.getActions != null
                 ? [
                     DataCell(
-                      IconButton(
-                        icon: Icon(Icons.delete,
-                            color: Theme.of(context).accentColor),
-                        onPressed: () {
-                          doBorrar(context, _object.reference, () {
-                            if (module.onRemove != null) {
-                              module.onRemove(_object);
-                            }
-                          });
-                        },
-                      ),
+                      Row(
+                          children: module.getActions == null
+                              ? []
+                              : module.getActions(_object) +
+                                  (module.canRemove
+                                      ? [
+                                          IconButton(
+                                            icon: Icon(Icons.delete,
+                                                color: Theme.of(context)
+                                                    .accentColor),
+                                            onPressed: () {
+                                              doBorrar(
+                                                  context, _object.reference,
+                                                  () {
+                                                if (module.onRemove != null) {
+                                                  module.onRemove(_object);
+                                                }
+                                              });
+                                            },
+                                          ),
+                                        ]
+                                      : [])),
                     )
                   ]
                 : []));

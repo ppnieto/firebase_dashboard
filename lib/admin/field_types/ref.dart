@@ -14,7 +14,6 @@ class FieldTypeRef extends FieldType {
   static final DocumentReference nullValue =
       FirebaseFirestore.instance.doc("/values/null");
 
-  DocumentSnapshot object;
   ColumnModule column;
   FieldTypeRef(
       {this.collection,
@@ -24,12 +23,12 @@ class FieldTypeRef extends FieldType {
       this.getQueryCollection,
       this.getStream});
 
-  Widget getListWidget(String content, {TextStyle style}) =>
+  Widget getListWidget(DocumentSnapshot _object, String content,
+          {TextStyle style}) =>
       Text(content, style: style);
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    this.object = _object;
     this.column = column;
     var _data = _object.data()[column.field];
 
@@ -41,14 +40,15 @@ class FieldTypeRef extends FieldType {
           if (!snapshot.hasData) return Container();
           if (snapshot.data.data() != null &&
               snapshot.data.data().containsKey(this.refLabel)) {
-            return getListWidget(snapshot.data.data()[this.refLabel] ?? "-");
+            return getListWidget(
+                _object, snapshot.data.data()[this.refLabel] ?? "-");
           } else
-            return getListWidget("<no existe>",
+            return getListWidget(_object, "<no existe>",
                 style: TextStyle(color: Colors.red));
         },
       );
     } else {
-      return getListWidget("<sin asignar>",
+      return getListWidget(_object, "<sin asignar>",
           style: TextStyle(color: Colors.red));
     }
   }
