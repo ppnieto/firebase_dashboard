@@ -7,11 +7,15 @@ class FieldTypeText extends FieldType {
   final bool nullable;
   final Function showTextFunction;
   final bool obscureText;
+  final bool emptyNull;
+  final Widget nullWidget;
   FieldTypeText(
       {this.nullable,
       this.regexp,
       this.showTextFunction,
-      this.obscureText = false});
+      this.obscureText = false,
+      this.emptyNull = false,
+      this.nullWidget});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
@@ -22,7 +26,7 @@ class FieldTypeText extends FieldType {
             : showTextFunction(_object[column.field]));
       }
     }
-    return Text("-");
+    return nullWidget == null ? Text("-") : nullWidget;
   }
 
   @override
@@ -48,6 +52,9 @@ class FieldTypeText extends FieldType {
           return onValidate != null ? onValidate(value) : null;
         },
         onSaved: (val) {
+          if (emptyNull) {
+            val = val.isEmpty ? null : val;
+          }
           if (onChange != null) onChange(val);
         });
   }

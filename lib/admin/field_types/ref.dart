@@ -117,11 +117,13 @@ class FieldTypeRef extends FieldType {
                             value: object.reference,
                             child: Text(object.data()[this.refLabel]));
                       }).toList(),
-                  onChanged: (val) {
-                    if (onChange != null) {
-                      onChange(val);
-                    }
-                  },
+                  onChanged: column.editable
+                      ? (val) {
+                          if (onChange != null) {
+                            onChange(val);
+                          }
+                        }
+                      : null,
                   onSaved: (val) {
                     onChange(val);
                   },
