@@ -42,7 +42,7 @@ class Module {
   bool canAdd;
   bool canEdit;
   bool canRemove;
-  List<IconButton> Function(DocumentSnapshot object) getActions;
+  List<Widget> Function(DocumentSnapshot object) getActions;
 
   List<ColumnModule> columns;
   Module(
