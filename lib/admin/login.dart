@@ -125,8 +125,8 @@ class __LoginMobileState extends State<_LoginMobile> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(5.0),
                 ),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                child: ListView(
+                    //crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: 20),
                       Text(widget.parent.title,
