@@ -445,27 +445,26 @@ class MyDataTableSource extends DataTableSource {
                 ? [
                     DataCell(
                       Row(
-                          children: module.getActions == null
-                              ? []
-                              : module.getActions(_object) +
-                                  (module.canRemove
-                                      ? [
-                                          IconButton(
-                                            icon: Icon(Icons.delete,
-                                                color: Theme.of(context)
-                                                    .accentColor),
-                                            onPressed: () {
-                                              doBorrar(
-                                                  context, _object.reference,
-                                                  () {
-                                                if (module.onRemove != null) {
-                                                  module.onRemove(_object);
-                                                }
-                                              });
-                                            },
-                                          ),
-                                        ]
-                                      : [])),
+                          children: (module.getActions == null
+                                  ? <Widget>[]
+                                  : module.getActions(_object)) +
+                              (module.canRemove
+                                  ? [
+                                      IconButton(
+                                        icon: Icon(Icons.delete,
+                                            color:
+                                                Theme.of(context).accentColor),
+                                        onPressed: () {
+                                          doBorrar(context, _object.reference,
+                                              () {
+                                            if (module.onRemove != null) {
+                                              module.onRemove(_object);
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ]
+                                  : [])),
                     )
                   ]
                 : []));

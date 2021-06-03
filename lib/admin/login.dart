@@ -19,6 +19,7 @@ class LoginScreen extends StatelessWidget {
   final String password;
 
   final Function(LoginMethod, String, String) onEntrar;
+  final Function(String) onForgotPassword;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -27,6 +28,7 @@ class LoginScreen extends StatelessWidget {
       {Key key,
       @required this.title,
       @required this.onEntrar,
+      this.onForgotPassword,
       this.allowReminder = false,
       this.logoURL,
       this.imageURL,
@@ -125,7 +127,7 @@ class __LoginMobileState extends State<_LoginMobile> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(5.0),
                 ),
-                child: ListView(
+                child: ListView(shrinkWrap: true,
                     //crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: 20),
@@ -173,14 +175,85 @@ class __LoginMobileState extends State<_LoginMobile> {
                                   )
                                 ])
                           : SizedBox.shrink(),
+                      SizedBox(height: 10),
                       widget.parent.allowReminder
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                   Container(),
                                   TextButton(
-                                    child: Text("Olvidé mi contraseña"),
-                                    onPressed: () {},
+                                    child: Text("Olvidé mi contraseña",
+                                        style: TextStyle(
+                                            color:
+                                                Theme.of(context).accentColor)),
+                                    onPressed: () {
+                                      TextEditingController emailController =
+                                          TextEditingController();
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text(
+                                                  "Introduzca su dirección de email"),
+                                              content: Container(
+                                                height: 90,
+                                                child: Column(
+                                                  children: [
+                                                    TextField(
+                                                        controller:
+                                                            emailController)
+                                                  ],
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButtonTheme(
+                                                    data: TextButtonThemeData(
+                                                        style: TextButton
+                                                            .styleFrom(
+                                                      padding: EdgeInsets.only(
+                                                          top: 15,
+                                                          bottom: 15,
+                                                          left: 30,
+                                                          right: 30),
+                                                      primary: Colors.white,
+                                                      backgroundColor:
+                                                          Theme.of(context)
+                                                              .primaryColor,
+                                                    )),
+                                                    child: TextButton(
+                                                        onPressed: () {
+                                                          if (emailController
+                                                              .text
+                                                              .isNotEmpty) {
+                                                            if (widget.parent
+                                                                    .onForgotPassword !=
+                                                                null) {
+                                                              widget.parent
+                                                                  .onForgotPassword(
+                                                                      emailController
+                                                                          .text);
+                                                            }
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                            ScaffoldMessenger
+                                                                    .of(context)
+                                                                .showSnackBar(
+                                                                    SnackBar(
+                                                              content: Text(
+                                                                  "Si el usuario existe en el sistema se le enviarán las instrucciones por correo electrónico"),
+                                                            ));
+                                                          }
+                                                        },
+                                                        child: Text(
+                                                            "Obtener nueva contraseña",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white))))
+                                              ],
+                                            );
+                                          });
+                                    },
                                   )
                                 ])
                           : SizedBox.shrink(),
@@ -204,7 +277,7 @@ class __LoginMobileState extends State<_LoginMobile> {
                                     widget.parent.emailController.text,
                                     widget.parent.passwordController.text);
                               })),
-                      Expanded(child: Container()),
+                      SizedBox(height: 40),
                       widget.parent.useGoogle
                           ? TextButton.icon(
                               onPressed: () {
