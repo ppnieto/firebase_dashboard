@@ -32,7 +32,7 @@ class FieldTypeRating extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    var rating = _object.data()[column.field];
+    var rating = _object.get(column.field);
 
     return Row(
         children: List.generate(

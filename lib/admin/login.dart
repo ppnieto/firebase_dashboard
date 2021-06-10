@@ -44,7 +44,7 @@ class LoginScreen extends StatelessWidget {
     passwordController.text = this.password;
 
     return Scaffold(
-      backgroundColor: Color.fromRGBO(220, 220, 220, 1),
+      backgroundColor: Theme.of(context).canvasColor,
       bottomNavigationBar: Container(
           height: 30,
           color: Colors.transparent,

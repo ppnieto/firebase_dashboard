@@ -16,8 +16,7 @@ class FieldTypeDouble extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    if (_object.data().containsKey(column.field) &&
-        _object.data()[column.field] != null) {
+    if (_object.get(column.field) != null) {
       return Text(this.formatter.format(_object[column.field]));
     } else {
       return nullWidget != null ? nullWidget : Text(this.formatter.format(0));

@@ -10,7 +10,11 @@ class AdminScreen extends StatefulWidget {
   final bool showScaffoldBack;
   final CollectionReference collection;
 
-  AdminScreen({this.module, this.showScaffoldBack = false, this.collection});
+  AdminScreen({
+    this.module,
+    this.showScaffoldBack = false,
+    this.collection,
+  });
 
   @override
   State<StatefulWidget> createState() => AdminScreenState();
@@ -69,7 +73,6 @@ class AdminScreenState extends State<AdminScreen> {
       query = query.orderBy(widget.module.reverseOrderBy, descending: true);
     }
 
-    print("query ${query}");
     return StreamBuilder(
       stream: query.snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {

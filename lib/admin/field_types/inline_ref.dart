@@ -49,7 +49,7 @@ class FieldTypeInlineRef extends FieldTypeRef {
                         snapshot.data.docs.map((element) {
                           return PopupMenuItem<DocumentReference>(
                               value: element.reference,
-                              child: Text(element.data()[this.refLabel]));
+                              child: Text(element.get(this.refLabel)));
                         }).toList();
                   },
                   onSelected: (DocumentReference ref) {

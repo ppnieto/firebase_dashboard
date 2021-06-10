@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class FieldTypeBoolean extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    bool value = _object.data()[column.field] ?? false;
+    bool value = _object[column.field] ?? false;
     return Icon(
         value ? Icons.check_box_outlined : Icons.check_box_outline_blank);
   }

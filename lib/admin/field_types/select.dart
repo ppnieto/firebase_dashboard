@@ -12,18 +12,17 @@ class FieldTypeSelect extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    if (_object.data().containsKey(column.field)) {
-      if (_object.data()[column.field] != null) {
-        String key = _object.data()[column.field];
-        if (this.options.containsKey(key)) {
-          return Text(this.options[key]);
-        } else {
-          if (this.unselected != null) {
-            return this.unselected;
-          }
+    if (_object.get(column.field) != null) {
+      String key = _object.get(column.field);
+      if (this.options.containsKey(key)) {
+        return Text(this.options[key]);
+      } else {
+        if (this.unselected != null) {
+          return this.unselected;
         }
       }
     }
+
     return Text("<sin asignar>", style: TextStyle(color: Colors.red));
   }
 

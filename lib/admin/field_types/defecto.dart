@@ -14,7 +14,7 @@ class FieldTypeDefecto extends FieldType {
         stream: FirebaseFirestore.instance.doc("config/parameters").snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return Container();
-          if (snapshot.data.data()[this.defaultField] == _object.reference) {
+          if (snapshot.data.get(this.defaultField) == _object.reference) {
             return Icon(Icons.star, color: Colors.yellow);
           } else {
             return Icon(Icons.star_border_outlined);

@@ -13,7 +13,7 @@ class FieldTypeQR extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    String code = _object.data()[column.field];
+    String code = _object.get(column.field);
     return code.isEmpty
         ? SizedBox.shrink()
         : IconButton(

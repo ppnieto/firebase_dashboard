@@ -30,7 +30,7 @@ class FieldTypeRef extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     this.column = column;
-    var _data = _object.data()[column.field];
+    var _data = _object.get(column.field);
 
     if (_data != null && _data is DocumentReference) {
       DocumentReference ref = _data;
@@ -39,9 +39,9 @@ class FieldTypeRef extends FieldType {
         builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
           if (snapshot.data.data() != null &&
-              snapshot.data.data().containsKey(this.refLabel)) {
+              snapshot.data.get(this.refLabel) != null) {
             return getListWidget(
-                _object, snapshot.data.data()[this.refLabel] ?? "-");
+                _object, snapshot.data.get(this.refLabel) ?? "-");
           } else
             return getListWidget(_object, "<no existe>",
                 style: TextStyle(color: Colors.red));
@@ -115,7 +115,7 @@ class FieldTypeRef extends FieldType {
                       list.map((object) {
                         return DropdownMenuItem<DocumentReference>(
                             value: object.reference,
-                            child: Text(object.data()[this.refLabel]));
+                            child: Text(object.get(this.refLabel)));
                       }).toList(),
                   onChanged: column.editable
                       ? (val) {
@@ -155,7 +155,7 @@ class FieldTypeRef extends FieldType {
                   snapshot.data.docs.map<DropdownMenuItem<dynamic>>((object) {
                     return DropdownMenuItem(
                         value: object.reference,
-                        child: Text(object.data()[this.refLabel]));
+                        child: Text(object.get(this.refLabel)));
                   }).toList(),
               onChanged: (val) {
                 if (onFilter != null) onFilter(val);

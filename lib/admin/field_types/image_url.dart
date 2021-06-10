@@ -22,7 +22,7 @@ class FieldTypeImageURL extends FieldType {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Image.network(
-        _object.data()[column.field].toString(),
+        _object[column.field].toString(),
         width: this.width,
         height: this.height,
       ),

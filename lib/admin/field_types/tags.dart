@@ -44,7 +44,7 @@ class FieldTypeTags extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    if (_object.data().containsKey(column.field)) {
+    if (_object.get(column.field) != null) {
       var value = _object[column.field];
       if (value is List) {
         return MultiSelectChipDisplay(

@@ -10,9 +10,7 @@ abstract class FieldType {
   }
 
   getListContent(DocumentSnapshot _object, ColumnModule column) => Text(
-      _object.data().containsKey(column.field) && _object[column.field] != null
-          ? _object[column.field].toString()
-          : "-");
+      _object[column.field] != null ? _object[column.field].toString() : "-");
   getEditContent(Map<String, dynamic> values, ColumnModule column,
       Function onValidate, Function onChange) {
     return Text("No implementado para tipo " + this.toString());

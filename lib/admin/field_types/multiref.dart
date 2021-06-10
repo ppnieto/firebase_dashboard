@@ -26,7 +26,7 @@ class FieldTypeMultiref extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    if (_object.data().containsKey(column.field)) {
+    if (_object.get(column.field) != null) {
       var value = _object[column.field];
       if (value is List) {
         List<DocumentReference> refs = [];
@@ -44,7 +44,7 @@ class FieldTypeMultiref extends FieldType {
               print(snapshot.data);
               return MultiSelectChipDisplay(
                 items: snapshot.data.map((entry) {
-                  return MultiSelectItem(entry, entry.data()[this.refLabel]);
+                  return MultiSelectItem(entry, entry.get(this.refLabel));
                 }).toList(),
               );
             });
@@ -103,8 +103,7 @@ class FieldTypeMultiref extends FieldType {
             title: Text("Seleccione " + column?.label),
             initialValue: value,
             items: snapshot.data.docs
-                .map((e) =>
-                    MultiSelectItem(e.reference, e.data()[this.refLabel]))
+                .map((e) => MultiSelectItem(e.reference, e.get(this.refLabel)))
                 .toSet()
                 .toList(),
             listType: MultiSelectListType.CHIP,

@@ -19,13 +19,12 @@ class FieldTypeText extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    if (_object.data().containsKey(column.field)) {
-      if (_object.data()[column.field] != null) {
-        return Text(showTextFunction == null
-            ? _object[column.field].toString()
-            : showTextFunction(_object[column.field]));
-      }
+    if (_object.get(column.field) != null) {
+      return Text(showTextFunction == null
+          ? _object[column.field].toString()
+          : showTextFunction(_object[column.field]));
     }
+
     return nullWidget == null ? Text("-") : nullWidget;
   }
 

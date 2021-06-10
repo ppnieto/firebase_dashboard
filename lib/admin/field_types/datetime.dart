@@ -14,9 +14,8 @@ class FieldTypeDateTime extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     final f = new DateFormat('dd/MM/yyyy HH:mm');
-    if (_object.data().containsKey(column.field) &&
-        _object.data()[column.field] != null) {
-      return Text(f.format(_object.data()[column.field].toDate()));
+    if (_object.get(column.field) != null) {
+      return Text(f.format(_object.get(column.field).toDate()));
     } else {
       return Text("-");
     }
