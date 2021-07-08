@@ -1,6 +1,5 @@
 library dashboard;
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dashboard/admin/admin_modules.dart';
 import 'package:flutter/material.dart';
 

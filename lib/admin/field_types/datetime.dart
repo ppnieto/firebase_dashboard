@@ -26,6 +26,7 @@ class FieldTypeDateTime extends FieldType {
       Function onValidate, Function onChange) {
     var value = values[column.field];
     return DateTimePicker(
+        //locale: Locale('es'),
         type: showTime
             ? DateTimePickerType.dateTimeSeparate
             : DateTimePickerType.date,

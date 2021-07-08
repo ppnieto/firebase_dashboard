@@ -11,6 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations: # Add this line
+    sdk: flutter         # Add this line
 
   flutter_icons: ^1.1.0
   sweetsheet: any
@@ -30,7 +32,7 @@ dependencies:
   badges: any
   multi_select_flutter: ^4.0.0
   flutter_tags: ^0.4.9+1
-  
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

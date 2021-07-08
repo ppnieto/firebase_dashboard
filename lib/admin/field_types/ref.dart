@@ -30,7 +30,9 @@ class FieldTypeRef extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     this.column = column;
-    var _data = _object.get(column.field);
+    var _data = (_object.data() as Map).containsKey(column.field)
+        ? _object.get(column.field)
+        : "-";
 
     if (_data != null && _data is DocumentReference) {
       DocumentReference ref = _data;
