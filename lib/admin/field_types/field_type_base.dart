@@ -33,3 +33,17 @@ abstract class FieldType {
     return Text("No implementado para tipo " + this.toString());
   }
 }
+
+extension SafeFieldAdmin on DocumentSnapshot {
+  dynamic getFieldAdm(String fieldName, dynamic defValue) {
+    if (!hasFieldAdm(fieldName)) return defValue;
+    return (this.data() as Map)[fieldName];
+  }
+
+  bool hasFieldAdm(String fieldName) {
+    if (this.data() == null) return false;
+    if (!(this.data() as Map).containsKey(fieldName)) return false;
+    if ((this.data() as Map)[fieldName] == null) return false;
+    return true;
+  }
+}

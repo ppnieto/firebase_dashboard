@@ -21,6 +21,7 @@ class FieldTypeMemo extends FieldType {
       Function onValidate, Function onChange) {
     var value = values[column.field];
     return TextFormField(
+        enabled: column.editable,
         style: TextStyle(
             //fontFamily: 'HelveticaNeue',
             ),

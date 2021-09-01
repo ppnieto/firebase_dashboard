@@ -25,6 +25,6 @@ class FieldTypeRefNumChilds extends FieldType {
   @override
   getEditContent(
       value, ColumnModule column, Function onValidate, Function onChange) {
-    return Text("3");
+    return SizedBox.shrink();
   }
 }
