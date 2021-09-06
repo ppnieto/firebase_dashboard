@@ -174,8 +174,14 @@ class Menu extends MenuBase {
 }
 
 class MenuGroup extends MenuBase {
-  List<MenuBase> children;
-  MenuGroup({this.children, String label, IconData iconData, String role})
+  final List<MenuBase> children;
+  final bool open;
+  MenuGroup(
+      {this.children,
+      String label,
+      IconData iconData,
+      String role,
+      this.open = false})
       : super(label: label, iconData: iconData, role: role);
 }
 

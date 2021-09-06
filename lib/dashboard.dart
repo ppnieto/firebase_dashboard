@@ -178,7 +178,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
       if (menu is MenuGroup) {
         return hasRole
             ? ExpansionTile(
-                initiallyExpanded: true,
+                initiallyExpanded: menu.open,
                 childrenPadding: EdgeInsets.only(left: 24),
                 title: Text(menu.label,
                     style: TextStyle(
