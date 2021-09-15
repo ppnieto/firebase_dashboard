@@ -4,7 +4,7 @@ import 'package:dashboard/admin/admin_modules.dart';
 
 class FieldTypeMemo extends FieldType {
   int maxLines;
-  double listWidth;
+  double? listWidth;
   FieldTypeMemo({this.maxLines = 4, this.listWidth});
 
   @override
@@ -18,7 +18,7 @@ class FieldTypeMemo extends FieldType {
 
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     var value = values[column.field];
     return TextFormField(
         enabled: column.editable,

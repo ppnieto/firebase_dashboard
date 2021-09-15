@@ -2,16 +2,16 @@ import 'package:dashboard/admin/admin_modules.dart';
 import 'package:dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_icons/flutter_icons.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:sweetsheet/sweetsheet.dart';
 
 class AdminScreen extends StatefulWidget {
   final Module module;
   final bool showScaffoldBack;
-  final CollectionReference collection;
+  final CollectionReference? collection;
 
   AdminScreen({
-    this.module,
+    required this.module,
     this.showScaffoldBack = false,
     this.collection,
   });
@@ -24,19 +24,20 @@ enum TipoPantalla { listado, detalle, nuevo, confirmar }
 
 class AdminScreenState extends State<AdminScreen> {
   TipoPantalla tipo = TipoPantalla.listado;
-  DocumentSnapshot detalle;
-  Map<String, dynamic> updateData;
+  DocumentSnapshot? detalle;
+  Map<String, dynamic>? updateData;
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic> filtro = {};
   final scrollController = ScrollController();
 
   CollectionReference _getCollection() {
-    if (widget?.module?.getQueryCollection != null) {
-      return widget.module.getQueryCollection();
+    if (widget.module.getQueryCollection != null) {
+      return widget.module.getQueryCollection!();
     } else {
-      String collection = widget?.collection?.path ??
-          widget.module?.collection ??
-          widget.collection?.path;
+      String collection = widget.collection?.path ??
+          widget.module.collection ??
+          widget.collection?.path ??
+          "";
       return FirebaseFirestore.instance.collection(collection);
     }
   }
@@ -62,15 +63,15 @@ class AdminScreenState extends State<AdminScreen> {
     Query query = _getCollection();
     query = addFilters(filtro, query);
     if (widget.module.addFilter != null) {
-      query = widget.module.addFilter(query);
+      query = widget.module.addFilter!(query);
     }
 
     if (widget.module.orderBy != null) {
-      query = query.orderBy(widget.module.orderBy);
+      query = query.orderBy(widget.module.orderBy!);
     }
 
     if (widget.module.reverseOrderBy != null) {
-      query = query.orderBy(widget.module.reverseOrderBy, descending: true);
+      query = query.orderBy(widget.module.reverseOrderBy!, descending: true);
     }
 
     return StreamBuilder(
@@ -78,7 +79,7 @@ class AdminScreenState extends State<AdminScreen> {
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) return Container();
 
-        List<DocumentSnapshot> docs = List.from(snapshot.data.docs);
+        List<DocumentSnapshot> docs = List.from(snapshot.data!.docs);
         /*
         if (widget.module.sortBy != null) {
           docs.sort((a, b) {
@@ -99,7 +100,7 @@ class AdminScreenState extends State<AdminScreen> {
         */
 
         if (widget.module.doFilter != null) {
-          docs = widget.module.doFilter(docs);
+          docs = widget.module.doFilter!(docs);
         }
 
         return ListView(controller: scrollController, children: [
@@ -121,7 +122,7 @@ class AdminScreenState extends State<AdminScreen> {
               source: MyDataTableSource(docs, widget.module, context, (index) {
                 setState(() {
                   detalle = docs[index];
-                  updateData = detalle.data();
+                  updateData = detalle?.data() as Map<String, dynamic>;
                   tipo = TipoPantalla.detalle;
                 });
               }))
@@ -140,46 +141,47 @@ class AdminScreenState extends State<AdminScreen> {
                 : 20),
         child: column.getEditContent(updateData, null, (value) {
           setState(() {
-            updateData[column.field] = value;
+            updateData![column.field] = value;
             print("actualizamos campo ${column.field} => ${value}");
           });
         }));
   }
 
   doGuardar() async {
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
 
       // ñapa para guardar el documentref /values/null como nulo!!!
-      for (var entry in this.updateData.entries) {
+      for (var entry in this.updateData!.entries) {
         if (entry.value is DocumentReference) {
           DocumentReference tmp = entry.value;
           if (tmp.path == FieldTypeRef.nullValue.path) {
-            this.updateData[entry.key] = null;
+            this.updateData![entry.key] = null;
           }
         }
       }
 
       bool isNew = tipo == TipoPantalla.nuevo;
 
-      String msgValidation;
+      String? msgValidation;
       print("update ${updateData}");
 
       if (widget.module.validation != null) {
-        msgValidation = await widget.module.validation(isNew, this.updateData);
+        msgValidation =
+            await widget.module.validation!(isNew, this.updateData!);
       }
 
       bool doUpdate = true;
       if (widget.module.onSave != null) {
         doUpdate =
-            widget.module.onSave(tipo == TipoPantalla.nuevo, this.updateData);
+            widget.module.onSave!(tipo == TipoPantalla.nuevo, this.updateData);
       }
       if (msgValidation == null) {
         if (doUpdate) {
           if (!isNew) {
-            detalle.reference.update(this.updateData).then((value) {
+            detalle!.reference.update(this.updateData!).then((value) {
               if (widget.module.onUpdated != null)
-                widget.module.onUpdated(isNew, detalle.reference);
+                widget.module.onUpdated!(isNew, detalle!.reference);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Elemento guardado con éxito'),
                 duration: Duration(seconds: 2),
@@ -191,7 +193,7 @@ class AdminScreenState extends State<AdminScreen> {
           } else if (tipo == TipoPantalla.nuevo) {
             _getCollection().add(this.updateData).then((value) {
               if (widget.module.onUpdated != null)
-                widget.module.onUpdated(isNew, value);
+                widget.module.onUpdated!(isNew, value);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Elemento guardado con éxito'),
                 duration: Duration(seconds: 2),
@@ -300,13 +302,14 @@ class AdminScreenState extends State<AdminScreen> {
       content = getNuevo();
     } else if (tipo == TipoPantalla.confirmar) {
       content = getConfirmar();
-    }
+    } else
+      content = Container();
 
     getLeading() {
       if (widget.showScaffoldBack) return null;
       if (tipo != TipoPantalla.listado) {
         return IconButton(
-            icon: Icon(FontAwesome.arrow_left),
+            icon: Icon(FontAwesomeIcons.arrowLeft),
             onPressed: () {
               setState(() {
                 tipo = TipoPantalla.listado;
@@ -337,7 +340,7 @@ class AdminScreenState extends State<AdminScreen> {
         return [
           IconButton(
             padding: EdgeInsets.all(0),
-            icon: Icon(FontAwesome.save),
+            icon: Icon(FontAwesomeIcons.save),
             onPressed: () {
               doGuardar();
             },
@@ -347,7 +350,7 @@ class AdminScreenState extends State<AdminScreen> {
                   padding: EdgeInsets.all(0),
                   icon: Icon(Icons.delete),
                   onPressed: () async {
-                    doBorrar(context, detalle.reference, () {
+                    doBorrar(context, detalle!.reference, () {
                       setState(() {
                         tipo = TipoPantalla.listado;
                       });
@@ -412,7 +415,7 @@ doBorrar(BuildContext context, DocumentReference ref, Function postDelete) {
     negative: SweetSheetAction(
       onPressed: () {
         Navigator.of(context).pop();
-        return false;
+        return;
       },
       title: 'Cancelar',
     ),
@@ -428,7 +431,7 @@ class MyDataTableSource extends DataTableSource {
   MyDataTableSource(this.docs, this.module, this.context, this.onTap);
   @override
   DataRow getRow(int index) {
-    QueryDocumentSnapshot _object = docs[index];
+    DocumentSnapshot _object = docs[index];
 
     return DataRow.byIndex(
         index: index,
@@ -450,7 +453,7 @@ class MyDataTableSource extends DataTableSource {
                       Row(
                           children: (module.getActions == null
                                   ? <Widget>[]
-                                  : module.getActions(_object)) +
+                                  : module.getActions!(_object)) +
                               (module.canRemove
                                   ? [
                                       IconButton(
@@ -461,7 +464,7 @@ class MyDataTableSource extends DataTableSource {
                                           doBorrar(context, _object.reference,
                                               () {
                                             if (module.onRemove != null) {
-                                              module.onRemove(_object);
+                                              module.onRemove!(_object);
                                             }
                                           });
                                         },

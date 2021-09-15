@@ -4,9 +4,9 @@ import 'package:dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeRefNumChilds extends FieldType {
-  String collection;
+  final String collection;
 
-  FieldTypeRefNumChilds({this.collection});
+  FieldTypeRefNumChilds({required this.collection});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
@@ -17,14 +17,14 @@ class FieldTypeRefNumChilds extends FieldType {
           .get(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) return Container();
-        return Text(snapshot.data.docs.length.toString());
+        return Text(snapshot.data!.docs.length.toString());
       },
     );
   }
 
   @override
   getEditContent(
-      value, ColumnModule column, Function onValidate, Function onChange) {
+      value, ColumnModule column, Function? onValidate, Function onChange) {
     return SizedBox.shrink();
   }
 }

@@ -24,36 +24,37 @@ export "field_types/select.dart";
 export "field_types/tags.dart";
 
 class Module {
-  String name;
+  //String name;
   String title;
   IconData icon;
-  String collection;
-  Function getQueryCollection;
-  Function doFilter;
-  String orderBy;
-  Function addFilter;
-  String reverseOrderBy;
-  Function onSave;
-  Function onUpdated;
-  Function onRemove;
-  Future<String> Function(bool isNew, Map<String, dynamic> updateData)
+  String? collection;
+  Function? getQueryCollection;
+  Function? doFilter;
+  String? orderBy;
+  Function? addFilter;
+  String? reverseOrderBy;
+  Function? onSave;
+  Function? onUpdated;
+  Function? onRemove;
+  Future<String> Function(bool isNew, Map<String, dynamic> updateData)?
       validation;
   int rowsPerPage;
   bool canAdd;
   bool canEdit;
   bool canRemove;
-  List<Widget> Function(DocumentSnapshot object) getActions;
+  List<Widget> Function(DocumentSnapshot object)? getActions;
 
   List<ColumnModule> columns;
   Module(
-      {this.name,
+      {
+      //this.name,
       this.collection,
       this.getQueryCollection,
       this.addFilter,
       this.doFilter,
-      this.title,
-      this.icon,
-      this.columns,
+      required this.title,
+      required this.icon,
+      required this.columns,
       this.orderBy,
       this.reverseOrderBy,
       //this.sortBy,
@@ -82,9 +83,9 @@ class ColumnModule {
   bool mandatory;
 
   ColumnModule({
-    this.label,
-    this.field,
-    this.type,
+    required this.label,
+    required this.field,
+    required this.type,
     this.editable = true,
     this.listable = true,
     this.clickToDetail = true,
@@ -96,7 +97,7 @@ class ColumnModule {
 
   getListContent(DocumentSnapshot _object) =>
       type.getListContent(_object, this);
-  getEditContent(value, Function onValidate, Function onChange) =>
+  getEditContent(value, Function? onValidate, Function onChange) =>
       type.getEditContent(value, this, onValidate, onChange);
   getFilterContent(value, Function onFilter) =>
       type.getFilterContent(value, this, onFilter);
@@ -105,9 +106,9 @@ class ColumnModule {
 abstract class MenuBase {
   String label;
   IconData iconData;
-  String role;
-  int idx;
-  MenuBase({this.label, this.iconData, this.role});
+  String? role;
+  //int idx;
+  MenuBase({required this.label, required this.iconData, this.role});
 
   @override
   int get hashCode {
@@ -128,10 +129,10 @@ class Menu extends MenuBase {
   Widget child;
 
   Menu({
-    this.child,
-    String label,
-    IconData iconData,
-    String role,
+    required this.child,
+    required String label,
+    required IconData iconData,
+    String? role,
   }) : super(label: label, iconData: iconData, role: role);
 
   @override
@@ -139,7 +140,7 @@ class Menu extends MenuBase {
     bool ident = false;
 
     return InkWell(
-      onTap: press,
+      onTap: () => press(),
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
         color: isSelected
@@ -174,13 +175,13 @@ class Menu extends MenuBase {
 }
 
 class MenuGroup extends MenuBase {
-  final List<MenuBase> children;
+  final List<MenuBase>? children;
   final bool open;
   MenuGroup(
       {this.children,
-      String label,
-      IconData iconData,
-      String role,
+      required String label,
+      required IconData iconData,
+      String? role,
       this.open = false})
       : super(label: label, iconData: iconData, role: role);
 }
@@ -190,19 +191,19 @@ class MenuInfo extends Menu {
   final Function info;
 
   MenuInfo(
-      {this.child,
-      String label,
-      IconData iconData,
-      String role,
-      @required this.info})
-      : super(label: label, iconData: iconData, role: role);
+      {required this.child,
+      required String label,
+      required IconData iconData,
+      String? role,
+      required this.info})
+      : super(label: label, iconData: iconData, role: role, child: child);
 
   @override
   build(BuildContext context, bool isSelected, Function press) {
     bool ident = false;
 
     return InkWell(
-      onTap: press,
+      onTap: press(),
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
         color: isSelected

@@ -21,8 +21,8 @@ class ProfileButton extends StatelessWidget {
                   child: Row(
                 children: [
                   Text(
-                      FirebaseAuth.instance.currentUser.email ??
-                          FirebaseAuth.instance.currentUser.displayName ??
+                      FirebaseAuth.instance.currentUser?.email ??
+                          FirebaseAuth.instance.currentUser?.displayName ??
                           "-",
                       style: TextStyle(fontSize: 16)),
                   SizedBox(width: 5),

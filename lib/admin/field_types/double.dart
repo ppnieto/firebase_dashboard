@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class FieldTypeDouble extends FieldType {
-  final bool emptyNull;
-  final Widget nullWidget;
-  NumberFormat formatter;
+  final bool? emptyNull;
+  final Widget? nullWidget;
+  NumberFormat? formatter;
 
   FieldTypeDouble({this.emptyNull, this.nullWidget, this.formatter}) {
     if (this.formatter == null) this.formatter = NumberFormat.decimalPattern();
@@ -16,12 +16,12 @@ class FieldTypeDouble extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    return Text(this.formatter.format(_object.getFieldAdm(column.field, 0.0)));
+    return Text(this.formatter!.format(_object.getFieldAdm(column.field, 0.0)));
   }
 
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     var value = values[column.field];
     return TextFormField(
         initialValue: value != null ? value.toString() : "",
@@ -31,7 +31,7 @@ class FieldTypeDouble extends FieldType {
             filled: !column.editable,
             fillColor: Colors.grey[100]),
         validator: (value) {
-          if (value.isNotEmpty) {
+          if (value != null && value.isNotEmpty) {
             return double.tryParse(value) == null
                 ? "Error de formato numérico"
                 : null;
@@ -40,7 +40,7 @@ class FieldTypeDouble extends FieldType {
         },
         onSaved: (val) {
           var doubleval;
-          if (val.isNotEmpty) {
+          if (val != null && val.isNotEmpty) {
             doubleval = double.parse(val);
           } else {
             doubleval = null;

@@ -6,21 +6,21 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 
 class FieldTypeMultiref extends FieldType {
-  String collection;
+  String? collection;
   final String refLabel;
-  final Function getFilter;
-  final dynamic initialValue;
-  final Function getQueryCollection;
+  final Function? getFilter;
+  final dynamic? initialValue;
+  final Function? getQueryCollection;
 
-  DocumentSnapshot object;
+  late DocumentSnapshot object;
   FieldTypeMultiref(
       {this.collection,
-      this.refLabel,
+      required this.refLabel,
       this.getFilter,
       this.initialValue,
       this.getQueryCollection});
 
-  Widget getListWidget(String content, {TextStyle style}) =>
+  Widget getListWidget(String content, {TextStyle? style}) =>
       Text(content, style: style);
 
   @override
@@ -42,7 +42,7 @@ class FieldTypeMultiref extends FieldType {
               if (!snapshot.hasData) return SizedBox.shrink();
               print(snapshot.data);
               return MultiSelectChipDisplay(
-                items: snapshot.data.map((entry) {
+                items: snapshot.data!.map((entry) {
                   return MultiSelectItem(entry, entry.get(this.refLabel));
                 }).toList(),
               );
@@ -55,15 +55,15 @@ class FieldTypeMultiref extends FieldType {
 
   CollectionReference getCollection() {
     if (getQueryCollection != null) {
-      return getQueryCollection();
+      return getQueryCollection!();
     } else {
-      return FirebaseFirestore.instance.collection(collection);
+      return FirebaseFirestore.instance.collection(collection!);
     }
   }
 
   Query _getQuery() {
     Query query = getCollection();
-    Map<String, dynamic> filters = getFilter != null ? getFilter() : {};
+    Map<String, dynamic> filters = getFilter != null ? getFilter!() : {};
     if (filters != null) {
       for (MapEntry entry in filters.entries) {
         query = query.where(entry.key, isEqualTo: entry.value);
@@ -74,7 +74,7 @@ class FieldTypeMultiref extends FieldType {
 
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     print("1");
     var tmp = values[column.field];
     List<DocumentReference> value = [];
@@ -98,10 +98,10 @@ class FieldTypeMultiref extends FieldType {
           if (!snapshot.hasData) return Container();
 
           return MultiSelectDialogField(
-            buttonText: Text("Seleccione " + column?.label),
-            title: Text("Seleccione " + column?.label),
+            buttonText: Text("Seleccione " + column.label),
+            title: Text("Seleccione " + column.label),
             initialValue: value,
-            items: snapshot.data.docs
+            items: snapshot.data!.docs
                 .map((e) => MultiSelectItem(e.reference, e.get(this.refLabel)))
                 .toSet()
                 .toList(),

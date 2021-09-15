@@ -12,9 +12,9 @@ class FieldTypeDefecto extends FieldType {
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     return StreamBuilder(
         stream: FirebaseFirestore.instance.doc("config/parameters").snapshots(),
-        builder: (context, snapshot) {
+        builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
-          if (snapshot.data.get(this.defaultField) == _object.reference) {
+          if (snapshot.data!.get(this.defaultField) == _object.reference) {
             return Icon(Icons.star, color: Colors.yellow);
           } else {
             return Icon(Icons.star_border_outlined);
@@ -24,7 +24,7 @@ class FieldTypeDefecto extends FieldType {
 
   @override
   getEditContent(
-      value, ColumnModule column, Function onValidate, Function onChange) {
+      value, ColumnModule column, Function? onValidate, Function onChange) {
     return Container();
   }
 

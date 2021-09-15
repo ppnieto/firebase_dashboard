@@ -4,27 +4,27 @@ import 'package:dashboard/admin/admin_modules.dart';
 import 'package:flutter/scheduler.dart';
 
 class FieldTypeRef extends FieldType {
-  final String collection;
+  final String? collection;
   final String refLabel;
-  final Function getFilter;
-  final dynamic initialValue;
-  final Function getQueryCollection;
-  final Function getStream;
+  final Function? getFilter;
+  final dynamic? initialValue;
+  final Function? getQueryCollection;
+  final Function? getStream;
 
   static final DocumentReference nullValue =
       FirebaseFirestore.instance.doc("/values/null");
 
-  ColumnModule column;
+  late ColumnModule column;
   FieldTypeRef(
       {this.collection,
-      this.refLabel,
+      required this.refLabel,
       this.getFilter,
       this.initialValue,
       this.getQueryCollection,
       this.getStream});
 
   Widget getListWidget(DocumentSnapshot _object, String content,
-          {TextStyle style}) =>
+          {TextStyle? style}) =>
       Text(content, style: style);
 
   @override
@@ -40,10 +40,10 @@ class FieldTypeRef extends FieldType {
         stream: ref.snapshots(),
         builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
-          if (snapshot.data.data() != null &&
-              snapshot.data.get(this.refLabel) != null) {
+          if (snapshot.data!.data() != null &&
+              snapshot.data!.get(this.refLabel) != null) {
             return getListWidget(
-                _object, snapshot.data.get(this.refLabel) ?? "-");
+                _object, snapshot.data!.get(this.refLabel) ?? "-");
           } else
             return getListWidget(_object, "<no existe>",
                 style: TextStyle(color: Colors.red));
@@ -57,15 +57,15 @@ class FieldTypeRef extends FieldType {
 
   CollectionReference getCollection() {
     if (getQueryCollection != null) {
-      return getQueryCollection();
+      return getQueryCollection!();
     } else {
-      return FirebaseFirestore.instance.collection(collection);
+      return FirebaseFirestore.instance.collection(collection!);
     }
   }
 
   Query _getQuery() {
     Query query = getCollection();
-    Map<String, dynamic> filters = getFilter != null ? getFilter() : {};
+    Map<String, dynamic> filters = getFilter != null ? getFilter!() : {};
     if (filters != null) {
       for (MapEntry entry in filters.entries) {
         query = query.where(entry.key, isEqualTo: entry.value);
@@ -76,25 +76,29 @@ class FieldTypeRef extends FieldType {
 
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     var value = values[column.field];
 
     if (value == null) {
       value = initialValue ?? nullValue;
       values[column.field] = value;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
         onChange(value);
       });
     }
 
     return StreamBuilder(
-        stream: getStream == null ? _getQuery().snapshots() : getStream(),
+        stream: getStream == null ? _getQuery().snapshots() : getStream!(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return Container();
 
-          List list = snapshot.data is QuerySnapshot
-              ? snapshot.data.docs
-              : snapshot.data;
+          late List<QueryDocumentSnapshot> list;
+          if (snapshot.data is QuerySnapshot) {
+            QuerySnapshot qs = snapshot.data as QuerySnapshot;
+            list = qs.docs;
+          } else {
+            list = snapshot.data as List<QueryDocumentSnapshot>;
+          }
 
           print(list);
 
@@ -142,7 +146,7 @@ class FieldTypeRef extends FieldType {
   }
 
   @override
-  getFilterContent(value, ColumnModule column, Function onFilter) {
+  getFilterContent(value, ColumnModule column, Function? onFilter) {
     return StreamBuilder(
         stream: _getQuery().snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -154,12 +158,12 @@ class FieldTypeRef extends FieldType {
                     DropdownMenuItem(
                         value: "", child: Text("Seleccione " + column.label))
                   ] +
-                  snapshot.data.docs.map<DropdownMenuItem<dynamic>>((object) {
+                  snapshot.data!.docs.map<DropdownMenuItem<dynamic>>((object) {
                     return DropdownMenuItem(
                         value: object.reference,
                         child: Text(object.get(this.refLabel)));
                   }).toList(),
-              onChanged: (val) {
+              onChanged: (dynamic val) {
                 if (onFilter != null) onFilter(val);
               },
             )

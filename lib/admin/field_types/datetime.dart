@@ -3,7 +3,6 @@ import 'package:dashboard/admin/admin_modules.dart';
 import 'package:dashboard/admin/field_types/field_type_base.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 import 'package:intl/intl.dart';
 
@@ -23,7 +22,7 @@ class FieldTypeDateTime extends FieldType {
 
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     var value = values[column.field];
     return DateTimePicker(
         enabled: column.editable,
@@ -49,8 +48,8 @@ class FieldTypeDateTime extends FieldType {
           print("on saved");
           print(val);
           DateTime tmp = showTime
-              ? new DateFormat('yyyy-MM-dd HH:mm').parse(val)
-              : new DateFormat('yyyy-MM-dd').parse(val);
+              ? new DateFormat('yyyy-MM-dd HH:mm').parse(val!)
+              : new DateFormat('yyyy-MM-dd').parse(val!);
           onChange(Timestamp.fromDate(tmp));
         });
   }

@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 
 class FieldTypeActions extends FieldType {
   final List<FieldTypeAction> actions;
-  FieldTypeActions({this.actions});
+  FieldTypeActions({required this.actions});
 
   @override
   getEditContent(
-      value, ColumnModule column, Function onValidate, Function onChange) {
+      value, ColumnModule column, Function? onValidate, Function onChange) {
     return Container();
   }
 
@@ -42,5 +42,6 @@ class FieldTypeAction {
   String title;
   IconData iconData;
   Function onTap;
-  FieldTypeAction({this.title = "accion", this.onTap, this.iconData});
+  FieldTypeAction(
+      {this.title = "accion", required this.onTap, required this.iconData});
 }

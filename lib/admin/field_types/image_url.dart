@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:dashboard/admin/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import "package:universal_html/html.dart" as html;
+import 'package:dashboard/admin/field_types/field_type_base.dart';
 
 class FieldTypeImageURL extends FieldType {
   final double width;
@@ -15,25 +16,33 @@ class FieldTypeImageURL extends FieldType {
   TextEditingController textController = TextEditingController();
 
   FieldTypeImageURL(
-      {this.width, this.height, this.allowUpload = false, this.storePath});
+      {required this.width,
+      required this.height,
+      this.allowUpload = false,
+      required this.storePath});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: Image.network(
-        _object[column.field].toString(),
-        width: this.width,
-        height: this.height,
-      ),
-    );
+    if (_object.hasFieldAdm(column.field)) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2.0),
+        child: Image.network(
+          _object[column.field].toString(),
+          width: this.width,
+          height: this.height,
+        ),
+      );
+    } else {
+      return Text("<No hay imagen>", style: TextStyle(color: Colors.red));
+    }
   }
 
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     var value = values[column.field];
-    textController.text = value;
+    print(value);
+    textController.text = value ?? "";
     return Row(
       children: [
         Expanded(
@@ -75,14 +84,15 @@ class _UploadDialog extends StatefulWidget {
   final FieldTypeImageURL parent;
   final String url;
 
-  _UploadDialog({Key key, this.parent, this.url}) : super(key: key);
+  _UploadDialog({Key? key, required this.parent, required this.url})
+      : super(key: key);
 
   @override
   __UploadDialogState createState() => __UploadDialogState();
 }
 
 class __UploadDialogState extends State<_UploadDialog> {
-  String url;
+  late String url;
 
   @override
   initState() {
@@ -91,24 +101,24 @@ class __UploadDialogState extends State<_UploadDialog> {
   }
 
   void uploadFile() {
-    Uint8List uploadedImage;
-    html.InputElement uploadInput = html.FileUploadInputElement();
+    Uint8List? uploadedImage;
+    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
     uploadInput.click();
 
     uploadInput.onChange.listen((e) {
       // read file content as dataURL
       final files = uploadInput.files;
-      if (files.length == 1) {
+      if (files != null && files.length == 1) {
         final file = files[0];
         html.FileReader reader = html.FileReader();
 
         reader.onLoadEnd.listen((e) async {
-          uploadedImage = reader.result;
+          uploadedImage = reader.result as Uint8List?;
           String fileName = widget.parent.storePath + "/" + file.name;
           print("subimos " + fileName);
           firebase_storage.Reference ref =
               firebase_storage.FirebaseStorage.instance.ref(fileName);
-          firebase_storage.UploadTask uploadTask = ref.putData(uploadedImage);
+          firebase_storage.UploadTask uploadTask = ref.putData(uploadedImage!);
           firebase_storage.TaskSnapshot task = await uploadTask;
           print("subido");
           String downloadURL = await task.ref.getDownloadURL();

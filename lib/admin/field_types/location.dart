@@ -10,7 +10,7 @@ class FieldTypeLocation extends FieldType {
   TextEditingController longitude = TextEditingController();
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     var value = values[column.field];
     GeoPoint position;
     if (value == null) {
@@ -22,9 +22,8 @@ class FieldTypeLocation extends FieldType {
       return Text("error");
     }
 
-    latitude.text = value?.latitude != null ? value.latitude.toString() : "0";
-    longitude.text =
-        value?.longitude != null ? value.longitude.toString() : "0";
+    latitude.text = value.latitude.toString();
+    longitude.text = value.longitude.toString();
 
     return Row(
       children: [
@@ -76,10 +75,10 @@ class FieldTypeLocation extends FieldType {
 class _LocationDialog extends StatelessWidget {
   final FieldTypeLocation parent;
 
-  LatLng newPosition;
+  late LatLng newPosition;
   Completer<GoogleMapController> _controller = Completer();
 
-  _LocationDialog({Key key, this.parent}) : super(key: key);
+  _LocationDialog({Key? key, required this.parent}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

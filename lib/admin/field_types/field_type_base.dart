@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 abstract class FieldType {
-  BuildContext context;
+  late BuildContext context;
 
   setContext(BuildContext context) {
     this.context = context;
@@ -25,7 +25,7 @@ abstract class FieldType {
   getListContent(DocumentSnapshot _object, ColumnModule column) =>
       Text((getField(_object, column.field, '-').toString()));
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     return Text("No implementado para tipo " + this.toString());
   }
 

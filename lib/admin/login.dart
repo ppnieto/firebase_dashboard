@@ -1,6 +1,6 @@
 import 'package:dashboard/responsive.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,8 +8,8 @@ enum LoginMethod { loginPassword, google, facebook, apple, twitter }
 
 class LoginScreen extends StatelessWidget {
   final String title;
-  final String logoURL;
-  final String imageURL;
+  final String? logoURL;
+  final String? imageURL;
   final bool allowReminder;
   final bool useGoogle;
   final bool remindCredentials;
@@ -19,15 +19,15 @@ class LoginScreen extends StatelessWidget {
   final String password;
 
   final Function(LoginMethod, String, String) onEntrar;
-  final Function(String) onForgotPassword;
+  final Function(String)? onForgotPassword;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   LoginScreen(
-      {Key key,
-      @required this.title,
-      @required this.onEntrar,
+      {Key? key,
+      required this.title,
+      required this.onEntrar,
       this.onForgotPassword,
       this.allowReminder = false,
       this.logoURL,
@@ -55,9 +55,9 @@ class LoginScreen extends StatelessWidget {
                     const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
                 child: FutureBuilder(
                   future: PackageInfo.fromPlatform(),
-                  builder: (context, snapshot) {
+                  builder: (context, AsyncSnapshot<PackageInfo> snapshot) {
                     if (!snapshot.hasData) return SizedBox.shrink();
-                    return Text(snapshot.data.version,
+                    return Text(snapshot.data!.version,
                         style: TextStyle(color: Colors.grey));
                   },
                 )),
@@ -73,7 +73,7 @@ class LoginScreen extends StatelessWidget {
 class _LoginMobile extends StatefulWidget {
   final LoginScreen parent;
 
-  const _LoginMobile({Key key, @required this.parent}) : super(key: key);
+  const _LoginMobile({Key? key, required this.parent}) : super(key: key);
 
   @override
   __LoginMobileState createState() => __LoginMobileState();
@@ -89,10 +89,10 @@ class __LoginMobileState extends State<_LoginMobile> {
     SharedPreferences.getInstance().then((SharedPreferences prefs) {
       bool recordar = prefs.getBool('recordarCredenciales') ?? false;
       if (recordar) {
-        String userName = prefs.getString("userName");
-        String password = prefs.getString("password");
-        widget.parent.emailController.text = userName;
-        widget.parent.passwordController.text = password;
+        String? userName = prefs.getString("userName");
+        String? password = prefs.getString("password");
+        widget.parent.emailController.text = userName ?? "";
+        widget.parent.passwordController.text = password ?? "";
         setState(() {
           recordarCredenciales = true;
         });
@@ -169,7 +169,7 @@ class __LoginMobileState extends State<_LoginMobile> {
                                         value: recordarCredenciales,
                                         onChanged: (val) {
                                           setState(() {
-                                            recordarCredenciales = val;
+                                            recordarCredenciales = val ?? false;
                                           });
                                         }),
                                   )
@@ -229,9 +229,9 @@ class __LoginMobileState extends State<_LoginMobile> {
                                                                     .onForgotPassword !=
                                                                 null) {
                                                               widget.parent
-                                                                  .onForgotPassword(
-                                                                      emailController
-                                                                          .text);
+                                                                      .onForgotPassword!(
+                                                                  emailController
+                                                                      .text);
                                                             }
                                                             Navigator.of(
                                                                     context)
@@ -284,7 +284,7 @@ class __LoginMobileState extends State<_LoginMobile> {
                                 widget.parent
                                     .onEntrar(LoginMethod.google, "", "");
                               },
-                              icon: Icon(FontAwesome.google,
+                              icon: Icon(FontAwesomeIcons.google,
                                   color: Theme.of(context).accentColor),
                               label: Text("Entrar usando Google",
                                   style: TextStyle(
@@ -298,8 +298,8 @@ class _LoginDesktop extends StatelessWidget {
   final LoginScreen parent;
 
   const _LoginDesktop({
-    Key key,
-    @required this.parent,
+    Key? key,
+    required this.parent,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -325,7 +325,7 @@ class _LoginDesktop extends StatelessWidget {
                       decoration: BoxDecoration(
                         image: parent.imageURL != null
                             ? DecorationImage(
-                                image: NetworkImage(parent.imageURL),
+                                image: NetworkImage(parent.imageURL!),
                                 fit: BoxFit.cover)
                             : null,
                       ),
@@ -345,7 +345,7 @@ class _LoginDesktop extends StatelessWidget {
                     ),
                     parent.logoURL != null
                         ? Positioned(
-                            child: Image.network(parent.logoURL),
+                            child: Image.network(parent.logoURL!),
                             left: 10.0,
                             right: 10.0,
                             top: 10.0,

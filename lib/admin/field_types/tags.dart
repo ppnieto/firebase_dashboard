@@ -8,11 +8,11 @@ class FieldTypeTags extends FieldType {
   final String hint;
   final Map<String, dynamic> options;
 
-  FieldTypeTags({@required this.hint, @required this.options});
+  FieldTypeTags({required this.hint, required this.options});
 
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     var value = values[column.field];
     List<String> valueString = [];
     if (value is List) {

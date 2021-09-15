@@ -4,18 +4,22 @@ import 'package:dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeSelect extends FieldType {
-  final String initialValue;
+  final String? initialValue;
   final Map<String, String> options;
-  final Widget unselected;
+  final Widget? unselected;
 
-  FieldTypeSelect({this.options, this.unselected, this.initialValue});
+  FieldTypeSelect({
+    required this.options,
+    this.unselected,
+    this.initialValue,
+  });
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     if (_object.get(column.field) != null) {
       String key = _object.get(column.field);
       if (this.options.containsKey(key)) {
-        return Text(this.options[key]);
+        return Text(this.options[key] ?? "");
       } else {
         if (this.unselected != null) {
           return this.unselected;
@@ -28,7 +32,7 @@ class FieldTypeSelect extends FieldType {
 
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     var value = values[column.field];
 
     return Row(children: [

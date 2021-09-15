@@ -13,7 +13,7 @@ class FieldTypeBoolean extends FieldType {
 
   @override
   getEditContent(
-      values, ColumnModule column, Function onValidate, Function onChange) {
+      values, ColumnModule column, Function? onValidate, Function onChange) {
     var value = values[column.field];
 
     {
@@ -29,13 +29,13 @@ class FieldTypeBoolean extends FieldType {
   }
 
   @override
-  getFilterContent(value, ColumnModule column, Function onFilter) {
+  Widget getFilterContent(value, ColumnModule column, Function? onFilter) {
     return DropdownButton(
       value: value,
       dropdownColor: Colors.blue,
       style: TextStyle(color: Colors.white),
-      items: <DropdownMenuItem<dynamic>>[
-        DropdownMenuItem(value: "", child: Text("Seleccione " + column.label)),
+      items: [
+        DropdownMenuItem(child: Text("Seleccione ${column.label}"), value: ""),
         DropdownMenuItem(value: true, child: Text("Si")),
         DropdownMenuItem(value: false, child: Text("No")),
       ],

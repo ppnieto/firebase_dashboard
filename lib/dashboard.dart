@@ -9,15 +9,15 @@ class DashboardMainScreen extends StatefulWidget {
   final List<MenuBase> menus;
   final List<Widget> actions;
   final String title;
-  final Function getRolesFunction;
-  final Widget sideBar;
+  final Function? getRolesFunction;
+  final Widget? sideBar;
   final double sideBarWidth;
-  final IconData sideBarIcon;
+  final IconData? sideBarIcon;
 
   DashboardMainScreen(
-      {this.menus,
-      this.actions,
-      this.title,
+      {required this.menus,
+      required this.actions,
+      required this.title,
       this.getRolesFunction,
       this.sideBar,
       this.sideBarWidth = 100,
@@ -30,11 +30,12 @@ class DashboardMainScreen extends StatefulWidget {
 class DashboardMainScreenState extends State<DashboardMainScreen>
     with SingleTickerProviderStateMixin {
   bool isSidebar = false;
-  TabController tabController;
+  late TabController tabController;
   int active = 0;
-  List<Widget> mainContents;
+  late List<Widget> mainContents;
   Map<int, int> indexes = {};
   int initialIndex = 0;
+//  String subtitle = "";
 
   @override
   void initState() {
@@ -56,10 +57,15 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
 
     addMenu(MenuBase menu) {
       bool hasRole = true;
+      List<String> roles = [];
       if (menu.role != null) {
         // si tiene restricción de rol
-        List<String> roles = widget.getRolesFunction();
-        if (roles == null)
+        if (widget.getRolesFunction != null) {
+          roles = widget.getRolesFunction!();
+        } else {
+          print("error");
+        }
+        if (roles.isEmpty)
           hasRole = false;
         else if (roles.contains(menu.role) == false) hasRole = false;
       }
@@ -71,7 +77,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
         result.add(menu.child);
       }
       if (menu is MenuGroup) {
-        for (var child in menu.children) {
+        for (var child in menu.children ?? []) {
           addMenu(child);
         }
       }
@@ -103,7 +109,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
               Container(
                 //margin: EdgeInsets.only(left: 32),
                 child: Text(
-                  widget.title,
+                  widget.title, // + " - " + subtitle,
                   style: TextStyle(
                     fontSize: 24,
                     color: Colors.white,
@@ -168,7 +174,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
 
       if (menu.role != null) {
         // si tiene restricción de rol
-        List<String> roles = widget.getRolesFunction();
+        List<String> roles = widget.getRolesFunction!();
         if (roles == null)
           hasRole = false;
         else if (roles.contains(menu.role) == false) hasRole = false;
@@ -184,11 +190,11 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
                     style: TextStyle(
                         fontSize: 18, color: Theme.of(context).primaryColor)),
                 leading: Icon(menu.iconData),
-                children: menu.children.map<Widget>((submenu) {
+                children: menu.children!.map<Widget>((submenu) {
                   bool isSelected =
                       tabController.index == indexes[submenu.hashCode];
                   return submenu.build(context, isSelected, () {
-                    tabController.animateTo(indexes[submenu.hashCode]);
+                    tabController.animateTo(indexes[submenu.hashCode]!);
                     if (drawerStatus) Navigator.pop(context);
                   });
                 }).toList())
@@ -196,8 +202,15 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
       } else {
         return hasRole
             ? menu.build(context, isSelected, () {
-                tabController.animateTo(indexes[menu.hashCode]);
+                print("animateTo...");
+
+                tabController.animateTo(indexes[menu.hashCode]!);
                 if (drawerStatus) Navigator.pop(context);
+/*
+                setState(() {
+                  subtitle = menu.label;
+                });
+                */
               })
             : Container();
       }

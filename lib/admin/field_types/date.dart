@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dashboard/admin/admin_modules.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
 class FieldTypeDate extends FieldType {
@@ -20,7 +20,7 @@ class FieldTypeDate extends FieldType {
 
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function onChange) {
     var value = values[column.field];
     final f = new DateFormat(this.format);
     TextEditingController txt = TextEditingController();
@@ -42,19 +42,19 @@ class FieldTypeDate extends FieldType {
         enabled: column.editable,
         validator: (val) {
           try {
-            var tmp = new DateFormat(this.format).parse(val);
+            var tmp = new DateFormat(this.format).parse(val!);
             return null;
           } catch (e) {
             return "Formato incorrecto";
           }
         },
         onSaved: (val) {
-          var tmp = new DateFormat('dd/MM/yyyy').parse(val);
+          var tmp = new DateFormat('dd/MM/yyyy').parse(val!);
           onChange(Timestamp.fromDate(tmp));
         },
       )),
       IconButton(
-        icon: Icon(FontAwesome.calendar),
+        icon: Icon(FontAwesomeIcons.calendar),
         onPressed: () async {
           /*
           final DateTime picked = await showDatePicker(context: GlobalModel.instance.navigatorKey.currentContext, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);

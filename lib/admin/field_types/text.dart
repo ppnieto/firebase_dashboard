@@ -3,14 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeText extends FieldType {
-  final RegExp regexp;
+  final RegExp? regexp;
   final bool nullable;
-  final Function showTextFunction;
+  final Function? showTextFunction;
   final bool obscureText;
   final bool emptyNull;
-  final Widget nullWidget;
+  final Widget? nullWidget;
   FieldTypeText(
-      {this.nullable,
+      {this.nullable = true,
       this.regexp,
       this.showTextFunction,
       this.obscureText = false,
@@ -22,14 +22,14 @@ class FieldTypeText extends FieldType {
     if ((_object.data() as Map).containsKey(column.field))
       return Text(showTextFunction == null
           ? _object[column.field].toString()
-          : showTextFunction(_object[column.field]));
+          : showTextFunction!(_object[column.field]));
 
     return nullWidget == null ? Text("-") : nullWidget;
   }
 
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function onValidate, Function onChange) {
+      Function? onValidate, Function? onChange) {
     var value = values[column.field];
     return TextFormField(
         initialValue: value,
@@ -43,7 +43,7 @@ class FieldTypeText extends FieldType {
             fillColor: Colors.grey[100]),
         validator: (value) {
           if (regexp != null) {
-            if (!regexp.hasMatch(value)) {
+            if (!regexp!.hasMatch(value ?? "")) {
               return "Formato incorrecto";
             }
           }
@@ -51,7 +51,7 @@ class FieldTypeText extends FieldType {
         },
         onSaved: (val) {
           if (emptyNull) {
-            val = val.isEmpty ? null : val;
+            val = (val ?? "").isEmpty ? null : val;
           }
           if (onChange != null) onChange(val);
         });

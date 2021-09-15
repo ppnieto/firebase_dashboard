@@ -4,11 +4,11 @@ import 'package:dashboard/admin/admin_modules.dart';
 
 class FieldTypeInlineRef extends FieldTypeRef {
   FieldTypeInlineRef(
-      {String collection,
-      String refLabel,
-      Function getFilter,
+      {String? collection,
+      required String refLabel,
+      Function? getFilter,
       dynamic initialValue,
-      Function getQueryCollection})
+      Function? getQueryCollection})
       : super(
             collection: collection,
             refLabel: refLabel,
@@ -18,9 +18,9 @@ class FieldTypeInlineRef extends FieldTypeRef {
 
   @override
   Widget getListWidget(DocumentSnapshot _object, String content,
-      {TextStyle style}) {
+      {TextStyle? style}) {
     Query query = getCollection();
-    Map<String, dynamic> filters = getFilter != null ? getFilter() : {};
+    Map<String, dynamic> filters = getFilter != null ? getFilter!() : {};
     if (filters != null) {
       for (MapEntry entry in filters.entries) {
         query = query.where(entry.key, isEqualTo: entry.value);
@@ -46,7 +46,7 @@ class FieldTypeInlineRef extends FieldTypeRef {
                               child: Text("<sin asignar>",
                                   style: TextStyle(color: Colors.red)))
                         ] +
-                        snapshot.data.docs.map((element) {
+                        snapshot.data!.docs.map((element) {
                           return PopupMenuItem<DocumentReference>(
                               value: element.reference,
                               child: Text(element.get(this.refLabel)));
