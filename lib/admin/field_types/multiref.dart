@@ -25,7 +25,7 @@ class FieldTypeMultiref extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    if (_object.get(column.field) != null) {
+    if (_object.hasFieldAdm(column.field)) {
       var value = _object[column.field];
       if (value is List) {
         List<DocumentReference> refs = [];
