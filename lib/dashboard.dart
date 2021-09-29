@@ -35,6 +35,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
   late List<Widget> mainContents;
   Map<int, int> indexes = {};
   int initialIndex = 0;
+  bool isMenu = true;
 //  String subtitle = "";
 
   @override
@@ -99,6 +100,16 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: MediaQuery.of(context).size.width >= responsiveDashboardWidth
+            ? IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  setState(() {
+                    isMenu = !isMenu;
+                  });
+                },
+              )
+            : null,
         automaticallyImplyLeading:
             MediaQuery.of(context).size.width < responsiveDashboardWidth
                 ? true
@@ -133,7 +144,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
       ),
       body: Row(
         children: <Widget>[
-          MediaQuery.of(context).size.width < responsiveDashboardWidth
+          MediaQuery.of(context).size.width < responsiveDashboardWidth ||
+                  !isMenu
               ? Container()
               : Card(
                   elevation: 2.0,
@@ -141,14 +153,16 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
                       margin: EdgeInsets.all(0),
                       height: MediaQuery.of(context).size.height,
                       width: 300,
-                      color: Theme.of(context).canvasColor,
+                      color: Theme.of(context).backgroundColor,
                       child: listDrawerItems(context, false)),
                 ),
           Container(
-            width: (MediaQuery.of(context).size.width < responsiveDashboardWidth
-                    ? MediaQuery.of(context).size.width
-                    : MediaQuery.of(context).size.width - 310) -
-                (isSidebar ? widget.sideBarWidth : 0),
+            width:
+                (MediaQuery.of(context).size.width < responsiveDashboardWidth ||
+                            !isMenu
+                        ? MediaQuery.of(context).size.width
+                        : MediaQuery.of(context).size.width - 310) -
+                    (isSidebar ? widget.sideBarWidth : 0),
             child: TabBarView(
               physics: NeverScrollableScrollPhysics(),
               controller: tabController,
@@ -170,11 +184,12 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
     var menus = widget.menus;
     return ListView(
         children: menus.map<Widget>((menu) {
+      //print("menu " + menu.label);
       bool hasRole = true;
 
       if (menu.role != null) {
         // si tiene restricción de rol
-        List<String> roles = widget.getRolesFunction!();
+        List<String>? roles = widget.getRolesFunction!();
         if (roles == null)
           hasRole = false;
         else if (roles.contains(menu.role) == false) hasRole = false;
@@ -188,8 +203,10 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
                 childrenPadding: EdgeInsets.only(left: 24),
                 title: Text(menu.label,
                     style: TextStyle(
-                        fontSize: 18, color: Theme.of(context).primaryColor)),
-                leading: Icon(menu.iconData),
+                        fontSize: 18, color: Theme.of(context).highlightColor)),
+                collapsedIconColor: Theme.of(context).secondaryHeaderColor,
+                leading: Icon(menu.iconData,
+                    color: Theme.of(context).secondaryHeaderColor),
                 children: menu.children!.map<Widget>((submenu) {
                   bool isSelected =
                       tabController.index == indexes[submenu.hashCode];

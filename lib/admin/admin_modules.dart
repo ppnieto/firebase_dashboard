@@ -24,9 +24,9 @@ export "field_types/select.dart";
 export "field_types/tags.dart";
 
 class Module {
-  //String name;
+  final String name;
   String title;
-  IconData icon;
+  //IconData icon;
   String? collection;
   Function? getQueryCollection;
   Function? doFilter;
@@ -36,7 +36,7 @@ class Module {
   Function? onSave;
   Function? onUpdated;
   Function? onRemove;
-  Future<String> Function(bool isNew, Map<String, dynamic> updateData)?
+  Future<String?> Function(bool isNew, Map<String, dynamic> updateData)?
       validation;
   int rowsPerPage;
   bool canAdd;
@@ -46,14 +46,13 @@ class Module {
 
   List<ColumnModule> columns;
   Module(
-      {
-      //this.name,
+      {required this.name,
       this.collection,
       this.getQueryCollection,
       this.addFilter,
       this.doFilter,
       required this.title,
-      required this.icon,
+//      required this.icon,
       required this.columns,
       this.orderBy,
       this.reverseOrderBy,
@@ -144,8 +143,8 @@ class Menu extends MenuBase {
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
         color: isSelected
-            ? Theme.of(context).accentColor
-            : Theme.of(context).canvasColor,
+            ? Theme.of(context).highlightColor
+            : Theme.of(context).backgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
@@ -154,7 +153,7 @@ class Menu extends MenuBase {
               Icon(iconData,
                   color: isSelected
                       ? Theme.of(context).canvasColor
-                      : Theme.of(context).primaryColor),
+                      : Theme.of(context).highlightColor),
               SizedBox(
                 width: 8,
               ),
@@ -164,7 +163,7 @@ class Menu extends MenuBase {
                     fontSize: 18,
                     color: isSelected
                         ? Theme.of(context).canvasColor
-                        : Theme.of(context).primaryColor),
+                        : Theme.of(context).highlightColor),
               ),
             ]),
           ),
@@ -203,12 +202,14 @@ class MenuInfo extends Menu {
     bool ident = false;
 
     return InkWell(
-      onTap: press(),
+      onTap: () {
+        press();
+      },
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
         color: isSelected
-            ? Theme.of(context).accentColor
-            : Theme.of(context).canvasColor,
+            ? Theme.of(context).highlightColor
+            : Theme.of(context).backgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
@@ -216,8 +217,8 @@ class MenuInfo extends Menu {
             child: Row(children: [
               Icon(iconData,
                   color: isSelected
-                      ? Theme.of(context).accentIconTheme.color
-                      : Theme.of(context).primaryColor),
+                      ? Theme.of(context).canvasColor
+                      : Theme.of(context).highlightColor),
               SizedBox(
                 width: 8,
               ),
@@ -227,8 +228,8 @@ class MenuInfo extends Menu {
                   style: TextStyle(
                       fontSize: 18,
                       color: isSelected
-                          ? Theme.of(context).accentIconTheme.color
-                          : Theme.of(context).primaryColor),
+                          ? Theme.of(context).canvasColor
+                          : Theme.of(context).highlightColor),
                 ),
               ),
               this.info()

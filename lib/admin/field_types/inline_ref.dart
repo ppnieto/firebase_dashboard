@@ -36,7 +36,8 @@ class FieldTypeInlineRef extends FieldTypeRef {
             children: [
               Text(content, style: style),
               PopupMenuButton<DocumentReference>(
-                  icon: Icon(Icons.keyboard_arrow_down),
+                  icon: Icon(Icons.keyboard_arrow_down,
+                      color: Theme.of(context).highlightColor),
                   offset: Offset(0, 36),
                   itemBuilder: (context) {
                     return [
