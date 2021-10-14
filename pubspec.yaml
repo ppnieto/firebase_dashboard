@@ -1,8 +1,6 @@
 name: dashboard
 description: A new Flutter package project.
 version: 0.0.1
-author:
-homepage:
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -16,7 +14,7 @@ dependencies:
 
   font_awesome_flutter:
   sweetsheet: any
-  flutter_spinbox: 
+  flutter_spinbox: ^0.6.0
   firebase_core: any
   firebase_storage: any
   firebase_auth: any

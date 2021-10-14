@@ -9,21 +9,36 @@ class FieldTypeText extends FieldType {
   final bool obscureText;
   final bool emptyNull;
   final Widget? nullWidget;
+  final int ellipsisLength;
   FieldTypeText(
       {this.nullable = true,
       this.regexp,
       this.showTextFunction,
       this.obscureText = false,
       this.emptyNull = false,
+      this.ellipsisLength = 0,
       this.nullWidget});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    if ((_object.data() as Map).containsKey(column.field))
-      return Text(showTextFunction == null
+    if ((_object.data() as Map).containsKey(column.field)) {
+      String texto = showTextFunction == null
           ? _object[column.field].toString()
-          : showTextFunction!(_object[column.field]));
-
+          : showTextFunction!(_object[column.field]);
+      if (this.ellipsisLength > 0 && texto.length >= this.ellipsisLength) {
+        return _Text(text: texto, ellipsisLength: ellipsisLength);
+        /*
+        return Row(
+          children: [
+            Text(texto.substring(0, ellipsisLength) + '...'),
+            IconButton(onPressed: () {}, icon: Icon(Icons.remove_red_eye))
+          ],
+        );
+        */
+      } else {
+        return Text(texto);
+      }
+    }
     return nullWidget == null ? Text("-") : nullWidget;
   }
 
@@ -71,6 +86,47 @@ class FieldTypeText extends FieldType {
           if (onFilter != null) onFilter(val);
         },
       ),
+    );
+  }
+}
+
+class _Text extends StatefulWidget {
+  final String text;
+  final int ellipsisLength;
+  const _Text({Key? key, required this.text, required this.ellipsisLength})
+      : super(key: key);
+
+  @override
+  __TextState createState() => __TextState();
+}
+
+class __TextState extends State<_Text> {
+  late final String texto;
+  bool collapsed = true;
+
+  @override
+  initState() {
+    super.initState();
+    this.texto = widget.text;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(collapsed
+            ? texto.substring(0, widget.ellipsisLength) + '...'
+            : texto),
+        IconButton(
+            onPressed: () {
+              setState(() {
+                collapsed = !collapsed;
+              });
+            },
+            icon: Icon(Icons.remove_red_eye,
+                color: Theme.of(context).highlightColor))
+      ],
     );
   }
 }

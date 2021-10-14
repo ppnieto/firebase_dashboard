@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:dashboard/admin/admin_modules.dart';
 import 'package:dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweetsheet/sweetsheet.dart';
 
 class AdminScreen extends StatefulWidget {
@@ -29,6 +33,32 @@ class AdminScreenState extends State<AdminScreen> {
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic> filtro = {};
   final scrollController = ScrollController();
+  late Map<String, bool> columnasSeleccionadas = {};
+
+  @override
+  void initState() {
+    super.initState();
+
+    SharedPreferences.getInstance().then((SharedPreferences prefs) {
+      String key = 'admin_columns_' + widget.module.name;
+      if (prefs.containsKey(key)) {
+        List<String> sel = prefs.getStringList(key)!;
+        for (var col in widget.module.columns) {
+          columnasSeleccionadas[col.field] = false;
+        }
+        for (var s in sel) {
+          columnasSeleccionadas[s] = true;
+        }
+        String json = prefs.getString(key)!;
+        print("json = ${json}");
+        var tmp = jsonDecode(json);
+      } else {
+        for (var col in widget.module.columns) {
+          columnasSeleccionadas[col.field] = true;
+        }
+      }
+    });
+  }
 
   CollectionReference _getCollection() {
     if (widget.module.getQueryCollection != null) {
@@ -112,7 +142,12 @@ class AdminScreenState extends State<AdminScreen> {
               },
               rowsPerPage: widget.module.rowsPerPage,
               columns: widget.module.columns
-                      .where((element) => element.listable)
+                      .where((element) =>
+                          element.listable &&
+                          this
+                              .columnasSeleccionadas
+                              .containsKey(element.field) &&
+                          this.columnasSeleccionadas[element.field]!)
                       .map((column) {
                     return DataColumn(label: Text(column.label));
                   }).toList() +
@@ -122,10 +157,10 @@ class AdminScreenState extends State<AdminScreen> {
               source: MyDataTableSource(docs, widget.module, context, (index) {
                 setState(() {
                   detalle = docs[index];
-                  updateData = detalle?.data() as Map<String, dynamic>;
+                  updateData = detalle?.data() as Map<String, dynamic>?;
                   tipo = TipoPantalla.detalle;
                 });
-              }))
+              }, this.columnasSeleccionadas))
         ]);
       },
     );
@@ -316,7 +351,47 @@ class AdminScreenState extends State<AdminScreen> {
               });
             });
       } else {
-        return Container();
+        return IconButton(
+            icon: Icon(FontAwesomeIcons.listUl),
+            onPressed: () async {
+              await showDialog(
+                context: context,
+                builder: (ctx) {
+                  return MultiSelectDialog<String>(
+                    items:
+                        widget.module.columns.map((ColumnModule columnModule) {
+                      return MultiSelectItem(
+                          columnModule.field, columnModule.label);
+                    }).toList(),
+                    initialValue: columnasSeleccionadas.entries.map((e) {
+                      if (e.value) return e.key;
+                      return "";
+                    }).toList(),
+                    searchable: false,
+                    confirmText: Text('Aceptar'),
+                    cancelText: Text('Cancelar'),
+                    title: Text("Seleccione las columnas para mostrar"),
+                    //items: ['uno', 'dos'],
+                    //initialValue: 'uno',
+                    onConfirm: (values) {
+                      setState(() {
+                        columnasSeleccionadas.clear();
+                        for (var value in values) {
+                          columnasSeleccionadas[value] = true;
+                        }
+
+                        SharedPreferences.getInstance()
+                            .then((SharedPreferences prefs) {
+                          String key = 'admin_columns_' + widget.module.name;
+                          prefs.setStringList(key, values);
+                        });
+                      });
+                    },
+                  );
+                },
+              );
+            });
+//        return Container();
       }
     }
 
@@ -377,8 +452,6 @@ class AdminScreenState extends State<AdminScreen> {
                   return Row(children: [
                     columnModule.getFilterContent(filtro[columnModule.field],
                         (val) {
-                      print("val = ");
-                      print(val);
                       setState(() {
                         filtro[columnModule.field] = val;
                       });
@@ -429,7 +502,9 @@ class MyDataTableSource extends DataTableSource {
   Module module;
   Function onTap;
   int indexSelected = 3;
-  MyDataTableSource(this.docs, this.module, this.context, this.onTap);
+  Map<String, bool> showFields;
+  MyDataTableSource(
+      this.docs, this.module, this.context, this.onTap, this.showFields);
   @override
   DataRow getRow(int index) {
     DocumentSnapshot _object = docs[index];
@@ -437,7 +512,10 @@ class MyDataTableSource extends DataTableSource {
     return DataRow.byIndex(
         index: index,
         cells: module.columns
-                .where((element) => element.listable)
+                .where((element) =>
+                    element.listable &&
+                    this.showFields.containsKey(element.field) &&
+                    this.showFields[element.field]!)
                 .map<DataCell>((column) {
               // set context
               column.type.setContext(context);

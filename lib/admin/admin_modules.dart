@@ -24,9 +24,9 @@ export "field_types/select.dart";
 export "field_types/tags.dart";
 
 class Module {
-  String? name;
+  final String name;
   String title;
-  IconData? icon;
+  //IconData icon;
   String? collection;
   Function? getQueryCollection;
   Function? doFilter;
@@ -36,8 +36,7 @@ class Module {
   Function? onSave;
   Function? onUpdated;
   Function? onRemove;
-  Future<String> Function(bool isNew, Map<String, dynamic> updateData)?
-      validation;
+  Future<String?> Function(bool isNew, Map<String, dynamic> updateData)? validation;
   int rowsPerPage;
   bool canAdd;
   bool canEdit;
@@ -46,13 +45,13 @@ class Module {
 
   List<ColumnModule> columns;
   Module(
-      {this.name,
+      {required this.name,
       this.collection,
       this.getQueryCollection,
       this.addFilter,
       this.doFilter,
       required this.title,
-      this.icon,
+//      required this.icon,
       required this.columns,
       this.orderBy,
       this.reverseOrderBy,
@@ -94,12 +93,9 @@ class ColumnModule {
     this.showOnNew = true,
   });
 
-  getListContent(DocumentSnapshot _object) =>
-      type.getListContent(_object, this);
-  getEditContent(value, Function? onValidate, Function onChange) =>
-      type.getEditContent(value, this, onValidate, onChange);
-  getFilterContent(value, Function onFilter) =>
-      type.getFilterContent(value, this, onFilter);
+  getListContent(DocumentSnapshot _object) => type.getListContent(_object, this);
+  getEditContent(value, Function? onValidate, Function onChange) => type.getEditContent(value, this, onValidate, onChange);
+  getFilterContent(value, Function onFilter) => type.getFilterContent(value, this, onFilter);
 }
 
 abstract class MenuBase {
@@ -142,28 +138,19 @@ class Menu extends MenuBase {
       onTap: () => press(),
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
-        color: isSelected
-            ? Theme.of(context).highlightColor
-            : Theme.of(context).canvasColor,
+        color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).backgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData,
-                  color: isSelected
-                      ? Theme.of(context).canvasColor
-                      : Theme.of(context).primaryColor),
+              Icon(iconData, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
               SizedBox(
                 width: 8,
               ),
               Text(
                 label,
-                style: TextStyle(
-                    fontSize: 18,
-                    color: isSelected
-                        ? Theme.of(context).canvasColor
-                        : Theme.of(context).primaryColor),
+                style: TextStyle(fontSize: 18, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
               ),
             ]),
           ),
@@ -176,12 +163,7 @@ class Menu extends MenuBase {
 class MenuGroup extends MenuBase {
   final List<MenuBase>? children;
   final bool open;
-  MenuGroup(
-      {this.children,
-      required String label,
-      required IconData iconData,
-      String? role,
-      this.open = false})
+  MenuGroup({this.children, required String label, required IconData iconData, String? role, this.open = false})
       : super(label: label, iconData: iconData, role: role);
 }
 
@@ -189,12 +171,7 @@ class MenuInfo extends Menu {
   final Widget child;
   final Function info;
 
-  MenuInfo(
-      {required this.child,
-      required String label,
-      required IconData iconData,
-      String? role,
-      required this.info})
+  MenuInfo({required this.child, required String label, required IconData iconData, String? role, required this.info})
       : super(label: label, iconData: iconData, role: role, child: child);
 
   @override
@@ -202,32 +179,25 @@ class MenuInfo extends Menu {
     bool ident = false;
 
     return InkWell(
-      onTap: press(),
+      onTap: () {
+        press();
+      },
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
-        color: isSelected
-            ? Theme.of(context).highlightColor
-            : Theme.of(context).canvasColor,
+        color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).backgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData,
-                  color: isSelected
-                      ? Theme.of(context).highlightColor
-                      : Theme.of(context).primaryColor),
+              Icon(iconData, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
               SizedBox(
                 width: 8,
               ),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: isSelected
-                          ? Theme.of(context).highlightColor
-                          : Theme.of(context).primaryColor),
+                  style: TextStyle(fontSize: 18, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
                 ),
               ),
               this.info()

@@ -10,7 +10,7 @@ class ProfileButton extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Container(
             decoration: BoxDecoration(
-                color: Theme.of(context).highlightColor,
+                color: Theme.of(context).secondaryHeaderColor,
                 border: Border.all(
                   color: Colors.white54,
                 ),
@@ -20,10 +20,7 @@ class ProfileButton extends StatelessWidget {
               child: Center(
                   child: Row(
                 children: [
-                  Text(
-                      FirebaseAuth.instance.currentUser?.email ??
-                          FirebaseAuth.instance.currentUser?.displayName ??
-                          "-",
+                  Text(FirebaseAuth.instance.currentUser?.email ?? FirebaseAuth.instance.currentUser?.displayName ?? "-",
                       style: TextStyle(fontSize: 16)),
                   SizedBox(width: 5),
                   Icon(Icons.keyboard_arrow_down)
