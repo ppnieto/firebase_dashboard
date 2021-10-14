@@ -190,9 +190,9 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
                 childrenPadding: EdgeInsets.only(left: 24),
                 iconColor: Theme.of(context).primaryColor,
                 collapsedIconColor: Theme.of(context).primaryColor,
-                title: Text(menu.label, style: TextStyle(fontSize: 18, color: Theme.of(context).highlightColor)),
+                title: Text(menu.label, style: TextStyle(fontSize: 18, color: Theme.of(context).primaryColor)),
 //                collapsedIconColor: Theme.of(context).secondaryHeaderColor,
-                leading: Icon(menu.iconData, color: Theme.of(context).secondaryHeaderColor),
+                leading: Icon(menu.iconData, color: Theme.of(context).primaryColor),
                 children: menu.children!.map<Widget>((submenu) {
                   bool isSelected = tabController.index == indexes[submenu.hashCode];
                   return submenu.build(context, isSelected, () {
