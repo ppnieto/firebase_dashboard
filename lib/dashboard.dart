@@ -57,7 +57,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
 
     addMenu(MenuBase menu) {
       bool hasRole = true;
-      List<String> roles = [];
+      List<String>? roles = [];
       if (menu.role != null) {
         // si tiene restricción de rol
         if (widget.getRolesFunction != null) {
@@ -65,7 +65,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
         } else {
           print("error");
         }
-        if (roles.isEmpty)
+
+        if (roles == null || roles.isEmpty)
           hasRole = false;
         else if (roles.contains(menu.role) == false) hasRole = false;
       }
@@ -186,6 +187,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
             ? ExpansionTile(
                 initiallyExpanded: menu.open,
                 childrenPadding: EdgeInsets.only(left: 24),
+                iconColor: Theme.of(context).primaryColor,
+                collapsedIconColor: Theme.of(context).primaryColor,
                 title: Text(menu.label,
                     style: TextStyle(
                         fontSize: 18, color: Theme.of(context).primaryColor)),

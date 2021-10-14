@@ -184,8 +184,8 @@ class __LoginMobileState extends State<_LoginMobile> {
                                   TextButton(
                                     child: Text("Olvidé mi contraseña",
                                         style: TextStyle(
-                                            color:
-                                                Theme.of(context).accentColor)),
+                                            color: Theme.of(context)
+                                                .highlightColor)),
                                     onPressed: () {
                                       TextEditingController emailController =
                                           TextEditingController();
@@ -285,10 +285,10 @@ class __LoginMobileState extends State<_LoginMobile> {
                                     .onEntrar(LoginMethod.google, "", "");
                               },
                               icon: Icon(FontAwesomeIcons.google,
-                                  color: Theme.of(context).accentColor),
+                                  color: Theme.of(context).highlightColor),
                               label: Text("Entrar usando Google",
                                   style: TextStyle(
-                                      color: Theme.of(context).accentColor)))
+                                      color: Theme.of(context).highlightColor)))
                           : SizedBox.shrink(),
                     ]))));
   }

@@ -106,7 +106,7 @@ class AdminScreenState extends State<AdminScreen> {
         return ListView(controller: scrollController, children: [
           PaginatedDataTable(
               onPageChanged: (page) {
-                print("onpagechanged... ${page}");
+                //print("onpagechanged... ${page}");
                 scrollController.animateTo(0,
                     duration: Duration(milliseconds: 250), curve: Curves.ease);
               },
@@ -191,7 +191,7 @@ class AdminScreenState extends State<AdminScreen> {
               });
             });
           } else if (tipo == TipoPantalla.nuevo) {
-            _getCollection().add(this.updateData).then((value) {
+            _getCollection().add(this.updateData!).then((value) {
               if (widget.module.onUpdated != null)
                 widget.module.onUpdated!(isNew, value);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -365,6 +365,7 @@ class AdminScreenState extends State<AdminScreen> {
 
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Theme.of(context).secondaryHeaderColor,
           title: Text(widget.module.title),
           leading: getLeading(),
           actions: <Widget>[] +
@@ -458,8 +459,8 @@ class MyDataTableSource extends DataTableSource {
                                   ? [
                                       IconButton(
                                         icon: Icon(Icons.delete,
-                                            color:
-                                                Theme.of(context).accentColor),
+                                            color: Theme.of(context)
+                                                .highlightColor),
                                         onPressed: () {
                                           doBorrar(context, _object.reference,
                                               () {

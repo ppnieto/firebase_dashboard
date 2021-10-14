@@ -27,7 +27,7 @@ class FieldTypeTags extends FieldType {
         title: Text(hint, style: TextStyle(color: Colors.white)),
         chipColor:
             Theme.of(context).canvasColor, // accentColor.withOpacity(0.2),
-        selectedChipColor: Theme.of(context).accentColor,
+        selectedChipColor: Theme.of(context).highlightColor,
         textStyle: TextStyle(color: Theme.of(context).primaryColor),
         headerColor: Theme.of(context).primaryColor,
         onSaved: (val) {

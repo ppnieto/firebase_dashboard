@@ -24,9 +24,9 @@ export "field_types/select.dart";
 export "field_types/tags.dart";
 
 class Module {
-  //String name;
+  String? name;
   String title;
-  IconData icon;
+  IconData? icon;
   String? collection;
   Function? getQueryCollection;
   Function? doFilter;
@@ -46,14 +46,13 @@ class Module {
 
   List<ColumnModule> columns;
   Module(
-      {
-      //this.name,
+      {this.name,
       this.collection,
       this.getQueryCollection,
       this.addFilter,
       this.doFilter,
       required this.title,
-      required this.icon,
+      this.icon,
       required this.columns,
       this.orderBy,
       this.reverseOrderBy,
@@ -144,7 +143,7 @@ class Menu extends MenuBase {
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
         color: isSelected
-            ? Theme.of(context).accentColor
+            ? Theme.of(context).highlightColor
             : Theme.of(context).canvasColor,
         child: Align(
           alignment: Alignment.centerLeft,
@@ -207,7 +206,7 @@ class MenuInfo extends Menu {
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
         color: isSelected
-            ? Theme.of(context).accentColor
+            ? Theme.of(context).highlightColor
             : Theme.of(context).canvasColor,
         child: Align(
           alignment: Alignment.centerLeft,
@@ -216,7 +215,7 @@ class MenuInfo extends Menu {
             child: Row(children: [
               Icon(iconData,
                   color: isSelected
-                      ? Theme.of(context).accentIconTheme.color
+                      ? Theme.of(context).highlightColor
                       : Theme.of(context).primaryColor),
               SizedBox(
                 width: 8,
@@ -227,7 +226,7 @@ class MenuInfo extends Menu {
                   style: TextStyle(
                       fontSize: 18,
                       color: isSelected
-                          ? Theme.of(context).accentIconTheme.color
+                          ? Theme.of(context).highlightColor
                           : Theme.of(context).primaryColor),
                 ),
               ),
