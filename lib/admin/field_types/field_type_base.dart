@@ -9,8 +9,7 @@ abstract class FieldType {
     this.context = context;
   }
 
-  dynamic getField(
-      DocumentSnapshot object, String fieldName, dynamic defValue) {
+  dynamic getField(DocumentSnapshot object, String fieldName, dynamic defValue) {
     if (!hasField(object, fieldName)) return defValue;
     return (object.data() as Map)[fieldName];
   }
@@ -22,10 +21,12 @@ abstract class FieldType {
     return true;
   }
 
-  getListContent(DocumentSnapshot _object, ColumnModule column) =>
-      Text((getField(_object, column.field, '-').toString()));
-  getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function? onValidate, Function onChange) {
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
+    return _object.getFieldAdm(column.field, "-").toString();
+  }
+
+  getListContent(DocumentSnapshot _object, ColumnModule column) => Text((getField(_object, column.field, '-').toString()));
+  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
     return Text("No implementado para tipo " + this.toString());
   }
 

@@ -9,18 +9,25 @@ class FieldTypeDate extends FieldType {
   FieldTypeDate({this.format = "dd/MM/yyyy"});
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
     final f = new DateFormat(this.format);
-    if (_object.get(column.field) != null) {
-      return Text(f.format(_object.get(column.field).toDate()));
-    } else {
-      return Text("-");
-    }
+    if (_object.hasFieldAdm(column.field)) {
+      return f.format(_object.get(column.field).toDate());
+    } else
+      return "-";
   }
 
   @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function? onValidate, Function onChange) {
+  getListContent(DocumentSnapshot _object, ColumnModule column) {
+    final f = new DateFormat(this.format);
+    if (_object.hasFieldAdm(column.field)) {
+      return Text(f.format(_object.get(column.field).toDate()));
+    } else
+      return Text("-");
+  }
+
+  @override
+  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
     var value = values[column.field];
     final f = new DateFormat(this.format);
     TextEditingController txt = TextEditingController();

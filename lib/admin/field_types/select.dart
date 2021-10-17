@@ -15,6 +15,21 @@ class FieldTypeSelect extends FieldType {
   });
 
   @override
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
+    if (_object.get(column.field) != null) {
+      String key = _object.get(column.field);
+      if (this.options.containsKey(key)) {
+        return this.options[key] ?? "";
+      } else {
+        if (this.unselected != null) {
+          return "<unselected>";
+        }
+      }
+    }
+    return "<sin asignar>";
+  }
+
+  @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     if (_object.get(column.field) != null) {
       String key = _object.get(column.field);
@@ -31,8 +46,7 @@ class FieldTypeSelect extends FieldType {
   }
 
   @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function? onValidate, Function onChange) {
+  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
     var value = values[column.field];
 
     return Row(children: [

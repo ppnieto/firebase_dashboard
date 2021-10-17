@@ -10,21 +10,21 @@ class FieldTypeText extends FieldType {
   final bool emptyNull;
   final Widget? nullWidget;
   final int ellipsisLength;
+  final bool tooltip;
   FieldTypeText(
       {this.nullable = true,
       this.regexp,
       this.showTextFunction,
       this.obscureText = false,
       this.emptyNull = false,
+      this.tooltip = false,
       this.ellipsisLength = 0,
       this.nullWidget});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     if ((_object.data() as Map).containsKey(column.field)) {
-      String texto = showTextFunction == null
-          ? _object[column.field].toString()
-          : showTextFunction!(_object[column.field]);
+      String texto = showTextFunction == null ? _object[column.field].toString() : showTextFunction!(_object[column.field]);
       if (this.ellipsisLength > 0 && texto.length >= this.ellipsisLength) {
         return _Text(text: texto, ellipsisLength: ellipsisLength);
         /*
@@ -36,15 +36,24 @@ class FieldTypeText extends FieldType {
         );
         */
       } else {
-        return Text(texto);
+        if (tooltip) {
+          return Tooltip(
+              message: texto,
+              child: Text(
+                texto,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ));
+        } else {
+          return Text(texto);
+        }
       }
     }
     return nullWidget == null ? Text("-") : nullWidget;
   }
 
   @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function? onValidate, Function? onChange) {
+  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function? onChange) {
     var value = values[column.field];
     return TextFormField(
         initialValue: value,
@@ -52,10 +61,7 @@ class FieldTypeText extends FieldType {
         obscureText: this.obscureText,
         enableSuggestions: this.obscureText,
         autocorrect: this.obscureText,
-        decoration: InputDecoration(
-            labelText: column.label,
-            filled: !column.editable,
-            fillColor: Colors.grey[100]),
+        decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Colors.grey[100]),
         validator: (value) {
           if (regexp != null) {
             if (!regexp!.hasMatch(value ?? "")) {
@@ -78,10 +84,7 @@ class FieldTypeText extends FieldType {
       padding: EdgeInsets.all(10),
       width: 250,
       child: TextField(
-        decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            hintText: "Filtrar por " + column.label),
+        decoration: InputDecoration(filled: true, fillColor: Colors.white, hintText: "Filtrar por " + column.label),
         onChanged: (val) {
           if (onFilter != null) onFilter(val);
         },
@@ -93,8 +96,7 @@ class FieldTypeText extends FieldType {
 class _Text extends StatefulWidget {
   final String text;
   final int ellipsisLength;
-  const _Text({Key? key, required this.text, required this.ellipsisLength})
-      : super(key: key);
+  const _Text({Key? key, required this.text, required this.ellipsisLength}) : super(key: key);
 
   @override
   __TextState createState() => __TextState();
@@ -115,17 +117,14 @@ class __TextState extends State<_Text> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(collapsed
-            ? texto.substring(0, widget.ellipsisLength) + '...'
-            : texto),
+        Text(collapsed ? texto.substring(0, widget.ellipsisLength) + '...' : texto),
         IconButton(
             onPressed: () {
               setState(() {
                 collapsed = !collapsed;
               });
             },
-            icon: Icon(Icons.remove_red_eye,
-                color: Theme.of(context).highlightColor))
+            icon: Icon(collapsed ? Icons.keyboard_arrow_right : Icons.keyboard_arrow_left, color: Theme.of(context).highlightColor))
       ],
     );
   }

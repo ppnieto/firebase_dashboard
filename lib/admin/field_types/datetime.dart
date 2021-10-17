@@ -8,32 +8,37 @@ import 'package:intl/intl.dart';
 
 class FieldTypeDateTime extends FieldType {
   final bool showTime;
+  final String format;
 
-  FieldTypeDateTime({this.showTime = true});
+  FieldTypeDateTime({this.showTime = true, this.format = "dd/MM/yyyy HH:mm"});
+
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
-    final f = new DateFormat('dd/MM/yyyy HH:mm');
-    if (_object.get(column.field) != null) {
-      return Text(f.format(_object.get(column.field).toDate()));
-    } else {
-      return Text("-");
-    }
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
+    final f = new DateFormat(this.format);
+    if (_object.hasFieldAdm(column.field)) {
+      return f.format(_object.get(column.field).toDate());
+    } else
+      return "-";
   }
 
   @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function? onValidate, Function onChange) {
+  getListContent(DocumentSnapshot _object, ColumnModule column) {
+    final f = new DateFormat(this.format);
+    if (_object.hasFieldAdm(column.field)) {
+      return Text(f.format(_object.get(column.field).toDate()));
+    } else
+      return Text("-");
+  }
+
+  @override
+  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
     var value = values[column.field];
     return DateTimePicker(
         enabled: column.editable,
         //locale: Locale('es'),
-        type: showTime
-            ? DateTimePickerType.dateTimeSeparate
-            : DateTimePickerType.date,
+        type: showTime ? DateTimePickerType.dateTimeSeparate : DateTimePickerType.date,
         dateMask: 'dd/MM/yyyy',
-        initialValue: value == null
-            ? DateTime.now().toString()
-            : value.toDate().toString(),
+        initialValue: value == null ? DateTime.now().toString() : value.toDate().toString(),
         firstDate: DateTime(2020),
         lastDate: DateTime(2100),
         icon: Icon(Icons.event),
@@ -47,9 +52,7 @@ class FieldTypeDateTime extends FieldType {
         onSaved: (val) {
           print("on saved");
           print(val);
-          DateTime tmp = showTime
-              ? new DateFormat('yyyy-MM-dd HH:mm').parse(val!)
-              : new DateFormat('yyyy-MM-dd').parse(val!);
+          DateTime tmp = showTime ? new DateFormat('yyyy-MM-dd HH:mm').parse(val!) : new DateFormat('yyyy-MM-dd').parse(val!);
           onChange(Timestamp.fromDate(tmp));
         });
   }

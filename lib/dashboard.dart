@@ -27,8 +27,7 @@ class DashboardMainScreen extends StatefulWidget {
   DashboardMainScreenState createState() => DashboardMainScreenState();
 }
 
-class DashboardMainScreenState extends State<DashboardMainScreen>
-    with SingleTickerProviderStateMixin {
+class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTickerProviderStateMixin {
   bool isSidebar = false;
   late TabController tabController;
   int active = 0;
@@ -44,8 +43,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
 
     mainContents = getMainContents();
 
-    tabController = new TabController(
-        vsync: this, length: mainContents.length, initialIndex: initialIndex)
+    tabController = new TabController(vsync: this, length: mainContents.length, initialIndex: initialIndex)
       ..addListener(() {
         setState(() {
           active = tabController.index;
@@ -64,22 +62,22 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
         if (widget.getRolesFunction != null) {
           roles = widget.getRolesFunction!();
         } else {
-          print("error");
+          print("error, no hay definido getRolesFunction");
         }
         if (roles.isEmpty)
           hasRole = false;
         else if (roles.contains(menu.role) == false) hasRole = false;
       }
-      if (!hasRole) return;
-
-      if (menu is Menu) {
-        // update idx
-        indexes[menu.hashCode] = result.length;
-        result.add(menu.child);
-      }
-      if (menu is MenuGroup) {
-        for (var child in menu.children ?? []) {
-          addMenu(child);
+      if (hasRole) {
+        if (menu is Menu) {
+          // update idx
+          indexes[menu.hashCode] = result.length;
+          result.add(menu.child);
+        }
+        if (menu is MenuGroup) {
+          for (var child in menu.children ?? []) {
+            addMenu(child);
+          }
         }
       }
     }
@@ -110,25 +108,20 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
                 },
               )
             : null,
-        automaticallyImplyLeading:
-            MediaQuery.of(context).size.width < responsiveDashboardWidth
-                ? true
-                : false,
-        title: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                //margin: EdgeInsets.only(left: 32),
-                child: Text(
-                  widget.title, // + " - " + subtitle,
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+        automaticallyImplyLeading: MediaQuery.of(context).size.width < responsiveDashboardWidth ? true : false,
+        title: Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
+          Container(
+            //margin: EdgeInsets.only(left: 32),
+            child: Text(
+              widget.title, // + " - " + subtitle,
+              style: TextStyle(
+                fontSize: 24,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
-            ]),
+            ),
+          ),
+        ]),
         actions: widget.actions +
             (widget.sideBar != null
                 ? [
@@ -144,8 +137,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
       ),
       body: Row(
         children: <Widget>[
-          MediaQuery.of(context).size.width < responsiveDashboardWidth ||
-                  !isMenu
+          MediaQuery.of(context).size.width < responsiveDashboardWidth || !isMenu
               ? Container()
               : Card(
                   elevation: 2.0,
@@ -157,26 +149,20 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
                       child: listDrawerItems(context, false)),
                 ),
           Container(
-            width:
-                (MediaQuery.of(context).size.width < responsiveDashboardWidth ||
-                            !isMenu
-                        ? MediaQuery.of(context).size.width
-                        : MediaQuery.of(context).size.width - 310) -
-                    (isSidebar ? widget.sideBarWidth : 0),
+            width: (MediaQuery.of(context).size.width < responsiveDashboardWidth || !isMenu
+                    ? MediaQuery.of(context).size.width
+                    : MediaQuery.of(context).size.width - 310) -
+                (isSidebar ? widget.sideBarWidth : 0),
             child: TabBarView(
               physics: NeverScrollableScrollPhysics(),
               controller: tabController,
               children: mainContents,
             ),
           ),
-          isSidebar
-              ? Container(width: widget.sideBarWidth, child: widget.sideBar)
-              : SizedBox.shrink(),
+          isSidebar ? Container(width: widget.sideBarWidth, child: widget.sideBar) : SizedBox.shrink(),
         ],
       ),
-      drawer: Padding(
-          padding: EdgeInsets.only(top: 56),
-          child: Drawer(child: listDrawerItems(context, true))),
+      drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: listDrawerItems(context, true))),
     );
   }
 
@@ -188,28 +174,27 @@ class DashboardMainScreenState extends State<DashboardMainScreen>
       bool hasRole = true;
 
       if (menu.role != null) {
+        //print("  menu.role = ${menu.role}");
         // si tiene restricción de rol
-        List<String>? roles = widget.getRolesFunction!();
+        List<String>? roles = widget.getRolesFunction != null ? widget.getRolesFunction!() : [];
+        //print("   lista de roles -> $roles");
         if (roles == null)
           hasRole = false;
-        else if (roles.contains(menu.role) == false) hasRole = false;
+        else
+          hasRole = roles.contains(menu.role);
       }
-
+      //print("hasRole = $hasRole");
       bool isSelected = tabController.index == indexes[menu.hashCode];
       if (menu is MenuGroup) {
         return hasRole
             ? ExpansionTile(
                 initiallyExpanded: menu.open,
                 childrenPadding: EdgeInsets.only(left: 24),
-                title: Text(menu.label,
-                    style: TextStyle(
-                        fontSize: 18, color: Theme.of(context).highlightColor)),
+                title: Text(menu.label, style: TextStyle(fontSize: 18, color: Theme.of(context).highlightColor)),
                 collapsedIconColor: Theme.of(context).secondaryHeaderColor,
-                leading: Icon(menu.iconData,
-                    color: Theme.of(context).secondaryHeaderColor),
+                leading: Icon(menu.iconData, color: Theme.of(context).secondaryHeaderColor),
                 children: menu.children!.map<Widget>((submenu) {
-                  bool isSelected =
-                      tabController.index == indexes[submenu.hashCode];
+                  bool isSelected = tabController.index == indexes[submenu.hashCode];
                   return submenu.build(context, isSelected, () {
                     tabController.animateTo(indexes[submenu.hashCode]!);
                     if (drawerStatus) Navigator.pop(context);

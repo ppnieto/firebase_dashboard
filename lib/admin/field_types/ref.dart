@@ -7,12 +7,12 @@ class FieldTypeRef extends FieldType {
   final String? collection;
   final String refLabel;
   final Function? getFilter;
-  final dynamic? initialValue;
+  final dynamic initialValue;
   final Function? getQueryCollection;
   final Function? getStream;
+  final Widget? empty;
 
-  static final DocumentReference nullValue =
-      FirebaseFirestore.instance.doc("/values/null");
+  static final DocumentReference nullValue = FirebaseFirestore.instance.doc("/values/null");
 
   late ColumnModule column;
   FieldTypeRef(
@@ -21,18 +21,30 @@ class FieldTypeRef extends FieldType {
       this.getFilter,
       this.initialValue,
       this.getQueryCollection,
-      this.getStream});
+      this.getStream,
+      this.empty /* = const Text("<sin asignar>", style: TextStyle(color: Colors.red))*/});
 
-  Widget getListWidget(DocumentSnapshot _object, String content,
-          {TextStyle? style}) =>
-      Text(content, style: style);
+  @override
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
+    var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : "-";
+    if (_data != null && _data is DocumentReference) {
+      DocumentReference ref = _data;
+      DocumentSnapshot snapshot = await ref.get();
+      if (snapshot.data() != null && snapshot.get(this.refLabel) != null) {
+        return snapshot.get(this.refLabel) ?? "-";
+      } else
+        return "<no existe>";
+    } else {
+      return " ";
+    }
+  }
+
+  Widget getListWidget(DocumentSnapshot _object, String content, {TextStyle? style}) => Text(content, style: style);
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     this.column = column;
-    var _data = (_object.data() as Map).containsKey(column.field)
-        ? _object.get(column.field)
-        : "-";
+    var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : "-";
 
     if (_data != null && _data is DocumentReference) {
       DocumentReference ref = _data;
@@ -40,18 +52,14 @@ class FieldTypeRef extends FieldType {
         stream: ref.snapshots(),
         builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
-          if (snapshot.data!.data() != null &&
-              snapshot.data!.get(this.refLabel) != null) {
-            return getListWidget(
-                _object, snapshot.data!.get(this.refLabel) ?? "-");
+          if (snapshot.data!.data() != null && snapshot.data!.get(this.refLabel) != null) {
+            return getListWidget(_object, snapshot.data!.get(this.refLabel) ?? "-");
           } else
-            return getListWidget(_object, "<no existe>",
-                style: TextStyle(color: Colors.red));
+            return getListWidget(_object, "<no existe>", style: TextStyle(color: Colors.red));
         },
       );
     } else {
-      return getListWidget(_object, "<sin asignar>",
-          style: TextStyle(color: Colors.red));
+      return this.empty ?? getListWidget(_object, "<sin asignar>", style: TextStyle(color: Colors.red));
     }
   }
 
@@ -75,8 +83,7 @@ class FieldTypeRef extends FieldType {
   }
 
   @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function? onValidate, Function onChange) {
+  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
     var value = values[column.field];
 
     if (value == null) {
@@ -105,8 +112,7 @@ class FieldTypeRef extends FieldType {
           List<DropdownMenuItem<DocumentReference>> getIfNullable() => [
                 DropdownMenuItem<DocumentReference>(
                     value: nullValue, // "-",
-                    child: Text("<sin asignar>",
-                        style: TextStyle(color: Colors.red)))
+                    child: Text("<sin asignar>", style: TextStyle(color: Colors.red)))
               ];
 
           return Row(children: [
@@ -119,9 +125,7 @@ class FieldTypeRef extends FieldType {
                   isExpanded: true,
                   items: getIfNullable() +
                       list.map((object) {
-                        return DropdownMenuItem<DocumentReference>(
-                            value: object.reference,
-                            child: Text(object.get(this.refLabel)));
+                        return DropdownMenuItem<DocumentReference>(value: object.reference, child: Text(object.get(this.refLabel)));
                       }).toList(),
                   onChanged: column.editable
                       ? (val) {
@@ -135,9 +139,7 @@ class FieldTypeRef extends FieldType {
                   },
                   validator: (value) {
                     print("validamos campo...");
-                    if (column.mandatory &&
-                        (value == null || value.path == nullValue.path))
-                      return "Campo obligatorio";
+                    if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
                     return null;
                   },
                 ))
@@ -151,23 +153,33 @@ class FieldTypeRef extends FieldType {
         stream: _getQuery().snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
-          return Row(children: [
-            DropdownButton(
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Theme.of(context).highlightColor,
+            ),
+            child: DropdownButton(
+              underline: Container(
+                height: 0,
+                color: Colors.deepPurpleAccent,
+              ),
+              style: TextStyle(color: Colors.white),
+              icon: Icon(
+                Icons.keyboard_arrow_down,
+                color: Colors.white,
+              ),
               value: value,
-              items: <DropdownMenuItem<dynamic>>[
-                    DropdownMenuItem(
-                        value: "", child: Text("Seleccione " + column.label))
-                  ] +
+              items: <DropdownMenuItem<dynamic>>[DropdownMenuItem(value: "", child: Text("Seleccione " + column.label))] +
                   snapshot.data!.docs.map<DropdownMenuItem<dynamic>>((object) {
-                    return DropdownMenuItem(
-                        value: object.reference,
-                        child: Text(object.get(this.refLabel)));
+                    return DropdownMenuItem(value: object.reference, child: Text(object.get(this.refLabel)));
                   }).toList(),
               onChanged: (dynamic val) {
                 if (onFilter != null) onFilter(val);
               },
-            )
-          ]);
+              dropdownColor: Theme.of(context).highlightColor,
+            ),
+          );
         });
   }
 }

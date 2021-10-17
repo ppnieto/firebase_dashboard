@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dashboard/admin/field_types/field_type_base.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
 export "field_types/field_type_base.dart";
@@ -36,13 +37,13 @@ class Module {
   Function? onSave;
   Function? onUpdated;
   Function? onRemove;
-  Future<String?> Function(bool isNew, Map<String, dynamic> updateData)?
-      validation;
+  Future<String?> Function(bool isNew, Map<String, dynamic> updateData)? validation;
   int rowsPerPage;
   bool canAdd;
   bool canEdit;
   bool canRemove;
-  List<Widget> Function(DocumentSnapshot object)? getActions;
+  bool exportExcel;
+  List<Widget> Function(DocumentSnapshot object, BuildContext context)? getActions;
 
   List<ColumnModule> columns;
   Module(
@@ -56,6 +57,7 @@ class Module {
       required this.columns,
       this.orderBy,
       this.reverseOrderBy,
+      this.exportExcel = true,
       //this.sortBy,
       //this.reverseSortBy,
       this.rowsPerPage = 10,
@@ -80,6 +82,7 @@ class ColumnModule {
   bool clickToDetail;
   bool filter;
   bool mandatory;
+  ColumnSize size;
 
   ColumnModule({
     required this.label,
@@ -91,15 +94,14 @@ class ColumnModule {
     this.filter = false,
     this.mandatory = false,
     this.showOnEdit = true,
+    this.size = ColumnSize.M,
     this.showOnNew = true,
   });
 
-  getListContent(DocumentSnapshot _object) =>
-      type.getListContent(_object, this);
-  getEditContent(value, Function? onValidate, Function onChange) =>
-      type.getEditContent(value, this, onValidate, onChange);
-  getFilterContent(value, Function onFilter) =>
-      type.getFilterContent(value, this, onFilter);
+  getListContent(DocumentSnapshot _object) => type.getListContent(_object, this);
+  getEditContent(value, Function? onValidate, Function onChange) => type.getEditContent(value, this, onValidate, onChange);
+  getFilterContent(value, Function onFilter) => type.getFilterContent(value, this, onFilter);
+  getStringContent(DocumentSnapshot _object) => type.getStringContent(_object, this);
 }
 
 abstract class MenuBase {
@@ -142,28 +144,19 @@ class Menu extends MenuBase {
       onTap: () => press(),
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
-        color: isSelected
-            ? Theme.of(context).highlightColor
-            : Theme.of(context).backgroundColor,
+        color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).backgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData,
-                  color: isSelected
-                      ? Theme.of(context).canvasColor
-                      : Theme.of(context).highlightColor),
+              Icon(iconData, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
               SizedBox(
                 width: 8,
               ),
               Text(
                 label,
-                style: TextStyle(
-                    fontSize: 18,
-                    color: isSelected
-                        ? Theme.of(context).canvasColor
-                        : Theme.of(context).highlightColor),
+                style: TextStyle(fontSize: 18, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
               ),
             ]),
           ),
@@ -176,12 +169,7 @@ class Menu extends MenuBase {
 class MenuGroup extends MenuBase {
   final List<MenuBase>? children;
   final bool open;
-  MenuGroup(
-      {this.children,
-      required String label,
-      required IconData iconData,
-      String? role,
-      this.open = false})
+  MenuGroup({this.children, required String label, required IconData iconData, String? role, this.open = false})
       : super(label: label, iconData: iconData, role: role);
 }
 
@@ -189,12 +177,7 @@ class MenuInfo extends Menu {
   final Widget child;
   final Function info;
 
-  MenuInfo(
-      {required this.child,
-      required String label,
-      required IconData iconData,
-      String? role,
-      required this.info})
+  MenuInfo({required this.child, required String label, required IconData iconData, String? role, required this.info})
       : super(label: label, iconData: iconData, role: role, child: child);
 
   @override
@@ -207,29 +190,20 @@ class MenuInfo extends Menu {
       },
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
-        color: isSelected
-            ? Theme.of(context).highlightColor
-            : Theme.of(context).backgroundColor,
+        color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).backgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData,
-                  color: isSelected
-                      ? Theme.of(context).canvasColor
-                      : Theme.of(context).highlightColor),
+              Icon(iconData, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
               SizedBox(
                 width: 8,
               ),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: isSelected
-                          ? Theme.of(context).canvasColor
-                          : Theme.of(context).highlightColor),
+                  style: TextStyle(fontSize: 18, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
                 ),
               ),
               this.info()
