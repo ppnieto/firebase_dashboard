@@ -22,8 +22,8 @@ dependencies:
   intl: any
   uuid: any
   google_maps_flutter: any
-  #google_maps_flutter_web: any
   package_info_plus: any
+<<<<<<< HEAD
   universal_html: ^2.0.8
   shared_preferences: ^2.0.5
   date_time_picker: ^2.0.0
@@ -34,6 +34,15 @@ dependencies:
   excel: any
   data_table_2:
 
+=======
+  universal_html: 
+  shared_preferences:
+  date_time_picker: 
+  badges: any
+  multi_select_flutter: 
+  flutter_tags: 
+  flutter_typeahead: 
+>>>>>>> 2b22b26b3b1215d03ad9444e09852d3219caefe0
 
 
 dev_dependencies:

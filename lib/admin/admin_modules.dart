@@ -150,13 +150,13 @@ class Menu extends MenuBase {
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
+              Icon(iconData, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).primaryColor),
               SizedBox(
                 width: 8,
               ),
               Text(
                 label,
-                style: TextStyle(fontSize: 18, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
+                style: TextStyle(fontSize: 18, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).primaryColor),
               ),
             ]),
           ),

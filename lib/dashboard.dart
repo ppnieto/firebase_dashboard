@@ -56,7 +56,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
 
     addMenu(MenuBase menu) {
       bool hasRole = true;
-      List<String> roles = [];
+      List<String>? roles = [];
       if (menu.role != null) {
         // si tiene restricción de rol
         if (widget.getRolesFunction != null) {
@@ -64,7 +64,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
         } else {
           print("error, no hay definido getRolesFunction");
         }
-        if (roles.isEmpty)
+
+        if (roles == null || roles.isEmpty)
           hasRole = false;
         else if (roles.contains(menu.role) == false) hasRole = false;
       }
@@ -190,9 +191,11 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
             ? ExpansionTile(
                 initiallyExpanded: menu.open,
                 childrenPadding: EdgeInsets.only(left: 24),
-                title: Text(menu.label, style: TextStyle(fontSize: 18, color: Theme.of(context).highlightColor)),
-                collapsedIconColor: Theme.of(context).secondaryHeaderColor,
-                leading: Icon(menu.iconData, color: Theme.of(context).secondaryHeaderColor),
+                iconColor: Theme.of(context).primaryColor,
+                collapsedIconColor: Theme.of(context).primaryColor,
+                title: Text(menu.label, style: TextStyle(fontSize: 18, color: Theme.of(context).primaryColor)),
+//                collapsedIconColor: Theme.of(context).secondaryHeaderColor,
+                leading: Icon(menu.iconData, color: Theme.of(context).primaryColor),
                 children: menu.children!.map<Widget>((submenu) {
                   bool isSelected = tabController.index == indexes[submenu.hashCode];
                   return submenu.build(context, isSelected, () {
