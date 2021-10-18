@@ -36,9 +36,10 @@ class AdminScreen extends StatefulWidget {
 enum TipoPantalla { listado, detalle, nuevo, confirmar }
 
 class AdminScreenState extends State<AdminScreen> {
+  // ignore: non_constant_identifier_names
+  static bool USE_DATA_TABLE_V2 = true;
+
   int? indexSelected;
-  int? _currentSortColumn;
-  late bool _currentSortAscending;
   late int rowsPerPage;
   String? _orderBy;
   List<DocumentSnapshot>? docs;
@@ -57,8 +58,6 @@ class AdminScreenState extends State<AdminScreen> {
     _orderBy = widget.module.orderBy;
 
     rowsPerPage = widget.module.rowsPerPage;
-    //  _currentSortColumn = 1;
-    _currentSortAscending = true;
 
     SharedPreferences.getInstance().then((SharedPreferences prefs) {
       String key = 'admin_columns_' + widget.module.name;
@@ -127,69 +126,78 @@ class AdminScreenState extends State<AdminScreen> {
           docs = widget.module.doFilter!(docs);
         }
 
-        return //ListView(controller: scrollController, children: [
-            PaginatedDataTable2(
-                onPageChanged: (page) {
-                  print("onpagechanged... $page");
-                  scrollController.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.ease);
-                },
-                //availableRowsPerPage: [10, 15, 20, 50, 100],
-                showCheckboxColumn: false,
-                columnSpacing: 0.0,
-                dataRowHeight: 38,
-                //wrapInCard: true,
-                minWidth: widget.minWidth,
-                //sortAscending: _currentSortAscending,
-                //sortColumnIndex: _currentSortColumn,
-                /*
-                onRowsPerPageChanged: (rowCount) {
-                  setState(() {
-                    rowsPerPage = rowCount!;
-                  });
-                },                
-                rowsPerPage: rowsPerPage,
-                */
-                //smRatio: 1,
-                lmRatio: 1.8,
-                autoRowsToHeight: true,
-                columns: widget.module.columns
-                        .where((element) =>
-                            element.listable && this.columnasSeleccionadas.containsKey(element.field) && this.columnasSeleccionadas[element.field]!)
-                        .map((column) {
-                      return DataColumn2(
-                        size: column.size,
-                        label: Text(column.label),
-                        /*onSort: (idx, ascending) {
-                            setState(() {
-                              _currentSortColumn = idx;
-                              _currentSortAscending = ascending;
-                              _orderBy = column.field;
-                              docs?.sort((a, b) {
-                                String aValue = a.getFieldAdm(column.field, "").toString();
-                                String bValue = b.getFieldAdm(column.field, "").toString();
-                                int result = aValue.compareTo(bValue);
-                                print("comparing $aValue == $bValue => $result");
-                                return result;
-                              });
-                            });
-                          }*/
-                      );
-                    }).toList() +
-                    (widget.module.canRemove || widget.module.getActions != null ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)] : []),
-                source: MyDataTableSource(
-                    docs: docs!,
-                    context: context,
-                    screen: this,
-                    onTap: (index) {
-                      setState(() {
-                        detalle = docs![index];
-                        updateData = detalle?.data() as Map<String, dynamic>?;
-                        tipo = TipoPantalla.detalle;
-                      });
-                    },
-                    showFields: this.columnasSeleccionadas));
-        //],
-        //);
+        if (USE_DATA_TABLE_V2) {
+          return PaginatedDataTable2(
+              onPageChanged: (page) {
+                print("onpagechanged... $page");
+                scrollController.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.ease);
+              },
+              showCheckboxColumn: false,
+              columnSpacing: 0.0,
+              dataRowHeight: 38,
+              minWidth: widget.minWidth,
+              lmRatio: 1.8,
+              autoRowsToHeight: true,
+              columns: widget.module.columns
+                      .where((element) =>
+                          element.listable && this.columnasSeleccionadas.containsKey(element.field) && this.columnasSeleccionadas[element.field]!)
+                      .map((column) {
+                    return DataColumn2(
+                      size: column.size,
+                      label: Text(column.label),
+                    );
+                  }).toList() +
+                  (widget.module.canRemove || widget.module.getActions != null ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)] : []),
+              source: MyDataTableSource(
+                  docs: docs!,
+                  context: context,
+                  screen: this,
+                  onTap: (index) {
+                    setState(() {
+                      detalle = docs![index];
+                      updateData = detalle?.data() as Map<String, dynamic>?;
+                      tipo = TipoPantalla.detalle;
+                    });
+                  },
+                  showFields: this.columnasSeleccionadas));
+        } else {
+          return ListView(
+            children: [
+              PaginatedDataTable(
+                  onPageChanged: (page) {
+                    print("onpagechanged... $page");
+                    scrollController.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.ease);
+                  },
+                  showCheckboxColumn: false,
+                  columnSpacing: 0.0,
+                  dataRowHeight: 38,
+                  columns: widget.module.columns
+                          .where((element) =>
+                              element.listable && this.columnasSeleccionadas.containsKey(element.field) && this.columnasSeleccionadas[element.field]!)
+                          .map((column) {
+                        return DataColumn2(
+                          size: column.size,
+                          label: Text(column.label),
+                        );
+                      }).toList() +
+                      (widget.module.canRemove || widget.module.getActions != null
+                          ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)]
+                          : []),
+                  source: MyDataTableSource(
+                      docs: docs!,
+                      context: context,
+                      screen: this,
+                      onTap: (index) {
+                        setState(() {
+                          detalle = docs![index];
+                          updateData = detalle?.data() as Map<String, dynamic>?;
+                          tipo = TipoPantalla.detalle;
+                        });
+                      },
+                      showFields: this.columnasSeleccionadas)),
+            ],
+          );
+        }
       },
     );
   }

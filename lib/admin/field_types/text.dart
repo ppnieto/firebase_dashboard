@@ -23,7 +23,7 @@ class FieldTypeText extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    if ((_object.data() as Map).containsKey(column.field)) {
+    if ((_object.data() as Map).containsKey(column.field) && _object.get(column.field) != null) {
       String texto = showTextFunction == null ? _object[column.field].toString() : showTextFunction!(_object[column.field]);
       if (this.ellipsisLength > 0 && texto.length >= this.ellipsisLength) {
         return _Text(text: texto, ellipsisLength: ellipsisLength);

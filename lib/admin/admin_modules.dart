@@ -57,7 +57,7 @@ class Module {
       required this.columns,
       this.orderBy,
       this.reverseOrderBy,
-      this.exportExcel = true,
+      this.exportExcel = false,
       //this.sortBy,
       //this.reverseSortBy,
       this.rowsPerPage = 10,
