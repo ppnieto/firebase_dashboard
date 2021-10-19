@@ -20,30 +20,28 @@ class FieldTypeInlineRef extends FieldTypeRef {
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) return SizedBox.shrink();
 
-        return Expanded(
-          child: PopupMenuButton<DocumentReference>(
-              tooltip: content,
-              child: Text(
-                content,
-                style: style,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              //icon: Icon(Icons.keyboard_arrow_down, color: Theme.of(context).highlightColor),
-              //offset: Offset(0, 36),
-              itemBuilder: (context) {
-                return [
-                      PopupMenuItem<DocumentReference>(
-                          value: FirebaseFirestore.instance.doc("values/null"), child: Text("<sin asignar>", style: TextStyle(color: Colors.red)))
-                    ] +
-                    snapshot.data!.docs.map((element) {
-                      return PopupMenuItem<DocumentReference>(value: element.reference, child: Text(element.get(this.refLabel)));
-                    }).toList();
-              },
-              onSelected: (DocumentReference ref) {
-                _object.reference.update({this.column.field: ref.path == "values/null" ? null : ref}).then((value) => print("updated!!!"));
-              }),
-        );
+        return PopupMenuButton<DocumentReference>(
+            tooltip: content,
+            child: Text(
+              content,
+              style: style,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            //icon: Icon(Icons.keyboard_arrow_down, color: Theme.of(context).highlightColor),
+            //offset: Offset(0, 36),
+            itemBuilder: (context) {
+              return [
+                    PopupMenuItem<DocumentReference>(
+                        value: FirebaseFirestore.instance.doc("values/null"), child: Text("<sin asignar>", style: TextStyle(color: Colors.red)))
+                  ] +
+                  snapshot.data!.docs.map((element) {
+                    return PopupMenuItem<DocumentReference>(value: element.reference, child: Text(element.get(this.refLabel)));
+                  }).toList();
+            },
+            onSelected: (DocumentReference ref) {
+              _object.reference.update({this.column.field: ref.path == "values/null" ? null : ref}).then((value) => print("updated!!!"));
+            });
       },
     );
   }
