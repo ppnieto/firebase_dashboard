@@ -26,7 +26,8 @@ class FieldTypeText extends FieldType {
     if ((_object.data() as Map).containsKey(column.field) && _object.get(column.field) != null) {
       String texto = showTextFunction == null ? _object[column.field].toString() : showTextFunction!(_object[column.field]);
       if (this.ellipsisLength > 0 && texto.length >= this.ellipsisLength) {
-        return _Text(text: texto, ellipsisLength: ellipsisLength);
+        //return _Text(text: texto, ellipsisLength: ellipsisLength);
+        return Text(texto);
         /*
         return Row(
           children: [
@@ -92,7 +93,7 @@ class FieldTypeText extends FieldType {
     );
   }
 }
-
+/*
 class _Text extends StatefulWidget {
   final String text;
   final int ellipsisLength;
@@ -129,3 +130,4 @@ class __TextState extends State<_Text> {
     );
   }
 }
+*/

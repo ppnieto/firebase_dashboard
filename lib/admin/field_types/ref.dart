@@ -51,7 +51,7 @@ class FieldTypeRef extends FieldType {
       return StreamBuilder(
         stream: ref.snapshots(),
         builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (!snapshot.hasData) return Container();
+          if (!snapshot.hasData) return SizedBox.shrink();
           if (snapshot.data!.data() != null && snapshot.data!.get(this.refLabel) != null) {
             return getListWidget(_object, snapshot.data!.get(this.refLabel) ?? "-");
           } else

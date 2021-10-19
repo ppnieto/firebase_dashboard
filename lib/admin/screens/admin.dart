@@ -118,7 +118,10 @@ class AdminScreenState extends State<AdminScreen> {
     return StreamBuilder(
       stream: query.snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData) return Container();
+        if (!snapshot.hasData) {
+          print("shrink!!!!");
+          return SizedBox.shrink();
+        }
 
         docs = List.from(snapshot.data!.docs);
 
@@ -130,7 +133,8 @@ class AdminScreenState extends State<AdminScreen> {
           return PaginatedDataTable2(
               onPageChanged: (page) {
                 print("onpagechanged... $page");
-                scrollController.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.ease);
+                setState(() {});
+                //scrollController.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.ease);
               },
               showCheckboxColumn: false,
               columnSpacing: 0.0,
