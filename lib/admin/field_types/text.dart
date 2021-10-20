@@ -69,6 +69,9 @@ class FieldTypeText extends FieldType {
               return "Formato incorrecto";
             }
           }
+
+          if (column.mandatory && (value == null || value.isEmpty)) return "Campo obligatorio";
+
           return onValidate != null ? onValidate(value) : null;
         },
         onSaved: (val) {
