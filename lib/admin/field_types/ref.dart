@@ -44,7 +44,10 @@ class FieldTypeRef extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     this.column = column;
-    var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : "-";
+    var _data;
+    if (_object.hasFieldAdm(column.field)) {
+      _data = _object.get(column.field);
+    }
 
     if (_data != null && _data is DocumentReference) {
       DocumentReference ref = _data;
@@ -52,7 +55,7 @@ class FieldTypeRef extends FieldType {
         stream: ref.snapshots(),
         builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (!snapshot.hasData) return SizedBox.shrink();
-          if (snapshot.data!.data() != null && snapshot.data!.get(this.refLabel) != null) {
+          if (snapshot.data!.data() != null && snapshot.data!.hasFieldAdm(this.refLabel)) {
             return getListWidget(_object, snapshot.data!.get(this.refLabel) ?? "-");
           } else
             return getListWidget(_object, "<no existe>", style: TextStyle(color: Colors.red));
@@ -107,7 +110,8 @@ class FieldTypeRef extends FieldType {
             list = snapshot.data as List<QueryDocumentSnapshot>;
           }
 
-          print(list);
+//          print(list);
+          List<DocumentReference> references = list.map((e) => e.reference).toList();
 
           List<DropdownMenuItem<DocumentReference>> getIfNullable() => [
                 DropdownMenuItem<DocumentReference>(
@@ -120,29 +124,31 @@ class FieldTypeRef extends FieldType {
             SizedBox(width: 10),
             Container(
                 width: 300,
-                child: DropdownButtonFormField<DocumentReference>(
-                  value: value,
-                  isExpanded: true,
-                  items: getIfNullable() +
-                      list.map((object) {
-                        return DropdownMenuItem<DocumentReference>(value: object.reference, child: Text(object.get(this.refLabel)));
-                      }).toList(),
-                  onChanged: column.editable
-                      ? (val) {
-                          if (onChange != null) {
-                            onChange(val);
-                          }
-                        }
-                      : null,
-                  onSaved: (val) {
-                    onChange(val);
-                  },
-                  validator: (value) {
-                    print("validamos campo...");
-                    if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
-                    return null;
-                  },
-                ))
+                child: references.contains(value)
+                    ? DropdownButtonFormField<DocumentReference>(
+                        value: references.contains(value) ? value : null,
+                        isExpanded: true,
+                        items: getIfNullable() +
+                            list.map((object) {
+                              return DropdownMenuItem<DocumentReference>(value: object.reference, child: Text(object.get(this.refLabel)));
+                            }).toList(),
+                        onChanged: column.editable
+                            ? (val) {
+                                if (onChange != null) {
+                                  onChange(val);
+                                }
+                              }
+                            : null,
+                        onSaved: (val) {
+                          onChange(val);
+                        },
+                        validator: (value) {
+                          print("validamos campo...");
+                          if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
+                          return null;
+                        },
+                      )
+                    : Text("Este campo no se puede cambiar", style: TextStyle(color: Colors.red)))
           ]);
         });
   }
