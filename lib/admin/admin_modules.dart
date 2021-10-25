@@ -42,6 +42,7 @@ class Module {
   bool canAdd;
   bool canEdit;
   bool canRemove;
+  bool canSort;
   bool exportExcel;
   List<Widget> Function(DocumentSnapshot object, BuildContext context)? getActions;
 
@@ -64,6 +65,7 @@ class Module {
       this.canAdd = true,
       this.canEdit = true,
       this.canRemove = true,
+      this.canSort = false,
       this.onSave,
       this.onUpdated,
       this.onRemove,

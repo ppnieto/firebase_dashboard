@@ -5,6 +5,7 @@ import 'package:dashboard/dashboard.dart';
 import 'package:data_table_2/paginated_data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
@@ -51,6 +52,9 @@ class AdminScreenState extends State<AdminScreen> {
   final scrollController = ScrollController();
   late Map<String, bool> columnasSeleccionadas = {};
 
+  bool sortAscending = true;
+  int? sortColumnIndex;
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +82,14 @@ class AdminScreenState extends State<AdminScreen> {
         }
       }
     });
+
+    preloadReferences();
+  }
+
+  Future<void> preloadReferences() async {
+    for (var column in widget.module.columns) {
+      await column.type.preloadData();
+    }
   }
 
   CollectionReference _getCollection() {
@@ -129,6 +141,23 @@ class AdminScreenState extends State<AdminScreen> {
           docs = widget.module.doFilter!(docs);
         }
 
+        if (widget.module.canSort && sortColumnIndex != null) {
+          var column = widget.module.columns[sortColumnIndex!];
+          this.docs?.sort((a, b) {
+            var varA = a.getFieldAdm(column.field, '');
+            var varB = b.getFieldAdm(column.field, '');
+
+            if (varA is DocumentReference) {
+              varA = column.type.preloadedData[varA.path];
+            }
+            if (varB is DocumentReference) {
+              varB = column.type.preloadedData[varB.path];
+            }
+
+            return this.sortAscending ? varA?.compareTo(varB) : varB?.compareTo(varA);
+          });
+        }
+
         if (USE_DATA_TABLE_V2) {
           return PaginatedDataTable2(
               onPageChanged: (page) {
@@ -136,6 +165,8 @@ class AdminScreenState extends State<AdminScreen> {
                 setState(() {});
                 //scrollController.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.ease);
               },
+              sortAscending: sortAscending,
+              sortColumnIndex: sortColumnIndex,
               showCheckboxColumn: false,
               columnSpacing: 0.0,
               dataRowHeight: 38,
@@ -147,6 +178,14 @@ class AdminScreenState extends State<AdminScreen> {
                           element.listable && this.columnasSeleccionadas.containsKey(element.field) && this.columnasSeleccionadas[element.field]!)
                       .map((column) {
                     return DataColumn2(
+                      onSort: (int column, bool ascending) {
+                        if (widget.module.canSort) {
+                          setState(() {
+                            sortAscending = ascending;
+                            sortColumnIndex = column;
+                          });
+                        }
+                      },
                       size: column.size,
                       label: Text(column.label),
                     );

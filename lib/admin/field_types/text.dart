@@ -11,6 +11,10 @@ class FieldTypeText extends FieldType {
   final Widget? nullWidget;
   final int ellipsisLength;
   final bool tooltip;
+  final int maxLines;
+
+  final TextEditingController controller = TextEditingController();
+
   FieldTypeText(
       {this.nullable = true,
       this.regexp,
@@ -18,6 +22,7 @@ class FieldTypeText extends FieldType {
       this.obscureText = false,
       this.emptyNull = false,
       this.tooltip = false,
+      this.maxLines = 2,
       this.ellipsisLength = 0,
       this.nullWidget});
 
@@ -26,23 +31,14 @@ class FieldTypeText extends FieldType {
     if ((_object.data() as Map).containsKey(column.field) && _object.get(column.field) != null) {
       String texto = showTextFunction == null ? _object[column.field].toString() : showTextFunction!(_object[column.field]);
       if (this.ellipsisLength > 0 && texto.length >= this.ellipsisLength) {
-        //return _Text(text: texto, ellipsisLength: ellipsisLength);
         return Text(texto);
-        /*
-        return Row(
-          children: [
-            Text(texto.substring(0, ellipsisLength) + '...'),
-            IconButton(onPressed: () {}, icon: Icon(Icons.remove_red_eye))
-          ],
-        );
-        */
       } else {
         if (tooltip) {
           return Tooltip(
               message: texto,
               child: Text(
                 texto,
-                maxLines: 2,
+                maxLines: this.maxLines,
                 overflow: TextOverflow.ellipsis,
               ));
         } else {
@@ -56,27 +52,36 @@ class FieldTypeText extends FieldType {
   @override
   getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function? onChange) {
     var value = values[column.field];
-    return TextFormField(
-        initialValue: value,
-        enabled: column.editable,
-        obscureText: this.obscureText,
-        enableSuggestions: this.obscureText,
-        autocorrect: this.obscureText,
-        decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Colors.grey[100]),
-        validator: (value) {
-          if (regexp != null) {
-            if (!regexp!.hasMatch(value ?? "")) {
-              return "Formato incorrecto";
+    print("value == $value");
+    controller.text = value ?? "";
+    return Focus(
+      onFocusChange: (hasFocus) {
+        if (!hasFocus) {
+          if (onChange != null) onChange(controller.text);
+        }
+      },
+      child: TextFormField(
+          controller: controller,
+          enabled: column.editable,
+          obscureText: this.obscureText,
+          enableSuggestions: this.obscureText,
+          autocorrect: this.obscureText,
+          decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Colors.grey[100]),
+          validator: (value) {
+            if (regexp != null) {
+              if (!regexp!.hasMatch(value ?? "")) {
+                return "Formato incorrecto";
+              }
             }
-          }
-          return onValidate != null ? onValidate(value) : null;
-        },
-        onSaved: (val) {
-          if (emptyNull) {
-            val = (val ?? "").isEmpty ? null : val;
-          }
-          if (onChange != null) onChange(val);
-        });
+            return onValidate != null ? onValidate(value) : null;
+          },
+          onSaved: (val) {
+            if (emptyNull) {
+              val = (val ?? "").isEmpty ? null : val;
+            }
+            if (onChange != null) onChange(val);
+          }),
+    );
   }
 
   @override

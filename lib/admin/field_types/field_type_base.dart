@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 abstract class FieldType {
   late BuildContext context;
+  final Map<String, String> preloadedData = {};
 
   setContext(BuildContext context) {
     this.context = context;
@@ -24,6 +25,8 @@ abstract class FieldType {
   Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
     return _object.getFieldAdm(column.field, "-").toString();
   }
+
+  Future<void> preloadData() async {}
 
   getListContent(DocumentSnapshot _object, ColumnModule column) => Text((getField(_object, column.field, '-').toString()));
   getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {

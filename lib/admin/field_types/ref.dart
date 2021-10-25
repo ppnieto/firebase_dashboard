@@ -25,6 +25,14 @@ class FieldTypeRef extends FieldType {
       this.empty /* = const Text("<sin asignar>", style: TextStyle(color: Colors.red))*/});
 
   @override
+  Future<void> preloadData() async {
+    QuerySnapshot qs = await getQuery().get();
+    for (var doc in qs.docs) {
+      preloadedData[doc.reference.path] = doc.getFieldAdm(refLabel, '');
+    }
+  }
+
+  @override
   Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
     var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : "-";
     if (_data != null && _data is DocumentReference) {
@@ -43,21 +51,25 @@ class FieldTypeRef extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
+    print("getListContent");
     this.column = column;
     var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : "-";
-
     if (_data != null && _data is DocumentReference) {
-      DocumentReference ref = _data;
-      return StreamBuilder(
-        stream: ref.snapshots(),
-        builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (!snapshot.hasData) return SizedBox.shrink();
-          if (snapshot.data!.data() != null && snapshot.data!.get(this.refLabel) != null) {
-            return getListWidget(_object, snapshot.data!.get(this.refLabel) ?? "-");
-          } else
-            return getListWidget(_object, "<no existe>", style: TextStyle(color: Colors.red));
-        },
-      );
+      if (this.preloadedData.isNotEmpty) {
+        return getListWidget(_object, this.preloadedData[_data.path] ?? "nada");
+      } else {
+        DocumentReference ref = _data;
+        return StreamBuilder(
+          stream: ref.snapshots(),
+          builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (!snapshot.hasData) return SizedBox.shrink();
+            if (snapshot.data!.data() != null && snapshot.data!.get(this.refLabel) != null) {
+              return getListWidget(_object, snapshot.data!.get(this.refLabel) ?? "-");
+            } else
+              return getListWidget(_object, "<no existe>", style: TextStyle(color: Colors.red));
+          },
+        );
+      }
     } else {
       return this.empty ?? getListWidget(_object, "<sin asignar>", style: TextStyle(color: Colors.red));
     }
@@ -71,7 +83,7 @@ class FieldTypeRef extends FieldType {
     }
   }
 
-  Query _getQuery() {
+  Query getQuery() {
     Query query = getCollection();
     Map<String, dynamic> filters = getFilter != null ? getFilter!() : {};
     if (filters != null) {
@@ -86,6 +98,12 @@ class FieldTypeRef extends FieldType {
   getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
     var value = values[column.field];
 
+    List<DropdownMenuItem<DocumentReference>> getIfNullable() => [
+          DropdownMenuItem<DocumentReference>(
+              value: nullValue, // "-",
+              child: Text("<sin asignar>", style: TextStyle(color: Colors.red)))
+        ];
+
     if (value == null) {
       value = initialValue ?? nullValue;
       values[column.field] = value;
@@ -93,64 +111,85 @@ class FieldTypeRef extends FieldType {
         onChange(value);
       });
     }
+    if (this.preloadedData.isNotEmpty) {
+      return Row(children: [
+        Text(column.label),
+        SizedBox(width: 10),
+        Container(
+            width: 300,
+            child: DropdownButtonFormField<DocumentReference>(
+              value: value,
+              isExpanded: true,
+              items: getIfNullable() +
+                  preloadedData.entries.map((entry) {
+                    return DropdownMenuItem<DocumentReference>(value: FirebaseFirestore.instance.doc(entry.key), child: Text(entry.value));
+                  }).toList(),
+              onChanged: column.editable
+                  ? (val) {
+                      onChange(val);
+                    }
+                  : null,
+              onSaved: (val) {
+                onChange(val);
+              },
+              validator: (value) {
+                print("validamos campo...");
+                if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
+                return null;
+              },
+            ))
+      ]);
+    } else {
+      return StreamBuilder(
+          stream: getStream == null ? getQuery().snapshots() : getStream!(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return Container();
 
-    return StreamBuilder(
-        stream: getStream == null ? _getQuery().snapshots() : getStream!(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return Container();
+            late List<QueryDocumentSnapshot> list;
+            if (snapshot.data is QuerySnapshot) {
+              QuerySnapshot qs = snapshot.data as QuerySnapshot;
+              list = qs.docs;
+            } else {
+              list = snapshot.data as List<QueryDocumentSnapshot>;
+            }
 
-          late List<QueryDocumentSnapshot> list;
-          if (snapshot.data is QuerySnapshot) {
-            QuerySnapshot qs = snapshot.data as QuerySnapshot;
-            list = qs.docs;
-          } else {
-            list = snapshot.data as List<QueryDocumentSnapshot>;
-          }
-
-          print(list);
-
-          List<DropdownMenuItem<DocumentReference>> getIfNullable() => [
-                DropdownMenuItem<DocumentReference>(
-                    value: nullValue, // "-",
-                    child: Text("<sin asignar>", style: TextStyle(color: Colors.red)))
-              ];
-
-          return Row(children: [
-            Text(column.label),
-            SizedBox(width: 10),
-            Container(
-                width: 300,
-                child: DropdownButtonFormField<DocumentReference>(
-                  value: value,
-                  isExpanded: true,
-                  items: getIfNullable() +
-                      list.map((object) {
-                        return DropdownMenuItem<DocumentReference>(value: object.reference, child: Text(object.get(this.refLabel)));
-                      }).toList(),
-                  onChanged: column.editable
-                      ? (val) {
-                          if (onChange != null) {
-                            onChange(val);
+            return Row(children: [
+              Text(column.label),
+              SizedBox(width: 10),
+              Container(
+                  width: 300,
+                  child: DropdownButtonFormField<DocumentReference>(
+                    value: value,
+                    isExpanded: true,
+                    items: getIfNullable() +
+                        list.map((object) {
+                          return DropdownMenuItem<DocumentReference>(value: object.reference, child: Text(object.get(this.refLabel)));
+                        }).toList(),
+                    onChanged: column.editable
+                        ? (val) {
+                            if (onChange != null) {
+                              onChange(val);
+                            }
                           }
-                        }
-                      : null,
-                  onSaved: (val) {
-                    onChange(val);
-                  },
-                  validator: (value) {
-                    print("validamos campo...");
-                    if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
-                    return null;
-                  },
-                ))
-          ]);
-        });
+                        : null,
+                    onSaved: (val) {
+                      onChange(val);
+                    },
+                    validator: (value) {
+                      print("validamos campo...");
+                      if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
+                      return null;
+                    },
+                  ))
+            ]);
+          });
+    }
   }
 
   @override
   getFilterContent(value, ColumnModule column, Function? onFilter) {
     return StreamBuilder(
-        stream: _getQuery().snapshots(),
+        stream: getQuery().snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
           return Container(
