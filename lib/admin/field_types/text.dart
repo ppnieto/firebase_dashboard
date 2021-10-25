@@ -55,33 +55,35 @@ class FieldTypeText extends FieldType {
     print("value == $value");
     controller.text = value ?? "";
     return Focus(
-      onFocusChange: (hasFocus) {
-        if (!hasFocus) {
-          if (onChange != null) onChange(controller.text);
-        }
-      },
-      child: TextFormField(
-          controller: controller,
-          enabled: column.editable,
-          obscureText: this.obscureText,
-          enableSuggestions: this.obscureText,
-          autocorrect: this.obscureText,
-          decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Colors.grey[100]),
-          validator: (value) {
-            if (regexp != null) {
-              if (!regexp!.hasMatch(value ?? "")) {
-                return "Formato incorrecto";
+        onFocusChange: (hasFocus) {
+          if (!hasFocus) {
+            if (onChange != null) onChange(controller.text);
+          }
+        },
+        child: TextFormField(
+            controller: controller,
+            enabled: column.editable,
+            obscureText: this.obscureText,
+            enableSuggestions: this.obscureText,
+            autocorrect: this.obscureText,
+            decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Colors.grey[100]),
+            validator: (value) {
+              if (regexp != null) {
+                if (!regexp!.hasMatch(value ?? "")) {
+                  return "Formato incorrecto";
+                }
               }
-            }
-            return onValidate != null ? onValidate(value) : null;
-          },
-          onSaved: (val) {
-            if (emptyNull) {
-              val = (val ?? "").isEmpty ? null : val;
-            }
-            if (onChange != null) onChange(val);
-          }),
-    );
+
+              if (column.mandatory && (value == null || value.isEmpty)) return "Campo obligatorio";
+
+              return onValidate != null ? onValidate(value) : null;
+            },
+            onSaved: (val) {
+              if (emptyNull) {
+                val = (val ?? "").isEmpty ? null : val;
+              }
+              if (onChange != null) onChange(val);
+            }));
   }
 
   @override

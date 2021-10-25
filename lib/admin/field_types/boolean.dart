@@ -6,14 +6,12 @@ import 'package:flutter/material.dart';
 class FieldTypeBoolean extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    bool value = _object[column.field] ?? false;
-    return Icon(
-        value ? Icons.check_box_outlined : Icons.check_box_outline_blank);
+    bool value = _object.getFieldAdm(column.field, false);
+    return Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank);
   }
 
   @override
-  getEditContent(
-      values, ColumnModule column, Function? onValidate, Function onChange) {
+  getEditContent(values, ColumnModule column, Function? onValidate, Function onChange) {
     var value = values[column.field];
 
     {

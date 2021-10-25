@@ -258,6 +258,21 @@ class AdminScreenState extends State<AdminScreen> {
         }));
   }
 
+  showError(e) {
+    String message = "Error al guardar";
+    if (e is FirebaseException) {
+      print(e.code);
+      if (e.code == "permission-denied") {
+        message = "Error, no tiene permisos para realizar esta acción";
+      }
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.red,
+      duration: Duration(seconds: 2),
+    ));
+  }
+
   doGuardar() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -275,7 +290,7 @@ class AdminScreenState extends State<AdminScreen> {
       bool isNew = tipo == TipoPantalla.nuevo;
 
       String? msgValidation;
-      print("update ${updateData}");
+      //print("update ${updateData}");
 
       if (widget.module.validation != null) {
         msgValidation = await widget.module.validation!(isNew, this.updateData!);
@@ -297,6 +312,8 @@ class AdminScreenState extends State<AdminScreen> {
               setState(() {
                 this.tipo = TipoPantalla.listado;
               });
+            }).catchError((e) {
+              showError(e);
             });
           } else if (tipo == TipoPantalla.nuevo) {
             _getCollection().add(this.updateData!).then((value) {
@@ -308,6 +325,8 @@ class AdminScreenState extends State<AdminScreen> {
               setState(() {
                 this.tipo = TipoPantalla.listado;
               });
+            }).catchError((e) {
+              showError(e);
             });
           }
         } else {

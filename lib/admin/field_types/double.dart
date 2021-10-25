@@ -20,21 +20,17 @@ class FieldTypeDouble extends FieldType {
   }
 
   @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function? onValidate, Function onChange) {
+  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
     var value = values[column.field];
     return TextFormField(
         initialValue: value != null ? value.toString() : "",
         enabled: column.editable,
-        decoration: InputDecoration(
-            labelText: column.label,
-            filled: !column.editable,
-            fillColor: Colors.grey[100]),
+        decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Colors.grey[100]),
         validator: (value) {
+          if (column.mandatory && (value == null || value.isEmpty)) return "Campo obligatorio";
+
           if (value != null && value.isNotEmpty) {
-            return double.tryParse(value) == null
-                ? "Error de formato numérico"
-                : null;
+            return double.tryParse(value) == null ? "Error de formato numérico" : null;
           }
           return null;
         },
