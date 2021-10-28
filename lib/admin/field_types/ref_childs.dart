@@ -11,10 +11,7 @@ class FieldTypeRefNumChilds extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     return FutureBuilder(
-      future: FirebaseFirestore.instance
-          .collection(collection)
-          .where(column.field, isEqualTo: _object.reference)
-          .get(),
+      future: FirebaseFirestore.instance.collection(collection).where(column.field, isEqualTo: _object.reference).get(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) return Container();
         return Text(snapshot.data!.docs.length.toString());
@@ -23,8 +20,7 @@ class FieldTypeRefNumChilds extends FieldType {
   }
 
   @override
-  getEditContent(
-      value, ColumnModule column, Function? onValidate, Function onChange) {
+  getEditContent(value, ColumnModule column, Function? onValidate, Function onChange) {
     return SizedBox.shrink();
   }
 }

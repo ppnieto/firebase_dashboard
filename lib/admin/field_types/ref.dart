@@ -11,6 +11,7 @@ class FieldTypeRef extends FieldType {
   final Function? getQueryCollection;
   final Function? getStream;
   final Widget? empty;
+  final String? otherRef;
 
   static final DocumentReference nullValue = FirebaseFirestore.instance.doc("/values/null");
 
@@ -22,6 +23,7 @@ class FieldTypeRef extends FieldType {
       this.initialValue,
       this.getQueryCollection,
       this.getStream,
+      this.otherRef,
       this.empty /* = const Text("<sin asignar>", style: TextStyle(color: Colors.red))*/});
 
   @override
@@ -51,12 +53,11 @@ class FieldTypeRef extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    print("getListContent");
     this.column = column;
     var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : "-";
     if (_data != null && _data is DocumentReference) {
       if (this.preloadedData.isNotEmpty) {
-        return getListWidget(_object, this.preloadedData[_data.path] ?? "nada");
+        return getListWidget(_object, this.preloadedData[_data.path] ?? this.otherRef ?? "Otro");
       } else {
         DocumentReference ref = _data;
         return StreamBuilder(
@@ -112,6 +113,9 @@ class FieldTypeRef extends FieldType {
       });
     }
     if (this.preloadedData.isNotEmpty) {
+      if (preloadedData.containsKey(value.path) == false && value != nullValue) {
+        return Text("Este campo no se puede editar");
+      }
       return Row(children: [
         Text(column.label),
         SizedBox(width: 10),
