@@ -114,7 +114,7 @@ class FieldTypeRef extends FieldType {
     }
     if (this.preloadedData.isNotEmpty) {
       if (preloadedData.containsKey(value.path) == false && value != nullValue) {
-        return Text("Este campo no se puede editar");
+        return Text(column.label + ": Este campo no se puede editar",style : TextStyle(color: Colors.red));
       }
       return Row(children: [
         Text(column.label),
