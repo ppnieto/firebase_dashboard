@@ -11,6 +11,7 @@ class FieldTypeRef extends FieldType {
   final Function? getQueryCollection;
   final Function? getStream;
   final Widget? empty;
+  final String? otherRef;
 
   static final DocumentReference nullValue = FirebaseFirestore.instance.doc("/values/null");
 
@@ -22,6 +23,7 @@ class FieldTypeRef extends FieldType {
       this.initialValue,
       this.getQueryCollection,
       this.getStream,
+      this.otherRef,
       this.empty /* = const Text("<sin asignar>", style: TextStyle(color: Colors.red))*/});
 
   @override
@@ -50,12 +52,11 @@ class FieldTypeRef extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    print("getListContent");
     this.column = column;
     var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : "-";
     if (_data != null && _data is DocumentReference) {
       if (this.preloadedData.isNotEmpty) {
-        return getListWidget(_object, this.preloadedData[_data.path] ?? "nada");
+        return getListWidget(_object, this.preloadedData[_data.path] ?? this.otherRef ?? "Otro");
       } else {
         DocumentReference ref = _data;
         return StreamBuilder(
@@ -110,6 +111,7 @@ class FieldTypeRef extends FieldType {
       });
     }
     if (this.preloadedData.isNotEmpty) {
+<<<<<<< HEAD
       return Container(
           width: 350,
           child: DropdownButtonFormField<DocumentReference>(
@@ -133,6 +135,38 @@ class FieldTypeRef extends FieldType {
               return null;
             },
           ));
+=======
+      if (preloadedData.containsKey(value.path) == false && value != nullValue) {
+        return Text(column.label + ": Este campo no se puede editar",style : TextStyle(color: Colors.red));
+      }
+      return Row(children: [
+        Text(column.label),
+        SizedBox(width: 10),
+        Container(
+            width: 300,
+            child: DropdownButtonFormField<DocumentReference>(
+              value: value,
+              isExpanded: true,
+              items: getIfNullable() +
+                  preloadedData.entries.map((entry) {
+                    return DropdownMenuItem<DocumentReference>(value: FirebaseFirestore.instance.doc(entry.key), child: Text(entry.value));
+                  }).toList(),
+              onChanged: column.editable
+                  ? (val) {
+                      onChange(val);
+                    }
+                  : null,
+              onSaved: (val) {
+                onChange(val);
+              },
+              validator: (value) {
+                print("validamos campo...");
+                if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
+                return null;
+              },
+            ))
+      ]);
+>>>>>>> 8e944602e641e048b663ea8a39bafde5fd49c9cb
     } else {
       return StreamBuilder(
           stream: getStream == null ? getQuery().snapshots() : getStream!(),

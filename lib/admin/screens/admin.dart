@@ -150,7 +150,6 @@ class AdminScreenState extends State<AdminScreen> {
       stream: query.snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) {
-          print("shrink!!!!");
           return SizedBox.shrink();
         }
 
@@ -176,6 +175,29 @@ class AdminScreenState extends State<AdminScreen> {
             if (varB is DocumentReference) {
               varB = column.type.preloadedData[varB.path];
             }
+
+            // ñapa para los campos fecha sin valor
+            if (varA is Timestamp && varB is String) {
+              varB = Timestamp(0, 0);
+            }
+            if (varB is Timestamp && varA is String) {
+              varA = Timestamp(0, 0);
+            }
+
+            if (varA is num && varB == null || varB == "") {
+              varB = 0;
+            }
+            if (varB is num && varA == null || varA == "") {
+              varA = 0;
+            }
+
+            if (varA is List) varA = varA.toString();
+            if (varB is List) varB = varB.toString();
+
+            if (varA == null) varA = "";
+            if (varB == null) varB = "";
+
+            //print("$varA === $varB");
 
             return this.sortAscending ? varA?.compareTo(varB) : varB?.compareTo(varA);
           });
