@@ -20,7 +20,7 @@ class FieldTypeDouble extends FieldType {
   }
 
   @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
     return TextFormField(
         initialValue: value != null ? value.toString() : "",

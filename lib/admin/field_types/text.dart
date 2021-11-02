@@ -50,9 +50,8 @@ class FieldTypeText extends FieldType {
   }
 
   @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function? onChange) {
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
-    print("value == $value");
     controller.text = value ?? "";
     return Focus(
         onFocusChange: (hasFocus) {
@@ -75,8 +74,7 @@ class FieldTypeText extends FieldType {
               }
 
               if (column.mandatory && (value == null || value.isEmpty)) return "Campo obligatorio";
-
-              return onValidate != null ? onValidate(value) : null;
+              return null;
             },
             onSaved: (val) {
               if (emptyNull) {

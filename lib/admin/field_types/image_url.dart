@@ -15,11 +15,7 @@ class FieldTypeImageURL extends FieldType {
   String storePath;
   TextEditingController textController = TextEditingController();
 
-  FieldTypeImageURL(
-      {required this.width,
-      required this.height,
-      this.allowUpload = false,
-      required this.storePath});
+  FieldTypeImageURL({required this.width, required this.height, this.allowUpload = false, required this.storePath});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
@@ -38,10 +34,8 @@ class FieldTypeImageURL extends FieldType {
   }
 
   @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column,
-      Function? onValidate, Function onChange) {
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
-    print(value);
     textController.text = value ?? "";
     return Row(
       children: [
@@ -51,9 +45,11 @@ class FieldTypeImageURL extends FieldType {
                 decoration: InputDecoration(
                   labelText: column.label,
                 ),
+                /*
                 validator: (value) {
                   return onValidate != null ? onValidate(value) : null;
                 },
+                */
                 onSaved: (val) {
                   if (onChange != null) onChange(val);
                 })),
@@ -69,8 +65,7 @@ class FieldTypeImageURL extends FieldType {
                   showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return _UploadDialog(
-                            parent: this, url: value.toString());
+                        return _UploadDialog(parent: this, url: value.toString());
                       });
                 },
               )
@@ -84,8 +79,7 @@ class _UploadDialog extends StatefulWidget {
   final FieldTypeImageURL parent;
   final String url;
 
-  _UploadDialog({Key? key, required this.parent, required this.url})
-      : super(key: key);
+  _UploadDialog({Key? key, required this.parent, required this.url}) : super(key: key);
 
   @override
   __UploadDialogState createState() => __UploadDialogState();
@@ -116,8 +110,7 @@ class __UploadDialogState extends State<_UploadDialog> {
           uploadedImage = reader.result as Uint8List?;
           String fileName = widget.parent.storePath + "/" + file.name;
           print("subimos " + fileName);
-          firebase_storage.Reference ref =
-              firebase_storage.FirebaseStorage.instance.ref(fileName);
+          firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref(fileName);
           firebase_storage.UploadTask uploadTask = ref.putData(uploadedImage!);
           firebase_storage.TaskSnapshot task = await uploadTask;
           print("subido");
@@ -155,14 +148,9 @@ class __UploadDialogState extends State<_UploadDialog> {
       width: 800,
       height: 700,
       padding: EdgeInsets.all(50),
-      decoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
-          ]),
+      decoration: BoxDecoration(shape: BoxShape.rectangle, color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [
+        BoxShadow(color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
+      ]),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[

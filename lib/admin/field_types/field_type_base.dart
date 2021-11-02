@@ -22,14 +22,14 @@ abstract class FieldType {
     return true;
   }
 
-  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
+  String getStringContent(DocumentSnapshot _object, ColumnModule column) {
     return _object.getFieldAdm(column.field, "-").toString();
   }
 
   Future<void> preloadData() async {}
 
   getListContent(DocumentSnapshot _object, ColumnModule column) => Text((getField(_object, column.field, '-').toString()));
-  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     return Text("No implementado para tipo " + this.toString());
   }
 

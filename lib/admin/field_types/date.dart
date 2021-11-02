@@ -9,7 +9,7 @@ class FieldTypeDate extends FieldType {
   FieldTypeDate({this.format = "dd/MM/yyyy"});
 
   @override
-  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
+  String getStringContent(DocumentSnapshot _object, ColumnModule column) {
     final f = new DateFormat(this.format);
     if (_object.hasFieldAdm(column.field)) {
       return f.format(_object.get(column.field).toDate());
@@ -27,7 +27,7 @@ class FieldTypeDate extends FieldType {
   }
 
   @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
     final f = new DateFormat(this.format);
     TextEditingController txt = TextEditingController();
@@ -63,13 +63,12 @@ class FieldTypeDate extends FieldType {
       IconButton(
         icon: Icon(FontAwesomeIcons.calendar),
         onPressed: () async {
-          /*
-          final DateTime picked = await showDatePicker(context: GlobalModel.instance.navigatorKey.currentContext, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);
+          final DateTime? picked =
+              await showDatePicker(context: context, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);
           if (picked != null) {
             txt.text = f.format(picked);
             onChange(Timestamp.fromDate(picked));
           }
-          */
         },
       )
     ]);

@@ -8,8 +8,7 @@ class FieldTypeActions extends FieldType {
   FieldTypeActions({required this.actions});
 
   @override
-  getEditContent(
-      value, ColumnModule column, Function? onValidate, Function onChange) {
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     return Container();
   }
 
@@ -21,9 +20,7 @@ class FieldTypeActions extends FieldType {
         padding: EdgeInsets.symmetric(horizontal: 4),
         child: RaisedButton.icon(
             icon: Icon(action.iconData, color: Colors.white),
-            color: context != null
-                ? Theme.of(this.context).primaryColor
-                : Colors.blue,
+            color: context != null ? Theme.of(this.context).primaryColor : Colors.blue,
             label: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(action.title, style: TextStyle(color: Colors.white)),
@@ -42,6 +39,5 @@ class FieldTypeAction {
   String title;
   IconData iconData;
   Function onTap;
-  FieldTypeAction(
-      {this.title = "accion", required this.onTap, required this.iconData});
+  FieldTypeAction({this.title = "accion", required this.onTap, required this.iconData});
 }

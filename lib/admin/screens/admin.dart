@@ -44,6 +44,7 @@ class AdminScreenState extends State<AdminScreen> {
   late int rowsPerPage;
   String? _orderBy;
   List<DocumentSnapshot>? docs;
+  String? globalSearch;
   TipoPantalla tipo = TipoPantalla.listado;
   DocumentSnapshot? detalle;
   Map<String, dynamic>? updateData;
@@ -112,6 +113,24 @@ class AdminScreenState extends State<AdminScreen> {
     return result;
   }
 
+  void doGlobalSearch() {
+    List<DocumentSnapshot> result = [];
+    for (DocumentSnapshot doc in docs ?? []) {
+      for (var column in widget.module.columns) {
+        if (doc.hasFieldAdm(column.field)) {
+          String value = column.getStringContent(doc);
+          bool encontrado = value.toLowerCase().contains(this.globalSearch!.toLowerCase());
+          print("$value contains ${this.globalSearch} ? $encontrado");
+          if (encontrado) {
+            result.add(doc);
+            break;
+          }
+        }
+      }
+    }
+    this.docs = result;
+  }
+
   getList() {
     Query query = _getCollection();
     query = addFilters(filtro, query);
@@ -139,6 +158,10 @@ class AdminScreenState extends State<AdminScreen> {
 
         if (widget.module.doFilter != null) {
           docs = widget.module.doFilter!(docs);
+        }
+
+        if (this.globalSearch != null) {
+          doGlobalSearch();
         }
 
         if (widget.module.canSort && sortColumnIndex != null) {
@@ -247,15 +270,22 @@ class AdminScreenState extends State<AdminScreen> {
 
   getEditField(ColumnModule column) {
     column.type.setContext(context);
+    Widget child = column.getEditContent(detalle!, updateData!, column, (value) {
+      setState(() {
+        updateData![column.field] = value;
+        print("actualizamos campo ${column.field} => $value");
+      });
+    });
 
-    return Padding(
-        padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 5 : 20),
-        child: column.getEditContent(updateData, null, (value) {
-          setState(() {
-            updateData![column.field] = value;
-            print("actualizamos campo ${column.field} => ${value}");
-          });
-        }));
+    if (column.showLabelOnEdit) {
+      child = Row(children: [
+        ConstrainedBox(constraints: BoxConstraints(minWidth: 120), child: Text(column.label)),
+        SizedBox(width: 20),
+        Expanded(child: child)
+      ]);
+    }
+
+    return Padding(padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 5 : 20), child: child);
   }
 
   showError(e) {
@@ -290,7 +320,6 @@ class AdminScreenState extends State<AdminScreen> {
       bool isNew = tipo == TipoPantalla.nuevo;
 
       String? msgValidation;
-      //print("update ${updateData}");
 
       if (widget.module.validation != null) {
         msgValidation = await widget.module.validation!(isNew, this.updateData!);
@@ -354,7 +383,6 @@ class AdminScreenState extends State<AdminScreen> {
           child: Padding(
             padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 32.0 : 5),
             child: Container(
-                //padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                 child: Builder(
                     builder: (context) => Form(
                         key: _formKey,
@@ -471,17 +499,39 @@ class AdminScreenState extends State<AdminScreen> {
       }
     }
 
-    Future<void> exportExcel() async {
+    Widget getGlobalSearch() => Container(
+          width: 280,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: TextField(
+            decoration: InputDecoration(
+              suffixIcon: Icon(Icons.search, color: Theme.of(context).canvasColor),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: Theme.of(context).canvasColor, width: 2.0)),
+              hintText: "Buscar...",
+              hintStyle: TextStyle(color: Theme.of(context).canvasColor),
+              contentPadding: EdgeInsets.all(10),
+            ),
+            style: TextStyle(color: Theme.of(context).canvasColor),
+            onChanged: (value) {
+              setState(() {
+                this.globalSearch = value;
+              });
+            },
+          ),
+        );
+
+    void exportExcel() {
       var excelFile = Excel.createExcel();
       String? sheetObjectName = excelFile.getDefaultSheet();
       Sheet sheetObject = excelFile[sheetObjectName!];
 
-      //sheetObject.appendRow(["Datos de " + widget.module.title]);
       if (docs != null) {
         // cabecera
         List<String> row = [];
         for (var column in widget.module.columns) {
-          row.add(column.label);
+          if (column.listable) {
+            row.add(column.label);
+          }
         }
         sheetObject.appendRow(row);
 
@@ -489,8 +539,9 @@ class AdminScreenState extends State<AdminScreen> {
         for (var doc in docs!) {
           row = [];
           for (var column in widget.module.columns) {
-            String content = await column.type.getStringContent(doc, column);
-            row.add(content);
+            if (column.listable) {
+              row.add(column.type.getStringContent(doc, column));
+            }
           }
           sheetObject.appendRow(row);
         }
@@ -517,12 +568,16 @@ class AdminScreenState extends State<AdminScreen> {
     getActions() {
       List<Widget> result = [];
 
+      if (widget.module.globalSearch && tipo == TipoPantalla.listado) {
+        result.add(getGlobalSearch());
+      }
+
       if (tipo == TipoPantalla.listado && widget.module.exportExcel) {
         result.add(IconButton(
           padding: EdgeInsets.all(0),
           icon: Icon(FontAwesomeIcons.fileExcel),
-          onPressed: () async {
-            await exportExcel();
+          onPressed: () {
+            exportExcel();
           },
         ));
       }

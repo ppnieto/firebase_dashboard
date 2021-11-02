@@ -26,25 +26,26 @@ export "field_types/tags.dart";
 
 class Module {
   final String name;
-  String title;
+  final String title;
   //IconData icon;
-  String? collection;
-  Function? getQueryCollection;
-  Function? doFilter;
-  String? orderBy;
-  Function? addFilter;
-  String? reverseOrderBy;
-  Function? onSave;
-  Function? onUpdated;
-  Function? onRemove;
-  Future<String?> Function(bool isNew, Map<String, dynamic> updateData)? validation;
-  int rowsPerPage;
-  bool canAdd;
-  bool canEdit;
-  bool canRemove;
-  bool canSort;
-  bool exportExcel;
-  List<Widget> Function(DocumentSnapshot object, BuildContext context)? getActions;
+  final String? collection;
+  final Function? getQueryCollection;
+  final Function? doFilter;
+  final String? orderBy;
+  final Function? addFilter;
+  final String? reverseOrderBy;
+  final Function? onSave;
+  final Function? onUpdated;
+  final Function? onRemove;
+  final bool globalSearch;
+  final Future<String?> Function(bool isNew, Map<String, dynamic> updateData)? validation;
+  final int rowsPerPage;
+  final bool canAdd;
+  final bool canEdit;
+  final bool canRemove;
+  final bool canSort;
+  final bool exportExcel;
+  final List<Widget> Function(DocumentSnapshot object, BuildContext context)? getActions;
 
   List<ColumnModule> columns;
   Module(
@@ -56,9 +57,10 @@ class Module {
       required this.title,
 //      required this.icon,
       required this.columns,
+      this.globalSearch = false,
       this.orderBy,
       this.reverseOrderBy,
-      this.exportExcel = false,
+      this.exportExcel = true,
       //this.sortBy,
       //this.reverseSortBy,
       this.rowsPerPage = 10,
@@ -85,6 +87,7 @@ class ColumnModule {
   bool filter;
   bool mandatory;
   ColumnSize size;
+  bool showLabelOnEdit;
 
   ColumnModule({
     required this.label,
@@ -96,12 +99,14 @@ class ColumnModule {
     this.filter = false,
     this.mandatory = false,
     this.showOnEdit = true,
+    this.showLabelOnEdit = true,
     this.size = ColumnSize.M,
     this.showOnNew = true,
   });
 
   getListContent(DocumentSnapshot _object) => type.getListContent(_object, this);
-  getEditContent(value, Function? onValidate, Function onChange) => type.getEditContent(value, this, onValidate, onChange);
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) =>
+      type.getEditContent(_object, values, column, onChange);
   getFilterContent(value, Function onFilter) => type.getFilterContent(value, this, onFilter);
   getStringContent(DocumentSnapshot _object) => type.getStringContent(_object, this);
 }

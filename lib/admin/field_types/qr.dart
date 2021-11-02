@@ -14,16 +14,11 @@ class FieldTypeQR extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     String code = _object.get(column.field);
-    return code.isEmpty
-        ? SizedBox.shrink()
-        : IconButton(
-            icon: Icon(FontAwesomeIcons.qrcode),
-            onPressed: () => onListTap(_object, column));
+    return code.isEmpty ? SizedBox.shrink() : IconButton(icon: Icon(FontAwesomeIcons.qrcode), onPressed: () => onListTap(_object, column));
   }
 
   @override
-  getEditContent(
-      values, ColumnModule column, Function? onValidate, Function onChange) {
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     TextEditingController qr = TextEditingController();
     var value = values[column.field];
 

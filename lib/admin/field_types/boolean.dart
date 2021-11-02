@@ -11,7 +11,7 @@ class FieldTypeBoolean extends FieldType {
   }
 
   @override
-  getEditContent(values, ColumnModule column, Function? onValidate, Function onChange) {
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
 
     {

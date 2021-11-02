@@ -23,8 +23,7 @@ class FieldTypeDefecto extends FieldType {
   }
 
   @override
-  getEditContent(
-      value, ColumnModule column, Function? onValidate, Function onChange) {
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     return Container();
   }
 

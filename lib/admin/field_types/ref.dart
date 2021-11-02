@@ -33,17 +33,16 @@ class FieldTypeRef extends FieldType {
   }
 
   @override
-  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
-    var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : "-";
-    if (_data != null && _data is DocumentReference) {
-      DocumentReference ref = _data;
-      DocumentSnapshot snapshot = await ref.get();
-      if (snapshot.data() != null && snapshot.get(this.refLabel) != null) {
-        return snapshot.get(this.refLabel) ?? "-";
-      } else
-        return "<no existe>";
+  String getStringContent(DocumentSnapshot _object, ColumnModule column) {
+    var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : null;
+    if (preloadedData.isNotEmpty && _data != null) {
+      if (preloadedData.containsKey(_data.path)) {
+        return preloadedData[_data.path]!;
+      } else {
+        return "Error no data preloaded!!!";
+      }
     } else {
-      return " ";
+      return "";
     }
   }
 
@@ -94,8 +93,7 @@ class FieldTypeRef extends FieldType {
     return query;
   }
 
-  @override
-  getEditContent(Map<String, dynamic> values, ColumnModule column, Function? onValidate, Function onChange) {
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
 
     List<DropdownMenuItem<DocumentReference>> getIfNullable() => [
@@ -112,33 +110,29 @@ class FieldTypeRef extends FieldType {
       });
     }
     if (this.preloadedData.isNotEmpty) {
-      return Row(children: [
-        Text(column.label),
-        SizedBox(width: 10),
-        Container(
-            width: 300,
-            child: DropdownButtonFormField<DocumentReference>(
-              value: value,
-              isExpanded: true,
-              items: getIfNullable() +
-                  preloadedData.entries.map((entry) {
-                    return DropdownMenuItem<DocumentReference>(value: FirebaseFirestore.instance.doc(entry.key), child: Text(entry.value));
-                  }).toList(),
-              onChanged: column.editable
-                  ? (val) {
-                      onChange(val);
-                    }
-                  : null,
-              onSaved: (val) {
-                onChange(val);
-              },
-              validator: (value) {
-                print("validamos campo...");
-                if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
-                return null;
-              },
-            ))
-      ]);
+      return Container(
+          width: 350,
+          child: DropdownButtonFormField<DocumentReference>(
+            value: value,
+            isExpanded: true,
+            items: getIfNullable() +
+                preloadedData.entries.map((entry) {
+                  return DropdownMenuItem<DocumentReference>(value: FirebaseFirestore.instance.doc(entry.key), child: Text(entry.value));
+                }).toList(),
+            onChanged: column.editable
+                ? (val) {
+                    onChange(val);
+                  }
+                : null,
+            onSaved: (val) {
+              onChange(val);
+            },
+            validator: (value) {
+              print("validamos campo...");
+              if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
+              return null;
+            },
+          ));
     } else {
       return StreamBuilder(
           stream: getStream == null ? getQuery().snapshots() : getStream!(),
