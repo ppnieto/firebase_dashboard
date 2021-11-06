@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:dashboard/admin/admin_modules.dart';
+import 'package:dashboard/components/admin_datatable.dart';
+import 'package:dashboard/components/syncfusion_datatable.dart';
 import 'package:dashboard/dashboard.dart';
-import 'package:data_table_2/paginated_data_table_2.dart';
+//import 'package:data_table_2/paginated_data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/scheduler.dart';
@@ -13,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweetsheet/sweetsheet.dart';
 import 'package:excel/excel.dart';
 import 'dart:html' as html; // or package:universal_html/prefer_universal/html.dart
-import 'package:data_table_2/data_table_2.dart';
+//import 'package:data_table_2/data_table_2.dart';
 
 class AdminScreen extends StatefulWidget {
   final Module module;
@@ -37,9 +39,6 @@ class AdminScreen extends StatefulWidget {
 enum TipoPantalla { listado, detalle, nuevo, confirmar }
 
 class AdminScreenState extends State<AdminScreen> {
-  // ignore: non_constant_identifier_names
-  static bool USE_DATA_TABLE_V2 = true;
-
   int? indexSelected;
   late int rowsPerPage;
   String? _orderBy;
@@ -51,10 +50,9 @@ class AdminScreenState extends State<AdminScreen> {
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic> filtro = {};
   final scrollController = ScrollController();
-  late Map<String, bool> columnasSeleccionadas = {};
-
   bool sortAscending = true;
   int? sortColumnIndex;
+  late Map<String, bool> columnasSeleccionadas = {};
 
   @override
   void initState() {
@@ -120,7 +118,7 @@ class AdminScreenState extends State<AdminScreen> {
         if (doc.hasFieldAdm(column.field)) {
           String value = column.getStringContent(doc);
           bool encontrado = value.toLowerCase().contains(this.globalSearch!.toLowerCase());
-          print("$value contains ${this.globalSearch} ? $encontrado");
+          //print("$value contains ${this.globalSearch} ? $encontrado");
           if (encontrado) {
             result.add(doc);
             break;
@@ -203,6 +201,23 @@ class AdminScreenState extends State<AdminScreen> {
           });
         }
 
+        if (1 == 1) {
+          return AdminDataTable(adminScreen: this);
+        } else {
+          return SyncfusionDataTable(
+            columns: widget.module.columns,
+            docs: docs!,
+            onTap: (index) {
+              setState(() {
+                detalle = docs![index];
+                updateData = detalle?.data() as Map<String, dynamic>?;
+                tipo = TipoPantalla.detalle;
+              });
+            },
+          );
+        }
+
+        /*
         if (USE_DATA_TABLE_V2) {
           return PaginatedDataTable2(
               onPageChanged: (page) {
@@ -286,6 +301,7 @@ class AdminScreenState extends State<AdminScreen> {
             ],
           );
         }
+        */
       },
     );
   }
@@ -698,7 +714,7 @@ doBorrar(BuildContext context, DocumentReference ref, Function postDelete) {
     ),
   );
 }
-
+/*
 class MyDataTableSource extends DataTableSource {
   List<DocumentSnapshot> docs;
   BuildContext context;
@@ -774,3 +790,4 @@ class MyDataTableSource extends DataTableSource {
   @override
   int get selectedRowCount => 0;
 }
+*/

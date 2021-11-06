@@ -20,11 +20,7 @@ class FieldTypeRefNumChilds extends FieldType {
   }
 
   @override
-<<<<<<< HEAD
   getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
-=======
-  getEditContent(value, ColumnModule column, Function? onValidate, Function onChange) {
->>>>>>> 8e944602e641e048b663ea8a39bafde5fd49c9cb
     return SizedBox.shrink();
   }
 }

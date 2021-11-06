@@ -111,33 +111,8 @@ class FieldTypeRef extends FieldType {
       });
     }
     if (this.preloadedData.isNotEmpty) {
-<<<<<<< HEAD
-      return Container(
-          width: 350,
-          child: DropdownButtonFormField<DocumentReference>(
-            value: value,
-            isExpanded: true,
-            items: getIfNullable() +
-                preloadedData.entries.map((entry) {
-                  return DropdownMenuItem<DocumentReference>(value: FirebaseFirestore.instance.doc(entry.key), child: Text(entry.value));
-                }).toList(),
-            onChanged: column.editable
-                ? (val) {
-                    onChange(val);
-                  }
-                : null,
-            onSaved: (val) {
-              onChange(val);
-            },
-            validator: (value) {
-              print("validamos campo...");
-              if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
-              return null;
-            },
-          ));
-=======
       if (preloadedData.containsKey(value.path) == false && value != nullValue) {
-        return Text(column.label + ": Este campo no se puede editar",style : TextStyle(color: Colors.red));
+        return Text(column.label + ": Este campo no se puede editar", style: TextStyle(color: Colors.red));
       }
       return Row(children: [
         Text(column.label),
@@ -166,7 +141,6 @@ class FieldTypeRef extends FieldType {
               },
             ))
       ]);
->>>>>>> 8e944602e641e048b663ea8a39bafde5fd49c9cb
     } else {
       return StreamBuilder(
           stream: getStream == null ? getQuery().snapshots() : getStream!(),
