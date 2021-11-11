@@ -11,7 +11,7 @@ class FieldTypeTags extends FieldType {
   FieldTypeTags({required this.hint, required this.options});
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
     List<String> valueString = [];
     if (value is List) {

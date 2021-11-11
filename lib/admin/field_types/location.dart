@@ -9,7 +9,7 @@ class FieldTypeLocation extends FieldType {
   TextEditingController latitude = TextEditingController();
   TextEditingController longitude = TextEditingController();
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
     GeoPoint position;
     if (value == null) {

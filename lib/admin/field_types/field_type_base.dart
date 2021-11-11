@@ -29,7 +29,7 @@ abstract class FieldType {
   Future<void> preloadData() async {}
 
   getListContent(DocumentSnapshot _object, ColumnModule column) => Text((getField(_object, column.field, '-').toString()));
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     return Text("No implementado para tipo " + this.toString());
   }
 

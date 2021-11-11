@@ -67,7 +67,7 @@ class FieldTypeMultiref extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var tmp = values[column.field];
     List<DocumentReference> value = [];
     if (tmp is List) {

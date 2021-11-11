@@ -94,7 +94,7 @@ class FieldTypeRef extends FieldType {
     return query;
   }
 
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
 
     List<DropdownMenuItem<DocumentReference>> getIfNullable() => [

@@ -307,8 +307,12 @@ class AdminScreenState extends State<AdminScreen> {
   }
 
   getEditField(ColumnModule column) {
+    print("get edit field " + column.field);
+    print("type = ${column.type}");
+    print("detalle = $detalle");
     column.type.setContext(context);
-    Widget child = column.getEditContent(detalle!, updateData!, column, (value) {
+
+    Widget child = column.type.getEditContent(detalle, updateData!, column, (value) {
       setState(() {
         updateData![column.field] = value;
         print("actualizamos campo ${column.field} => $value");

@@ -31,14 +31,14 @@ class FieldTypeDateTime extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
-    var value = values[column.field];
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+    Timestamp value = _object?.getFieldAdm(column.field, Timestamp.fromDate(DateTime.now())) ?? Timestamp.fromDate(DateTime.now());
     return DateTimePicker(
         enabled: column.editable,
         //locale: Locale('es'),
         type: showTime ? DateTimePickerType.dateTimeSeparate : DateTimePickerType.date,
         dateMask: 'dd/MM/yyyy',
-        initialValue: value == null ? DateTime.now().toString() : value.toDate().toString(),
+        initialValue: value.toDate().toString(),
         firstDate: DateTime(2020),
         lastDate: DateTime(2100),
         icon: Icon(Icons.event),

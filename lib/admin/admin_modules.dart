@@ -105,8 +105,11 @@ class ColumnModule {
   });
 
   getListContent(DocumentSnapshot _object) => type.getListContent(_object, this);
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) =>
-      type.getEditContent(_object, values, column, onChange);
+  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+    print("get edit content 2 . type = $type");
+    return type.getEditContent(_object, values, column, onChange);
+  }
+
   getFilterContent(value, Function onFilter) => type.getFilterContent(value, this, onFilter);
   getStringContent(DocumentSnapshot _object) => type.getStringContent(_object, this);
 }

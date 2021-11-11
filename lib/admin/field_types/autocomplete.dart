@@ -47,7 +47,7 @@ class FieldTypeAutocomplete extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
 
     if (value == null) {

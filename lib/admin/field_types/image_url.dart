@@ -34,7 +34,7 @@ class FieldTypeImageURL extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
     textController.text = value ?? "";
     return Row(
