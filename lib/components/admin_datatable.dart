@@ -24,7 +24,7 @@ class _AdminDataTableState extends State<AdminDataTable> {
         },
         sortAscending: widget.adminScreen.sortAscending,
         sortColumnIndex: widget.adminScreen.sortColumnIndex,
-        showCheckboxColumn: false,
+        showCheckboxColumn: widget.adminScreen.canSelect,
         columnSpacing: 0.0,
         dataRowHeight: 38,
         minWidth: widget.adminScreen.widget.minWidth,
@@ -85,8 +85,20 @@ class MyDataTableSource extends DataTableSource {
     DocumentSnapshot _object = docs[index];
 
     return DataRow2.byIndex(
-        selected: screen.indexSelected == index,
+        selected: screen.widget.module.indexSelected.contains(index),
         index: index,
+        onSelectChanged: (value) {
+          print("onSelectChanged ${screen.widget.module.indexSelected}");
+          screen.setState(() {
+            if (value ?? false) {
+              screen.widget.module.indexSelected.add(index);
+              screen.widget.module.rowsSelected.add(_object);
+            } else {
+              screen.widget.module.indexSelected.remove(index);
+              screen.widget.module.rowsSelected.removeWhere((obj) => obj.reference.path == _object.reference.path);
+            }
+          });
+        },
         cells: module.columns
                 .where((element) => element.listable && this.showFields.containsKey(element.field) && this.showFields[element.field]!)
                 .map<DataCell>((column) {
@@ -95,9 +107,12 @@ class MyDataTableSource extends DataTableSource {
               return DataCell(column.getListContent(_object),
                   onTap: column.clickToDetail
                       ? () {
-                          if (screen.widget.selectPreEdit && (screen.indexSelected == null || screen.indexSelected != index)) {
+                          if (screen.widget.selectPreEdit && screen.widget.module.indexSelected.contains(index) == false) {
                             screen.setState(() {
-                              screen.indexSelected = index;
+                              screen.widget.module.indexSelected.clear();
+                              screen.widget.module.indexSelected.add(index);
+                              screen.widget.module.rowsSelected.clear();
+                              screen.widget.module.rowsSelected.add(_object);
                             });
                           } else {
                             if (module.canEdit) {

@@ -40,12 +40,16 @@ class Module {
   final bool globalSearch;
   final Future<String?> Function(bool isNew, Map<String, dynamic> updateData)? validation;
   final int rowsPerPage;
+  final bool canSelect;
   final bool canAdd;
   final bool canEdit;
   final bool canRemove;
   final bool canSort;
   final bool exportExcel;
   final List<Widget> Function(DocumentSnapshot object, BuildContext context)? getActions;
+  final List<Widget> Function(Module module, BuildContext context)? getScaffoldActions;
+  List<int> indexSelected = [];
+  List<DocumentSnapshot> rowsSelected = [];
 
   List<ColumnModule> columns;
   Module(
@@ -68,11 +72,13 @@ class Module {
       this.canEdit = true,
       this.canRemove = true,
       this.canSort = false,
+      this.canSelect = false,
       this.onSave,
       this.onUpdated,
       this.onRemove,
       this.validation,
-      this.getActions});
+      this.getActions,
+      this.getScaffoldActions});
 }
 
 class ColumnModule {

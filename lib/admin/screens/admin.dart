@@ -23,6 +23,7 @@ class AdminScreen extends StatefulWidget {
   final bool selectPreEdit;
   final CollectionReference? collection;
   final double minWidth;
+  //final List<Widget> actions;
 
   AdminScreen({
     required this.module,
@@ -30,6 +31,7 @@ class AdminScreen extends StatefulWidget {
     this.minWidth = 200,
     this.selectPreEdit = false,
     this.collection,
+    //this.actions = const []
   });
 
   @override
@@ -39,8 +41,8 @@ class AdminScreen extends StatefulWidget {
 enum TipoPantalla { listado, detalle, nuevo, confirmar }
 
 class AdminScreenState extends State<AdminScreen> {
-  int? indexSelected;
   late int rowsPerPage;
+  late bool canSelect;
   String? _orderBy;
   List<DocumentSnapshot>? docs;
   String? globalSearch;
@@ -61,6 +63,10 @@ class AdminScreenState extends State<AdminScreen> {
     _orderBy = widget.module.orderBy;
 
     rowsPerPage = widget.module.rowsPerPage;
+    canSelect = widget.module.canSelect;
+
+    widget.module.rowsSelected = [];
+    widget.module.indexSelected = [];
 
     SharedPreferences.getInstance().then((SharedPreferences prefs) {
       String key = 'admin_columns_' + widget.module.name;
@@ -307,9 +313,9 @@ class AdminScreenState extends State<AdminScreen> {
   }
 
   getEditField(ColumnModule column) {
-    print("get edit field " + column.field);
-    print("type = ${column.type}");
-    print("detalle = $detalle");
+    //print("get edit field " + column.field);
+    //print("type = ${column.type}");
+    //print("detalle = $detalle");
     column.type.setContext(context);
 
     Widget child = column.type.getEditContent(detalle, updateData!, column, (value) {
@@ -609,6 +615,10 @@ class AdminScreenState extends State<AdminScreen> {
 
     getActions() {
       List<Widget> result = [];
+
+      if (widget.module.getScaffoldActions != null) {
+        result.addAll(widget.module.getScaffoldActions!(widget.module, context));
+      }
 
       if (widget.module.globalSearch && tipo == TipoPantalla.listado) {
         result.add(getGlobalSearch());

@@ -32,6 +32,7 @@ class FieldTypeDateTime extends FieldType {
 
   @override
   getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+    print(column.editable);
     Timestamp value = _object?.getFieldAdm(column.field, Timestamp.fromDate(DateTime.now())) ?? Timestamp.fromDate(DateTime.now());
     return DateTimePicker(
         enabled: column.editable,
@@ -39,7 +40,7 @@ class FieldTypeDateTime extends FieldType {
         type: showTime ? DateTimePickerType.dateTimeSeparate : DateTimePickerType.date,
         dateMask: 'dd/MM/yyyy',
         initialValue: value.toDate().toString(),
-        firstDate: DateTime(2020),
+        firstDate: DateTime(2000),
         lastDate: DateTime(2100),
         icon: Icon(Icons.event),
         dateLabelText: 'Fecha',
