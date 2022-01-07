@@ -48,6 +48,9 @@ class FieldTypeDate extends FieldType {
         controller: txt,
         enabled: column.editable,
         validator: (val) {
+          if (val!.isEmpty && !column.mandatory) {
+            return null;
+          }
           try {
             var tmp = new DateFormat(this.format).parse(val!);
             return null;
@@ -56,21 +59,24 @@ class FieldTypeDate extends FieldType {
           }
         },
         onSaved: (val) {
-          var tmp = new DateFormat('dd/MM/yyyy').parse(val!);
-          onChange(Timestamp.fromDate(tmp));
-        },
-      )),
-      IconButton(
-        icon: Icon(FontAwesomeIcons.calendar),
-        onPressed: () async {
-          final DateTime? picked =
-              await showDatePicker(context: context, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);
-          if (picked != null) {
-            txt.text = f.format(picked);
-            onChange(Timestamp.fromDate(picked));
+          if (!val!.isEmpty || column.mandatory) {
+            var tmp = new DateFormat('dd/MM/yyyy').parse(val!);
+            onChange(Timestamp.fromDate(tmp));
           }
         },
-      )
+      )),
+      if (column.editable)
+        IconButton(
+          icon: Icon(FontAwesomeIcons.calendar),
+          onPressed: () async {
+            final DateTime? picked =
+                await showDatePicker(context: context, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);
+            if (picked != null) {
+              txt.text = f.format(picked);
+              onChange(Timestamp.fromDate(picked));
+            }
+          },
+        )
     ]);
   }
 }

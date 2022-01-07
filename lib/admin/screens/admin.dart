@@ -307,9 +307,11 @@ class AdminScreenState extends State<AdminScreen> {
   }
 
   getEditField(ColumnModule column) {
+    /*
     print("get edit field " + column.field);
     print("type = ${column.type}");
     print("detalle = $detalle");
+    */
     column.type.setContext(context);
 
     Widget child = column.type.getEditContent(detalle, updateData!, column, (value) {
@@ -547,6 +549,10 @@ class AdminScreenState extends State<AdminScreen> {
           child: TextField(
             decoration: InputDecoration(
               suffixIcon: Icon(Icons.search, color: Theme.of(context).canvasColor),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+                borderRadius: BorderRadius.circular(6.0),
+              ),
               enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: Theme.of(context).canvasColor, width: 2.0)),
               hintText: "Buscar...",

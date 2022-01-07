@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:dashboard/admin/admin_modules.dart';
 import 'package:flutter/scheduler.dart';
@@ -12,6 +13,7 @@ class FieldTypeRef extends FieldType {
   final Function? getStream;
   final Widget? empty;
   final String? otherRef;
+  final bool search;
 
   static final DocumentReference nullValue = FirebaseFirestore.instance.doc("/values/null");
 
@@ -24,6 +26,7 @@ class FieldTypeRef extends FieldType {
       this.getQueryCollection,
       this.getStream,
       this.otherRef,
+      this.search = false,
       this.empty /* = const Text("<sin asignar>", style: TextStyle(color: Colors.red))*/});
 
   @override
@@ -115,11 +118,22 @@ class FieldTypeRef extends FieldType {
         return Text(column.label + ": Este campo no se puede editar", style: TextStyle(color: Colors.red));
       }
       return Row(children: [
-        Text(column.label),
-        SizedBox(width: 10),
         Container(
             width: 300,
-            child: DropdownButtonFormField<DocumentReference>(
+            child: DropdownSearch<DocumentReference>(
+                maxHeight: 500,
+                selectedItem: value,
+                onChanged: column.editable
+                    ? (val) {
+                        onChange(val);
+                      }
+                    : null,
+                showSearchBox: search,
+                itemAsString: (item) => preloadedData[item!.path]?.toString() ?? "-",
+                items: //getIfNullable() +
+                    preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList())
+
+            /*DropdownButtonFormField<DocumentReference>(
               value: value,
               isExpanded: true,
               items: getIfNullable() +
@@ -139,7 +153,8 @@ class FieldTypeRef extends FieldType {
                 if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
                 return null;
               },
-            ))
+            ),*/
+            )
       ]);
     } else {
       return StreamBuilder(
