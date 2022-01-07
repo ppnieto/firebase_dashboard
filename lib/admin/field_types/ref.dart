@@ -118,6 +118,8 @@ class FieldTypeRef extends FieldType {
         return Text(column.label + ": Este campo no se puede editar", style: TextStyle(color: Colors.red));
       }
       return Row(children: [
+        //Text(column.label),
+        //SizedBox(width: 10),
         Container(
             width: 300,
             child: DropdownSearch<DocumentReference>(
@@ -171,8 +173,8 @@ class FieldTypeRef extends FieldType {
             }
 
             return Row(children: [
-              Text(column.label),
-              SizedBox(width: 10),
+              //Text(column.label),
+              //SizedBox(width: 10),
               Container(
                   width: 300,
                   child: DropdownButtonFormField<DocumentReference>(
