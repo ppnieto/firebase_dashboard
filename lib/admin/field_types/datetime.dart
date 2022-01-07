@@ -33,13 +33,15 @@ class FieldTypeDateTime extends FieldType {
   @override
   getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     print(column.editable);
-    Timestamp value = _object?.getFieldAdm(column.field, Timestamp.fromDate(DateTime.now())) ?? Timestamp.fromDate(DateTime.now());
+    Timestamp? value = _object?.get(column.field);
+    //Timestamp? value = _object?.getFieldAdm(column.field, Timestamp.fromDate(DateTime.now()));
+    print(value);
     return DateTimePicker(
         enabled: column.editable,
         //locale: Locale('es'),
         type: showTime ? DateTimePickerType.dateTimeSeparate : DateTimePickerType.date,
         dateMask: 'dd/MM/yyyy',
-        initialValue: value.toDate().toString(),
+        initialValue: value?.toDate().toString() ?? null,
         firstDate: DateTime(2000),
         lastDate: DateTime(2100),
         icon: Icon(Icons.event),
@@ -47,14 +49,18 @@ class FieldTypeDateTime extends FieldType {
         timeLabelText: "Hora",
         onChanged: (val) => print(val),
         validator: (val) {
-          print(val);
+          if (column.mandatory) {
+            if (val == null || val.isEmpty) return "Campo obligatorio";
+          }
+
           return null;
         },
         onSaved: (val) {
-          print("on saved");
-          print(val);
-          DateTime tmp = showTime ? new DateFormat('yyyy-MM-dd HH:mm').parse(val!) : new DateFormat('yyyy-MM-dd').parse(val!);
-          onChange(Timestamp.fromDate(tmp));
+//          print("onSaved");
+          if (val?.isNotEmpty ?? false) {
+            DateTime tmp = DateTime.parse(val!);
+            onChange(Timestamp.fromDate(tmp));
+          }
         });
   }
 }
