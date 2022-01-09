@@ -52,7 +52,7 @@ class FieldTypeDate extends FieldType {
             return null;
           }
           try {
-            var tmp = new DateFormat(this.format).parse(val!);
+            var tmp = new DateFormat(this.format).parse(val);
             return null;
           } catch (e) {
             return "Formato incorrecto";
@@ -60,7 +60,7 @@ class FieldTypeDate extends FieldType {
         },
         onSaved: (val) {
           if (!val!.isEmpty || column.mandatory) {
-            var tmp = new DateFormat('dd/MM/yyyy').parse(val!);
+            var tmp = new DateFormat('dd/MM/yyyy').parse(val);
             onChange(Timestamp.fromDate(tmp));
           }
         },
