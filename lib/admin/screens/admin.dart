@@ -23,6 +23,7 @@ class AdminScreen extends StatefulWidget {
   final bool selectPreEdit;
   final CollectionReference? collection;
   final double minWidth;
+  final double labelWidth;
   //final List<Widget> actions;
 
   AdminScreen({
@@ -31,6 +32,7 @@ class AdminScreen extends StatefulWidget {
     this.minWidth = 200,
     this.selectPreEdit = false,
     this.collection,
+    this.labelWidth = 120,
     //this.actions = const []
   });
 
@@ -329,7 +331,7 @@ class AdminScreenState extends State<AdminScreen> {
 
     if (column.showLabelOnEdit) {
       child = Row(children: [
-        ConstrainedBox(constraints: BoxConstraints(minWidth: 120), child: Text(column.label)),
+        ConstrainedBox(constraints: BoxConstraints(minWidth: widget.labelWidth), child: Text(column.label)),
         SizedBox(width: 20),
         Expanded(child: child)
       ]);

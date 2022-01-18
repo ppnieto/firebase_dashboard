@@ -13,8 +13,8 @@ class FieldTypeNumber extends FieldType {
   getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(column.label),
-      SizedBox(width: 20),
+      //Text(column.label),
+      //SizedBox(width: 20),
       Container(
         width: 200,
         child: SpinBox(
@@ -26,24 +26,8 @@ class FieldTypeNumber extends FieldType {
             if (onChange != null) onChange(value);
           },
         ),
-      )
-/*
-      SpinnerInput(
-          middleNumberWidth: 80,
-          middleNumberPadding: EdgeInsets.all(10),
-          plusButton: column.editable
-              ? SpinnerButtonStyle(color: Colors.blue)
-              : SpinnerButtonStyle(height: 0),
-          minusButton: column.editable
-              ? SpinnerButtonStyle(color: Colors.blue)
-              : SpinnerButtonStyle(height: 0),
-          spinnerValue: value ?? 0,
-//          popupTextStyle: TextStyle(),
-          onChange: (val) {
-            print("onChange ${val}");
-            if (onChange != null) onChange(val);
-          })
-          */
+      ),
+      SizedBox.shrink()
     ]);
   }
 }

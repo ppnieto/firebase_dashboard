@@ -33,7 +33,12 @@ class FieldTypeDateTime extends FieldType {
   @override
   getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     print(column.editable);
-    Timestamp? value = _object?.get(column.field);
+    Timestamp? value;
+    if (_object?.hasFieldAdm(column.field) ?? false) {
+      value = _object?.get(column.field);
+    } else {
+      value = null;
+    }
     //Timestamp? value = _object?.getFieldAdm(column.field, Timestamp.fromDate(DateTime.now()));
     print(value);
     return DateTimePicker(

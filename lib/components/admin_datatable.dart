@@ -126,6 +126,7 @@ class MyDataTableSource extends DataTableSource {
                 ? [
                     DataCell(
                       Row(
+                          mainAxisSize: MainAxisSize.max,
                           children: (module.getActions == null ? <Widget>[] : module.getActions!(_object, context)) +
                               (module.canRemove
                                   ? [

@@ -16,9 +16,7 @@ class FieldTypeBoolean extends FieldType {
 
     {
       return CheckboxListTile(
-          title: Text(
-            column.label,
-          ),
+          //title: Text(column.label),
           value: value ?? false,
           onChanged: (val) {
             if (onChange != null) onChange(val);
