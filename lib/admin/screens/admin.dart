@@ -14,7 +14,7 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweetsheet/sweetsheet.dart';
 import 'package:excel/excel.dart';
-import 'dart:html' as html; // or package:universal_html/prefer_universal/html.dart
+import 'package:universal_html/html.dart' as html;
 //import 'package:data_table_2/data_table_2.dart';
 
 class AdminScreen extends StatefulWidget {
@@ -27,6 +27,7 @@ class AdminScreen extends StatefulWidget {
   //final List<Widget> actions;
 
   AdminScreen({
+    Key? key,
     required this.module,
     this.showScaffoldBack = false,
     this.minWidth = 200,
@@ -34,7 +35,7 @@ class AdminScreen extends StatefulWidget {
     this.collection,
     this.labelWidth = 120,
     //this.actions = const []
-  });
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => AdminScreenState();
@@ -322,22 +323,24 @@ class AdminScreenState extends State<AdminScreen> {
     */
     column.type.setContext(context);
 
-    Widget child = column.type.getEditContent(detalle, updateData!, column, (value) {
+    Widget? child = column.type.getEditContent(detalle, updateData!, column, (value) {
       setState(() {
         updateData![column.field] = value;
         print("actualizamos campo ${column.field} => $value");
       });
     });
 
-    if (column.showLabelOnEdit) {
-      child = Row(children: [
-        ConstrainedBox(constraints: BoxConstraints(minWidth: widget.labelWidth), child: Text(column.label)),
-        SizedBox(width: 20),
-        Expanded(child: child)
-      ]);
-    }
-
-    return Padding(padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 5 : 20), child: child);
+    if (child != null) {
+      if (column.showLabelOnEdit) {
+        child = Row(children: [
+          ConstrainedBox(constraints: BoxConstraints(minWidth: widget.labelWidth), child: Text(column.label)),
+          SizedBox(width: 20),
+          Expanded(child: child)
+        ]);
+      }
+      return Padding(padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 5 : 20), child: child);
+    } else
+      return SizedBox.shrink();
   }
 
   showError(e) {

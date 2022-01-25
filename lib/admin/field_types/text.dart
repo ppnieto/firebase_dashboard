@@ -12,6 +12,7 @@ class FieldTypeText extends FieldType {
   final int ellipsisLength;
   final bool tooltip;
   final int maxLines;
+  final String? regExpMessage;
 
   final TextEditingController controller = TextEditingController();
 
@@ -23,6 +24,7 @@ class FieldTypeText extends FieldType {
       this.emptyNull = false,
       this.tooltip = false,
       this.maxLines = 2,
+      this.regExpMessage = "Formato incorrecto",
       this.ellipsisLength = 0,
       this.nullWidget});
 
@@ -69,7 +71,7 @@ class FieldTypeText extends FieldType {
             validator: (value) {
               if (regexp != null) {
                 if (!regexp!.hasMatch(value ?? "")) {
-                  return "Formato incorrecto";
+                  return regExpMessage;
                 }
               }
 

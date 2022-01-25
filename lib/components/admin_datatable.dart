@@ -104,7 +104,7 @@ class MyDataTableSource extends DataTableSource {
                 .map<DataCell>((column) {
               // set context
               column.type.setContext(context);
-              return DataCell(column.getListContent(_object),
+              return DataCell(column.getListContent(_object) ?? SizedBox.shrink(),
                   onTap: column.clickToDetail
                       ? () {
                           if (screen.widget.selectPreEdit && screen.widget.module.indexSelected.contains(index) == false) {

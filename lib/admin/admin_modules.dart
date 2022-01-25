@@ -23,6 +23,7 @@ export "field_types/qr.dart";
 export "field_types/rating.dart";
 export "field_types/select.dart";
 export "field_types/tags.dart";
+export "field_types/widget.dart";
 
 class Module {
   final String name;
@@ -71,7 +72,7 @@ class Module {
       this.canAdd = true,
       this.canEdit = true,
       this.canRemove = true,
-      this.canSort = false,
+      this.canSort = true,
       this.canSelect = false,
       this.onSave,
       this.onUpdated,
