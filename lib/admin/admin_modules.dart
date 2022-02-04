@@ -53,6 +53,10 @@ class Module {
   List<DocumentSnapshot> rowsSelected = [];
 
   List<ColumnModule> columns;
+  //List<ColumnModule> get listableColumns => columns.where((col) => col.listable).toList();
+
+  List<ColumnModule> showingColumns = [];
+
   Module(
       {required this.name,
       this.collection,
@@ -79,7 +83,9 @@ class Module {
       this.onRemove,
       this.validation,
       this.getActions,
-      this.getScaffoldActions});
+      this.getScaffoldActions}) {
+    this.showingColumns = this.columns;
+  }
 }
 
 class ColumnModule {
@@ -90,11 +96,13 @@ class ColumnModule {
   bool showOnEdit;
   bool showOnNew;
   bool listable;
+  bool excellable;
   bool clickToDetail;
   bool filter;
   bool mandatory;
   ColumnSize size;
   bool showLabelOnEdit;
+  bool canSort;
 
   ColumnModule({
     required this.label,
@@ -109,6 +117,8 @@ class ColumnModule {
     this.showLabelOnEdit = true,
     this.size = ColumnSize.M,
     this.showOnNew = true,
+    this.excellable = true,
+    this.canSort = true,
   });
 
   getListContent(DocumentSnapshot _object) => type.getListContent(_object, this);

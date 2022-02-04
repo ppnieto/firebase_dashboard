@@ -89,9 +89,16 @@ class AdminScreenState extends State<AdminScreen> {
           columnasSeleccionadas[col.field] = true;
         }
       }
+      onUpdateColumnasSeleccionadas();
     });
 
     preloadReferences();
+  }
+
+  void onUpdateColumnasSeleccionadas() {
+    widget.module.showingColumns = widget.module.columns
+        .where((col) => col.listable && columnasSeleccionadas.containsKey(col.field) && columnasSeleccionadas[col.field]!)
+        .toList();
   }
 
   Future<void> preloadReferences() async {
@@ -171,38 +178,11 @@ class AdminScreenState extends State<AdminScreen> {
         }
 
         if (widget.module.canSort && sortColumnIndex != null) {
-          var column = widget.module.columns[sortColumnIndex!];
+          var column = widget.module.showingColumns[sortColumnIndex!];
+          //print("ordenamos por columna " + column.label);
           this.docs?.sort((a, b) {
-            var varA = a.getFieldAdm(column.field, '');
-            var varB = b.getFieldAdm(column.field, '');
-
-            if (varA is DocumentReference) {
-              varA = column.type.preloadedData[varA.path];
-            }
-            if (varB is DocumentReference) {
-              varB = column.type.preloadedData[varB.path];
-            }
-
-            // ñapa para los campos fecha sin valor
-            if (varA is Timestamp && varB is String) {
-              varB = Timestamp(0, 0);
-            }
-            if (varB is Timestamp && varA is String) {
-              varA = Timestamp(0, 0);
-            }
-
-            if (varA is num && varB == null || varB == "") {
-              varB = 0;
-            }
-            if (varB is num && varA == null || varA == "") {
-              varA = 0;
-            }
-
-            if (varA is List) varA = varA.toString();
-            if (varB is List) varB = varB.toString();
-
-            if (varA == null) varA = "";
-            if (varB == null) varB = "";
+            var varA = column.type.getCompareValue(a, column);
+            var varB = column.type.getCompareValue(b, column);
 
             //print("$varA === $varB");
 
@@ -531,14 +511,14 @@ class AdminScreenState extends State<AdminScreen> {
                     confirmText: Text('Aceptar'),
                     cancelText: Text('Cancelar'),
                     title: Text("Seleccione las columnas para mostrar"),
-                    //items: ['uno', 'dos'],
-                    //initialValue: 'uno',
                     onConfirm: (values) {
                       setState(() {
                         columnasSeleccionadas.clear();
                         for (var value in values) {
                           columnasSeleccionadas[value] = true;
                         }
+
+                        onUpdateColumnasSeleccionadas();
 
                         SharedPreferences.getInstance().then((SharedPreferences prefs) {
                           String key = 'admin_columns_' + widget.module.name;
@@ -579,7 +559,7 @@ class AdminScreenState extends State<AdminScreen> {
           ),
         );
 
-    void exportExcel() {
+    void exportExcel() async {
       var excelFile = Excel.createExcel();
       String? sheetObjectName = excelFile.getDefaultSheet();
       Sheet sheetObject = excelFile[sheetObjectName!];
@@ -588,7 +568,7 @@ class AdminScreenState extends State<AdminScreen> {
         // cabecera
         List<String> row = [];
         for (var column in widget.module.columns) {
-          if (column.listable) {
+          if (column.listable && column.excellable) {
             row.add(column.label);
           }
         }
@@ -598,8 +578,8 @@ class AdminScreenState extends State<AdminScreen> {
         for (var doc in docs!) {
           row = [];
           for (var column in widget.module.columns) {
-            if (column.listable) {
-              row.add(column.type.getStringContent(doc, column));
+            if (column.listable && column.excellable) {
+              row.add(await column.type.getStringContent(doc, column));
             }
           }
           sheetObject.appendRow(row);

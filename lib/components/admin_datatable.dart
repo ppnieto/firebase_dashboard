@@ -30,15 +30,10 @@ class _AdminDataTableState extends State<AdminDataTable> {
         minWidth: widget.adminScreen.widget.minWidth,
         lmRatio: 1.8,
         autoRowsToHeight: true,
-        columns: parent.module.columns
-                .where((element) =>
-                    element.listable &&
-                    widget.adminScreen.columnasSeleccionadas.containsKey(element.field) &&
-                    widget.adminScreen.columnasSeleccionadas[element.field]!)
-                .map((column) {
+        columns: parent.module.showingColumns.map((column) {
               return DataColumn2(
                 onSort: (int column, bool ascending) {
-                  if (parent.module.canSort) {
+                  if (parent.module.canSort && parent.module.showingColumns[column].canSort) {
                     widget.adminScreen.setState(() {
                       widget.adminScreen.sortAscending = ascending;
                       widget.adminScreen.sortColumnIndex = column;

@@ -38,7 +38,7 @@ class FieldTypeRef extends FieldType {
   }
 
   @override
-  String getStringContent(DocumentSnapshot _object, ColumnModule column) {
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
     var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : null;
     if (preloadedData.isNotEmpty && _data != null) {
       if (preloadedData.containsKey(_data.path)) {
@@ -239,5 +239,17 @@ class FieldTypeRef extends FieldType {
             ),
           );
         });
+  }
+
+  @override
+  getCompareValue(DocumentSnapshot _object, ColumnModule column) {
+    var res;
+    if (_object.hasFieldAdm(column.field)) {
+      res = _object.get(column.field);
+      res = preloadedData[res.path];
+    } else {
+      res = "";
+    }
+    return res;
   }
 }

@@ -13,7 +13,7 @@ class FieldTypeDateTime extends FieldType {
   FieldTypeDateTime({this.showTime = true, this.format = "dd/MM/yyyy HH:mm"});
 
   @override
-  String getStringContent(DocumentSnapshot _object, ColumnModule column) {
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
     final f = new DateFormat(this.format);
     if (_object.hasFieldAdm(column.field)) {
       return f.format(_object.get(column.field).toDate());
@@ -67,5 +67,16 @@ class FieldTypeDateTime extends FieldType {
             onChange(Timestamp.fromDate(tmp));
           }
         });
+  }
+
+  @override
+  getCompareValue(DocumentSnapshot _object, ColumnModule column) {
+    var res;
+    if (_object.hasFieldAdm(column.field)) {
+      res = _object.get(column.field);
+    } else {
+      res = Timestamp(0, 0);
+    }
+    return res;
   }
 }
