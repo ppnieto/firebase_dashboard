@@ -13,7 +13,7 @@ class FieldTypeSelect extends FieldType {
   FieldTypeSelect({required this.options, this.unselected, this.initialValue, this.validate, this.frozenValue});
 
   @override
-  String getStringContent(DocumentSnapshot _object, ColumnModule column) {
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
     if (_object.hasFieldAdm(column.field)) {
       String key = _object.get(column.field);
       if (this.options.containsKey(key)) {

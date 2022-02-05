@@ -13,6 +13,8 @@ class FieldTypeNumber extends FieldType {
   getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      //Text(column.label),
+      //SizedBox(width: 20),
       Container(
         width: 200,
         child: SpinBox(
@@ -25,7 +27,8 @@ class FieldTypeNumber extends FieldType {
             onChange(value);
           },
         ),
-      )
+      ),
+      SizedBox.shrink()
     ]);
   }
 }

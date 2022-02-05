@@ -9,7 +9,7 @@ class FieldTypeDate extends FieldType {
   FieldTypeDate({this.format = "dd/MM/yyyy"});
 
   @override
-  String getStringContent(DocumentSnapshot _object, ColumnModule column) {
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
     final f = new DateFormat(this.format);
     if (_object.hasFieldAdm(column.field)) {
       return f.format(_object.get(column.field).toDate());
@@ -48,8 +48,11 @@ class FieldTypeDate extends FieldType {
         controller: txt,
         enabled: column.editable,
         validator: (val) {
+          if (val!.isEmpty && !column.mandatory) {
+            return null;
+          }
           try {
-            var tmp = new DateFormat(this.format).parse(val!);
+            var tmp = new DateFormat(this.format).parse(val);
             return null;
           } catch (e) {
             return "Formato incorrecto";
@@ -76,7 +79,19 @@ class FieldTypeDate extends FieldType {
             onChange(Timestamp.fromDate(picked));
           }
         },
-      )
+      ),
+      if (column.editable)
+        IconButton(
+          icon: Icon(FontAwesomeIcons.calendar),
+          onPressed: () async {
+            final DateTime? picked =
+                await showDatePicker(context: context, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);
+            if (picked != null) {
+              txt.text = f.format(picked);
+              onChange(Timestamp.fromDate(picked));
+            }
+          },
+        )
     ]);
   }
 }

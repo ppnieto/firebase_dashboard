@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:dashboard/admin/admin_modules.dart';
+import 'package:dashboard/components/admin_datatable.dart';
+import 'package:dashboard/components/syncfusion_datatable.dart';
 import 'package:dashboard/dashboard.dart';
-import 'package:data_table_2/data_table_2.dart';
-import 'package:data_table_2/paginated_data_table_2.dart';
+//import 'package:data_table_2/paginated_data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -13,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweetsheet/sweetsheet.dart';
 import 'package:excel/excel.dart';
 import 'package:universal_html/html.dart' as html;
+//import 'package:data_table_2/data_table_2.dart';
 
 class AdminScreen extends StatefulWidget {
   final Module module;
@@ -20,14 +22,19 @@ class AdminScreen extends StatefulWidget {
   final bool selectPreEdit;
   final CollectionReference? collection;
   final double minWidth;
+  final double labelWidth;
+  //final List<Widget> actions;
 
   AdminScreen({
+    Key? key,
     required this.module,
     this.showScaffoldBack = false,
     this.minWidth = 200,
     this.selectPreEdit = false,
     this.collection,
-  });
+    this.labelWidth = 120,
+    //this.actions = const []
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => AdminScreenState();
@@ -36,11 +43,8 @@ class AdminScreen extends StatefulWidget {
 enum TipoPantalla { listado, detalle, nuevo, confirmar }
 
 class AdminScreenState extends State<AdminScreen> {
-  // ignore: non_constant_identifier_names
-  static bool USE_DATA_TABLE_V2 = true;
-
-  int? indexSelected;
   late int rowsPerPage;
+  late bool canSelect;
   String? _orderBy;
   List<DocumentSnapshot>? docs;
   String? globalSearch;
@@ -50,10 +54,9 @@ class AdminScreenState extends State<AdminScreen> {
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic> filtro = {};
   final scrollController = ScrollController();
-  late Map<String, bool> columnasSeleccionadas = {};
-
   bool sortAscending = true;
   int? sortColumnIndex;
+  late Map<String, bool> columnasSeleccionadas = {};
 
   @override
   void initState() {
@@ -62,6 +65,10 @@ class AdminScreenState extends State<AdminScreen> {
     _orderBy = widget.module.orderBy;
 
     rowsPerPage = widget.module.rowsPerPage;
+    canSelect = widget.module.canSelect;
+
+    widget.module.rowsSelected = [];
+    widget.module.indexSelected = [];
 
     SharedPreferences.getInstance().then((SharedPreferences prefs) {
       String key = 'admin_columns_' + widget.module.name;
@@ -81,9 +88,16 @@ class AdminScreenState extends State<AdminScreen> {
           columnasSeleccionadas[col.field] = true;
         }
       }
+      onUpdateColumnasSeleccionadas();
     });
 
     preloadReferences();
+  }
+
+  void onUpdateColumnasSeleccionadas() {
+    widget.module.showingColumns = widget.module.columns
+        .where((col) => col.listable && columnasSeleccionadas.containsKey(col.field) && columnasSeleccionadas[col.field]!)
+        .toList();
   }
 
   Future<void> preloadReferences() async {
@@ -119,7 +133,7 @@ class AdminScreenState extends State<AdminScreen> {
         if (doc.hasFieldAdm(column.field)) {
           String value = column.getStringContent(doc);
           bool encontrado = value.toLowerCase().contains(this.globalSearch!.toLowerCase());
-          print("$value contains ${this.globalSearch} ? $encontrado");
+          //print("$value contains ${this.globalSearch} ? $encontrado");
           if (encontrado) {
             result.add(doc);
             break;
@@ -163,38 +177,11 @@ class AdminScreenState extends State<AdminScreen> {
         }
 
         if (widget.module.canSort && sortColumnIndex != null) {
-          var column = widget.module.columns[sortColumnIndex!];
+          var column = widget.module.showingColumns[sortColumnIndex!];
+          //print("ordenamos por columna " + column.label);
           this.docs?.sort((a, b) {
-            var varA = a.getFieldAdm(column.field, '');
-            var varB = b.getFieldAdm(column.field, '');
-
-            if (varA is DocumentReference) {
-              varA = column.type.preloadedData[varA.path];
-            }
-            if (varB is DocumentReference) {
-              varB = column.type.preloadedData[varB.path];
-            }
-
-            // ñapa para los campos fecha sin valor
-            if (varA is Timestamp && varB is String) {
-              varB = Timestamp(0, 0);
-            }
-            if (varB is Timestamp && varA is String) {
-              varA = Timestamp(0, 0);
-            }
-
-            if (varA is num && varB == null || varB == "") {
-              varB = 0;
-            }
-            if (varB is num && varA == null || varA == "") {
-              varA = 0;
-            }
-
-            if (varA is List) varA = varA.toString();
-            if (varB is List) varB = varB.toString();
-
-            if (varA == null) varA = "";
-            if (varB == null) varB = "";
+            var varA = column.type.getCompareValue(a, column);
+            var varB = column.type.getCompareValue(b, column);
 
             //print("$varA === $varB");
 
@@ -202,6 +189,23 @@ class AdminScreenState extends State<AdminScreen> {
           });
         }
 
+        if (1 == 1) {
+          return AdminDataTable(adminScreen: this);
+        } else {
+          return SyncfusionDataTable(
+            columns: widget.module.columns,
+            docs: docs!,
+            onTap: (index) {
+              setState(() {
+                detalle = docs![index];
+                updateData = detalle?.data() as Map<String, dynamic>?;
+                tipo = TipoPantalla.detalle;
+              });
+            },
+          );
+        }
+
+        /*
         if (USE_DATA_TABLE_V2) {
           return PaginatedDataTable2(
             onPageChanged: (page) {
@@ -286,28 +290,37 @@ class AdminScreenState extends State<AdminScreen> {
             ],
           );
         }
+        */
       },
     );
   }
 
   getEditField(ColumnModule column) {
+    /*
+    print("get edit field " + column.field);
+    print("type = ${column.type}");
+    print("detalle = $detalle");
+    */
     column.type.setContext(context);
-    Widget child = column.getEditContent(detalle, updateData!, column, (value) {
+
+    Widget? child = column.type.getEditContent(detalle, updateData!, column, (value) {
       setState(() {
         updateData![column.field] = value;
         print("actualizamos campo ${column.field} => $value");
       });
     });
 
-    if (column.showLabelOnEdit) {
-      child = Row(children: [
-        ConstrainedBox(constraints: BoxConstraints(minWidth: 120), child: Text(column.label)),
-        SizedBox(width: 20),
-        Expanded(child: child)
-      ]);
-    }
-
-    return Padding(padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 5 : 20), child: child);
+    if (child != null) {
+      if (column.showLabelOnEdit) {
+        child = Row(children: [
+          ConstrainedBox(constraints: BoxConstraints(minWidth: widget.labelWidth), child: Text(column.label)),
+          SizedBox(width: 20),
+          Expanded(child: child)
+        ]);
+      }
+      return Padding(padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 5 : 20), child: child);
+    } else
+      return SizedBox.shrink();
   }
 
   showError(e) {
@@ -498,14 +511,14 @@ class AdminScreenState extends State<AdminScreen> {
                     confirmText: Text('Aceptar'),
                     cancelText: Text('Cancelar'),
                     title: Text("Seleccione las columnas para mostrar"),
-                    //items: ['uno', 'dos'],
-                    //initialValue: 'uno',
                     onConfirm: (values) {
                       setState(() {
                         columnasSeleccionadas.clear();
                         for (var value in values) {
                           columnasSeleccionadas[value] = true;
                         }
+
+                        onUpdateColumnasSeleccionadas();
 
                         SharedPreferences.getInstance().then((SharedPreferences prefs) {
                           String key = 'admin_columns_' + widget.module.name;
@@ -527,6 +540,10 @@ class AdminScreenState extends State<AdminScreen> {
           child: TextField(
             decoration: InputDecoration(
               suffixIcon: Icon(Icons.search, color: Theme.of(context).canvasColor),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+                borderRadius: BorderRadius.circular(6.0),
+              ),
               enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: Theme.of(context).canvasColor, width: 2.0)),
               hintText: "Buscar...",
@@ -542,7 +559,7 @@ class AdminScreenState extends State<AdminScreen> {
           ),
         );
 
-    void exportExcel() {
+    void exportExcel() async {
       var excelFile = Excel.createExcel();
       String? sheetObjectName = excelFile.getDefaultSheet();
       Sheet sheetObject = excelFile[sheetObjectName!];
@@ -551,7 +568,7 @@ class AdminScreenState extends State<AdminScreen> {
         // cabecera
         List<String> row = [];
         for (var column in widget.module.columns) {
-          if (column.listable) {
+          if (column.listable && column.excellable) {
             row.add(column.label);
           }
         }
@@ -561,8 +578,8 @@ class AdminScreenState extends State<AdminScreen> {
         for (var doc in docs!) {
           row = [];
           for (var column in widget.module.columns) {
-            if (column.listable) {
-              row.add(column.type.getStringContent(doc, column));
+            if (column.listable && column.excellable) {
+              row.add(await column.type.getStringContent(doc, column));
             }
           }
           sheetObject.appendRow(row);
@@ -589,6 +606,10 @@ class AdminScreenState extends State<AdminScreen> {
 
     getActions() {
       List<Widget> result = [];
+
+      if (widget.module.getScaffoldActions != null) {
+        result.addAll(widget.module.getScaffoldActions!(widget.module, context));
+      }
 
       if (widget.module.globalSearch && tipo == TipoPantalla.listado) {
         result.add(getGlobalSearch());
@@ -704,7 +725,7 @@ doBorrar(BuildContext context, DocumentReference ref, Function postDelete) {
     ),
   );
 }
-
+/*
 class MyDataTableSource extends DataTableSource {
   List<DocumentSnapshot> docs;
   BuildContext context;
@@ -790,3 +811,4 @@ class MyDataTableSource extends DataTableSource {
   @override
   int get selectedRowCount => 0;
 }
+*/

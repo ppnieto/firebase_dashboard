@@ -10,22 +10,28 @@ class FieldTypeImageURL extends FieldType {
   final double width;
   final double height;
   bool allowUpload;
+  bool allowURL;
   String storePath;
   TextEditingController textController = TextEditingController();
+  TextEditingController pathController = TextEditingController();
 
-  FieldTypeImageURL({required this.width, required this.height, this.allowUpload = false, required this.storePath});
+  FieldTypeImageURL({required this.width, required this.height, this.allowURL = true, this.allowUpload = false, required this.storePath});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2.0),
-        child: Image.network(
-          _object[column.field].toString(),
-          width: this.width,
-          height: this.height,
-        ),
-      );
+      var value = _object.get(column.field);
+      if (value is Map) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2.0),
+          child: Image.network(
+            _object[column.field]['url'],
+            width: this.width,
+            height: this.height,
+          ),
+        );
+      } else
+        return Text("Error");
     } else {
       return Text("<No hay imagen>", style: TextStyle(color: Colors.red));
     }
@@ -34,7 +40,9 @@ class FieldTypeImageURL extends FieldType {
   @override
   getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
-    textController.text = value ?? "";
+    if (value is Map) {
+      textController.text = value['url'] ?? "";
+    }
     return Row(
       children: [
         Expanded(
@@ -43,31 +51,26 @@ class FieldTypeImageURL extends FieldType {
                 decoration: InputDecoration(
                   labelText: column.label,
                 ),
-                /*
-                validator: (value) {
-                  return onValidate != null ? onValidate(value) : null;
-                },
-                */
+                enabled: this.allowURL,
                 onSaved: (val) {
-                  if (onChange != null) onChange(val);
+                  onChange({'url': val, 'path': pathController.text});
                 })),
-        allowUpload
-            ? SizedBox(
-                width: 20,
-              )
-            : SizedBox.shrink(),
-        allowUpload
-            ? IconButton(
-                icon: Icon(Icons.upload_file),
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return _UploadDialog(parent: this, url: value.toString());
-                      });
-                },
-              )
-            : SizedBox.shrink()
+        //if (allowUpload) Expanded(child: TextFormField(controller: pathController)),
+        if (allowUpload)
+          SizedBox(
+            width: 20,
+          ),
+        if (allowUpload)
+          IconButton(
+            icon: Icon(Icons.upload_file),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return _UploadDialog(parent: this, url: value.toString());
+                  });
+            },
+          )
       ],
     );
   }
@@ -115,6 +118,7 @@ class __UploadDialogState extends State<_UploadDialog> {
           String downloadURL = await task.ref.getDownloadURL();
           print("url = " + downloadURL);
           widget.parent.textController.text = downloadURL;
+          widget.parent.pathController.text = fileName;
           setState(() {
             this.url = downloadURL;
           });

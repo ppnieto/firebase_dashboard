@@ -26,6 +26,8 @@ export "field_types/select.dart";
 export 'field_types/multi_select.dart';
 
 export "package:dashboard/theme.dart";
+export "field_types/tags.dart";
+export "field_types/widget.dart";
 
 class Module {
   final String name;
@@ -43,14 +45,22 @@ class Module {
   final bool globalSearch;
   final Future<String?> Function(bool isNew, Map<String, dynamic> updateData)? validation;
   final int rowsPerPage;
+  final bool canSelect;
   final bool canAdd;
   final bool canEdit;
   final bool canRemove;
   final bool canSort;
   final bool exportExcel;
   final List<Widget> Function(DocumentSnapshot object, BuildContext context)? getActions;
+  final List<Widget> Function(Module module, BuildContext context)? getScaffoldActions;
+  List<int> indexSelected = [];
+  List<DocumentSnapshot> rowsSelected = [];
 
   List<ColumnModule> columns;
+  //List<ColumnModule> get listableColumns => columns.where((col) => col.listable).toList();
+
+  List<ColumnModule> showingColumns = [];
+
   Module(
       {required this.name,
       this.collection,
@@ -70,12 +80,16 @@ class Module {
       this.canAdd = true,
       this.canEdit = true,
       this.canRemove = true,
-      this.canSort = false,
+      this.canSort = true,
+      this.canSelect = false,
       this.onSave,
       this.onUpdated,
       this.onRemove,
       this.validation,
-      this.getActions});
+      this.getActions,
+      this.getScaffoldActions}) {
+    this.showingColumns = this.columns;
+  }
 }
 
 class ColumnModule {
@@ -86,11 +100,13 @@ class ColumnModule {
   bool showOnEdit;
   bool showOnNew;
   bool listable;
+  bool excellable;
   bool clickToDetail;
   bool filter;
   bool mandatory;
   ColumnSize size;
   bool showLabelOnEdit;
+  bool canSort;
 
   ColumnModule({
     required this.label,
@@ -105,6 +121,8 @@ class ColumnModule {
     this.showLabelOnEdit = true,
     this.size = ColumnSize.M,
     this.showOnNew = true,
+    this.excellable = true,
+    this.canSort = true,
   });
 
   getListContent(DocumentSnapshot _object) => type.getListContent(_object, this);

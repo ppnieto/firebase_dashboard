@@ -22,7 +22,7 @@ abstract class FieldType {
     return true;
   }
 
-  String getStringContent(DocumentSnapshot _object, ColumnModule column) {
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
     return _object.getFieldAdm(column.field, "-").toString();
   }
 
@@ -35,6 +35,16 @@ abstract class FieldType {
 
   getFilterContent(value, ColumnModule column, Function onFilter) {
     return Text("No implementado para tipo " + this.toString());
+  }
+
+  getCompareValue(DocumentSnapshot _object, ColumnModule column) {
+    var res;
+    if (_object.hasFieldAdm(column.field)) {
+      res = _object.get(column.field);
+    } else {
+      res = "";
+    }
+    return res;
   }
 }
 

@@ -4,10 +4,19 @@ import 'package:dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeBoolean extends FieldType {
+  final bool editOnList;
+
+  FieldTypeBoolean({this.editOnList = false});
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     bool value = _object.getFieldAdm(column.field, false);
-    return Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank);
+    return IconButton(
+      icon: Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank),
+      onPressed: () {
+        _object.reference.update({column.field: !value}).then((value) => print("updated!!!"));
+      },
+    );
+    //return Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank);
   }
 
   @override
@@ -16,11 +25,12 @@ class FieldTypeBoolean extends FieldType {
 
     {
       return CheckboxListTile(
-          //title: Text(column.label),
           value: value ?? false,
-          onChanged: (val) {
-            if (onChange != null) onChange(val);
-          });
+          onChanged: column.editable
+              ? (val) {
+                  if (onChange != null) onChange(val);
+                }
+              : null);
     }
   }
 

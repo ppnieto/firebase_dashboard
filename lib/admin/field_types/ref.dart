@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:dashboard/admin/admin_modules.dart';
 import 'package:flutter/scheduler.dart';
@@ -12,6 +13,7 @@ class FieldTypeRef extends FieldType {
   final Function? getStream;
   final Widget? empty;
   final String? otherRef;
+  final bool search;
 
   static final DocumentReference nullValue = FirebaseFirestore.instance.doc("/values/null");
 
@@ -24,6 +26,7 @@ class FieldTypeRef extends FieldType {
       this.getQueryCollection,
       this.getStream,
       this.otherRef,
+      this.search = false,
       this.empty /* = const Text("<sin asignar>", style: TextStyle(color: Colors.red))*/});
 
   @override
@@ -35,7 +38,7 @@ class FieldTypeRef extends FieldType {
   }
 
   @override
-  String getStringContent(DocumentSnapshot _object, ColumnModule column) {
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
     var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : null;
     if (preloadedData.isNotEmpty && _data != null) {
       if (preloadedData.containsKey(_data.path)) {
@@ -119,7 +122,24 @@ class FieldTypeRef extends FieldType {
         //SizedBox(width: 10),
         Container(
             width: 300,
-            child: DropdownButtonFormField<DocumentReference>(
+            child: Theme(
+              data: ThemeData(textTheme: TextTheme(subtitle1: TextStyle(color: Colors.red))),
+              child: DropdownSearch<DocumentReference>(
+                  maxHeight: 500,
+                  selectedItem: value,
+                  onChanged: column.editable
+                      ? (val) {
+                          onChange(val);
+                        }
+                      : null,
+                  showSearchBox: search,
+                  popupBackgroundColor: Colors.grey,
+                  itemAsString: (item) => preloadedData[item!.path]?.toString() ?? "-",
+                  items: //getIfNullable() +
+                      preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList()),
+            )
+
+            /*DropdownButtonFormField<DocumentReference>(
               value: value,
               isExpanded: true,
               items: getIfNullable() +
@@ -139,7 +159,8 @@ class FieldTypeRef extends FieldType {
                 if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
                 return null;
               },
-            ))
+            ),*/
+            )
       ]);
     } else {
       return StreamBuilder(
@@ -156,8 +177,8 @@ class FieldTypeRef extends FieldType {
             }
 
             return Row(children: [
-              Text(column.label),
-              SizedBox(width: 10),
+              //Text(column.label),
+              //SizedBox(width: 10),
               Container(
                   width: 300,
                   child: DropdownButtonFormField<DocumentReference>(
@@ -222,5 +243,17 @@ class FieldTypeRef extends FieldType {
             ),
           );
         });
+  }
+
+  @override
+  getCompareValue(DocumentSnapshot _object, ColumnModule column) {
+    var res;
+    if (_object.hasFieldAdm(column.field)) {
+      res = _object.get(column.field);
+      res = preloadedData[res.path];
+    } else {
+      res = "";
+    }
+    return res;
   }
 }

@@ -58,6 +58,7 @@ class FieldTypeGallery extends FieldType {
                         if (_textFieldController.text.isNotEmpty) {
                           this.urls.add(_textFieldController.text);
                         }
+
                         Navigator.of(context).pop();
                       },
                       child: Text("Aceptar"))
@@ -80,7 +81,8 @@ class FieldTypeGallery extends FieldType {
       name: column.label,
       addImageURL: this.addImageURL,
       onChange: () {
-        onChange(this.urls);
+        // removing duplicates
+        onChange(this.urls.toSet().toList());
       },
     );
   }
@@ -116,7 +118,6 @@ class __GalleryState extends State<_Gallery> {
                         icon: Icon(Icons.add),
                         onPressed: () async {
                           await widget.addImageURL();
-                          print("ok");
                           // recargamos imagenes
                           widget.onChange();
                           setState(() {});

@@ -39,7 +39,6 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
   Map<int, int> indexes = {};
   int initialIndex = 0;
   bool isMenu = true;
-//  String subtitle = "";
 
   @override
   void initState() {
@@ -119,7 +118,6 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
         automaticallyImplyLeading: MediaQuery.of(context).size.width < responsiveDashboardWidth ? true : false,
         title: Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
           Container(
-            //margin: EdgeInsets.only(left: 32),
             child: Text(
               widget.title, // + " - " + subtitle,
               style: TextStyle(

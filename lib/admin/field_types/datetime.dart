@@ -14,7 +14,7 @@ class FieldTypeDateTime extends FieldType {
   FieldTypeDateTime({this.showTime = true, this.format = "dd/MM/yyyy HH:mm", this.themeData});
 
   @override
-  String getStringContent(DocumentSnapshot _object, ColumnModule column) {
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
     final f = new DateFormat(this.format);
     if (_object.hasFieldAdm(column.field)) {
       return f.format(_object.get(column.field).toDate());
@@ -33,33 +33,56 @@ class FieldTypeDateTime extends FieldType {
 
   @override
   getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
-    var value = values[column.field];
+    print(column.editable);
+    Timestamp? value;
+    if (_object?.hasFieldAdm(column.field) ?? false) {
+      value = _object?.get(column.field);
+    } else {
+      value = null;
+    }
+    //Timestamp? value = _object?.getFieldAdm(column.field, Timestamp.fromDate(DateTime.now()));
+    print(value);
     var dtp = DateTimePicker(
         enabled: column.editable,
         //locale: Locale('es'),
         type: showTime ? DateTimePickerType.dateTimeSeparate : DateTimePickerType.date,
         dateMask: 'dd/MM/yyyy',
-        initialValue: value == null ? DateTime.now().toString() : value.toDate().toString(),
-        firstDate: DateTime(2020),
+        initialValue: value?.toDate().toString() ?? null,
+        firstDate: DateTime(2000),
         lastDate: DateTime(2100),
         icon: Icon(Icons.event),
         dateLabelText: 'Fecha',
         timeLabelText: "Hora",
         onChanged: (val) => print(val),
         validator: (val) {
-          print(val);
+          if (column.mandatory) {
+            if (val == null || val.isEmpty) return "Campo obligatorio";
+          }
+
           return null;
         },
         onSaved: (val) {
-          print("on saved");
-          print(val);
-          DateTime tmp = showTime ? new DateFormat('yyyy-MM-dd HH:mm').parse(val!) : new DateFormat('yyyy-MM-dd').parse(val!);
-          onChange(Timestamp.fromDate(tmp));
+//          print("onSaved");
+          if (val?.isNotEmpty ?? false) {
+            DateTime tmp = DateTime.parse(val!);
+            onChange(Timestamp.fromDate(tmp));
+          }
         });
     if (themeData == null)
       return dtp;
     else {
       return Theme(data: themeData!, child: dtp);
     }
+  }
+
+  @override
+  getCompareValue(DocumentSnapshot _object, ColumnModule column) {
+    var res;
+    if (_object.hasFieldAdm(column.field)) {
+      res = _object.get(column.field);
+    } else {
+      res = Timestamp(0, 0);
+    }
+    return res;
   }
 }
