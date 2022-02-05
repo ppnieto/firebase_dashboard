@@ -9,8 +9,9 @@ import 'package:intl/intl.dart';
 class FieldTypeDateTime extends FieldType {
   final bool showTime;
   final String format;
+  final ThemeData? themeData;
 
-  FieldTypeDateTime({this.showTime = true, this.format = "dd/MM/yyyy HH:mm"});
+  FieldTypeDateTime({this.showTime = true, this.format = "dd/MM/yyyy HH:mm", this.themeData});
 
   @override
   String getStringContent(DocumentSnapshot _object, ColumnModule column) {
@@ -31,9 +32,9 @@ class FieldTypeDateTime extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
-    return DateTimePicker(
+    var dtp = DateTimePicker(
         enabled: column.editable,
         //locale: Locale('es'),
         type: showTime ? DateTimePickerType.dateTimeSeparate : DateTimePickerType.date,
@@ -55,5 +56,10 @@ class FieldTypeDateTime extends FieldType {
           DateTime tmp = showTime ? new DateFormat('yyyy-MM-dd HH:mm').parse(val!) : new DateFormat('yyyy-MM-dd').parse(val!);
           onChange(Timestamp.fromDate(tmp));
         });
+    if (themeData == null)
+      return dtp;
+    else {
+      return Theme(data: themeData!, child: dtp);
+    }
   }
 }

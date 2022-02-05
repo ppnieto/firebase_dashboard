@@ -19,7 +19,7 @@ dependencies:
   firebase_storage: any
   firebase_auth: any
   cloud_firestore: any
-  intl: any
+  #intl: any
   uuid: any
   google_maps_flutter: any
   package_info_plus: any
@@ -32,7 +32,7 @@ dependencies:
   flutter_typeahead: ^3.2.0
   excel: any
   data_table_2:
-
+  textfield_tags:
 
 
 dev_dependencies:

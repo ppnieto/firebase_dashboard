@@ -11,14 +11,12 @@ class FieldTypeBoolean extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
 
     {
       return CheckboxListTile(
-          title: Text(
-            column.label,
-          ),
+          //title: Text(column.label),
           value: value ?? false,
           onChanged: (val) {
             if (onChange != null) onChange(val);

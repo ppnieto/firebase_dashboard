@@ -136,6 +136,7 @@ class __LoginMobileState extends State<_LoginMobile> {
                       ),
                       TextField(
                         decoration: InputDecoration(suffixIcon: Icon(Icons.person)),
+                        textInputAction: TextInputAction.next,
                         //decoration: InputDecoration(labelText: "email"),
                         controller: widget.parent.emailController,
                       ),
@@ -148,6 +149,7 @@ class __LoginMobileState extends State<_LoginMobile> {
                           obscureText: true,
                           decoration: InputDecoration(suffixIcon: Icon(Icons.lock)),
                           //decoration: InputDecoration(labelText: "contraseña"),
+                          textInputAction: TextInputAction.send,
                           controller: widget.parent.passwordController),
                       SizedBox(height: 10),
                       widget.parent.remindCredentials

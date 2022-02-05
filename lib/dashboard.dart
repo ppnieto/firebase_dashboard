@@ -1,6 +1,7 @@
 library dashboard;
 
 import 'package:dashboard/admin/admin_modules.dart';
+import 'package:dashboard/theme.dart';
 import 'package:flutter/material.dart';
 
 final int responsiveDashboardWidth = 1000;
@@ -13,6 +14,8 @@ class DashboardMainScreen extends StatefulWidget {
   final Widget? sideBar;
   final double sideBarWidth;
   final IconData? sideBarIcon;
+  final DashboardTheme theme;
+  static DashboardTheme? dashboardTheme;
 
   DashboardMainScreen(
       {required this.menus,
@@ -21,6 +24,7 @@ class DashboardMainScreen extends StatefulWidget {
       this.getRolesFunction,
       this.sideBar,
       this.sideBarWidth = 100,
+      required this.theme,
       this.sideBarIcon = Icons.view_sidebar});
 
   @override
@@ -40,6 +44,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
   @override
   void initState() {
     super.initState();
+
+    DashboardMainScreen.dashboardTheme = widget.theme;
 
     mainContents = getMainContents();
 
@@ -99,6 +105,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: widget.theme.appBar1BackgroundColor!,
         leading: MediaQuery.of(context).size.width >= responsiveDashboardWidth
             ? IconButton(
                 icon: Icon(Icons.menu),
@@ -143,11 +150,12 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
               : Card(
                   elevation: 2.0,
                   child: Container(
-                      margin: EdgeInsets.all(0),
-                      height: MediaQuery.of(context).size.height,
-                      width: 300,
-                      color: Theme.of(context).backgroundColor,
-                      child: listDrawerItems(context, false)),
+                    color: widget.theme.canvasColor,
+                    margin: EdgeInsets.all(0),
+                    height: MediaQuery.of(context).size.height,
+                    width: 300,
+                    child: listDrawerItems(context, false),
+                  ),
                 ),
           Container(
             width: (MediaQuery.of(context).size.width < responsiveDashboardWidth || !isMenu
@@ -171,7 +179,6 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
     var menus = widget.menus;
     return ListView(
         children: menus.map<Widget>((menu) {
-      //print("menu " + menu.label);
       bool hasRole = true;
 
       if (menu.role != null) {
@@ -189,16 +196,17 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
       if (menu is MenuGroup) {
         return hasRole
             ? ExpansionTile(
+                collapsedBackgroundColor: widget.theme.menuBackgroundColor,
+                backgroundColor: widget.theme.menuBackgroundColor,
                 initiallyExpanded: menu.open,
                 childrenPadding: EdgeInsets.only(left: 24),
-                iconColor: Theme.of(context).primaryColor,
-                collapsedIconColor: Theme.of(context).primaryColor,
-                title: Text(menu.label, style: TextStyle(fontSize: 18, color: Theme.of(context).primaryColor)),
-//                collapsedIconColor: Theme.of(context).secondaryHeaderColor,
-                leading: Icon(menu.iconData, color: Theme.of(context).primaryColor),
+                iconColor: widget.theme.menuTextColor,
+                collapsedIconColor: widget.theme.menuTextColor,
+                title: Text(menu.label, style: TextStyle(fontSize: 18, color: widget.theme.menuTextColor)),
+                leading: Icon(menu.iconData, color: widget.theme.menuTextColor),
                 children: menu.children!.map<Widget>((submenu) {
                   bool isSelected = tabController.index == indexes[submenu.hashCode];
-                  return submenu.build(context, isSelected, () {
+                  return submenu.build(context, isSelected, widget.theme, () {
                     tabController.animateTo(indexes[submenu.hashCode]!);
                     if (drawerStatus) Navigator.pop(context);
                   });
@@ -206,7 +214,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
             : Container();
       } else {
         return hasRole
-            ? menu.build(context, isSelected, () {
+            ? menu.build(context, isSelected, widget.theme, () {
                 print("animateTo...");
 
                 tabController.animateTo(indexes[menu.hashCode]!);

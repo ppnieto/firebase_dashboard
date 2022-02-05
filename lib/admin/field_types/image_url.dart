@@ -1,4 +1,3 @@
-//import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:dashboard/admin/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import "package:universal_html/html.dart" as html;
-import 'package:dashboard/admin/field_types/field_type_base.dart';
 
 class FieldTypeImageURL extends FieldType {
   final double width;
@@ -34,7 +32,7 @@ class FieldTypeImageURL extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
     textController.text = value ?? "";
     return Row(

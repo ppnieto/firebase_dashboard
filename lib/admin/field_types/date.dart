@@ -27,7 +27,7 @@ class FieldTypeDate extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
     final f = new DateFormat(this.format);
     TextEditingController txt = TextEditingController();
@@ -63,8 +63,14 @@ class FieldTypeDate extends FieldType {
       IconButton(
         icon: Icon(FontAwesomeIcons.calendar),
         onPressed: () async {
-          final DateTime? picked =
-              await showDatePicker(context: context, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);
+          final DateTime? picked = await showDatePicker(
+              context: context,
+              firstDate: DateTime(2020, 1),
+              lastDate: DateTime(2101),
+              initialDate: dateTime,
+              builder: (BuildContext context, Widget? child) {
+                return Theme(data: ThemeData(), child: child!);
+              });
           if (picked != null) {
             txt.text = f.format(picked);
             onChange(Timestamp.fromDate(picked));

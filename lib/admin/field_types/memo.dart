@@ -12,7 +12,7 @@ class FieldTypeMemo extends FieldType {
       listWidth != null ? Container(width: this.listWidth, child: super.getListContent(_object, column)) : super.getListContent(_object, column);
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
     return TextFormField(
         enabled: column.editable,

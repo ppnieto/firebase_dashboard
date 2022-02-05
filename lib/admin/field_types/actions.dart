@@ -8,7 +8,7 @@ class FieldTypeActions extends FieldType {
   FieldTypeActions({required this.actions});
 
   @override
-  getEditContent(DocumentSnapshot _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     return Container();
   }
 

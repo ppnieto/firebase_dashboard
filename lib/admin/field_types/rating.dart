@@ -3,28 +3,44 @@ import 'package:flutter/material.dart';
 import 'package:dashboard/admin/admin_modules.dart';
 
 class FieldTypeRating extends FieldType {
+  final bool showCount;
   final int startCount;
   final Color color;
+  final double iconSize;
 
-  FieldTypeRating({this.startCount = 5, this.color = Colors.yellow});
+  FieldTypeRating({this.startCount = 5, this.color = Colors.yellow, this.showCount = true, this.iconSize = 16});
+
+  Widget buildCount(var rating) {
+    if (this.showCount && rating != null && rating is Map && rating.containsKey('count')) {
+      return Text("(${rating['count']})");
+    } else
+      return SizedBox.shrink();
+  }
 
   Widget buildStar(int index, var rating) {
-    if (rating == null) return SizedBox.shrink();
+    double avg = 0;
+
+    if (rating != null && rating is Map && rating.containsKey('avg')) {
+      avg = rating['avg'];
+    }
     Icon icon;
-    if (index >= rating) {
+    if (index >= avg) {
       icon = new Icon(
         Icons.star_border,
-        color: Theme.of(context).buttonColor,
+        color: color,
+        size: iconSize,
       );
-    } else if (index > rating - 1 && index < rating) {
+    } else if (index > avg - 1 && index < avg) {
       icon = new Icon(
         Icons.star_half,
         color: color,
+        size: iconSize,
       );
     } else {
       icon = new Icon(
         Icons.star,
         color: color,
+        size: iconSize,
       );
     }
     return icon;
@@ -32,10 +48,13 @@ class FieldTypeRating extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    var rating = _object.get(column.field);
+    var rating = _object.getFieldAdm(column.field, 0);
+    return Row(children: List.generate(this.startCount, (index) => buildStar(index, rating)) + [buildCount(rating)]);
+  }
 
-    return Row(
-        children: List.generate(
-            this.startCount, (index) => buildStar(index, rating)));
+  @override
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+    var rating = _object?.getFieldAdm(column.field, 0) ?? 0;
+    return Row(children: List.generate(this.startCount, (index) => buildStar(index, rating)) + [buildCount(rating)]);
   }
 }
