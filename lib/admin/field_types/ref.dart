@@ -117,51 +117,65 @@ class FieldTypeRef extends FieldType {
       if (preloadedData.containsKey(value.path) == false && value != nullValue) {
         return Text(column.label + ": Este campo no se puede editar", style: TextStyle(color: Colors.red));
       }
-      return Row(children: [
-        //Text(column.label),
-        //SizedBox(width: 10),
-        Container(
-            width: 300,
-            child: Theme(
-              data: ThemeData(textTheme: TextTheme(subtitle1: TextStyle(color: Colors.red))),
-              child: DropdownSearch<DocumentReference>(
-                  maxHeight: 500,
-                  selectedItem: value,
-                  onChanged: column.editable
-                      ? (val) {
-                          onChange(val);
-                        }
-                      : null,
-                  showSearchBox: search,
-                  popupBackgroundColor: Colors.grey,
-                  itemAsString: (item) => preloadedData[item!.path]?.toString() ?? "-",
-                  items: //getIfNullable() +
-                      preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList()),
-            )
 
-            /*DropdownButtonFormField<DocumentReference>(
-              value: value,
-              isExpanded: true,
-              items: getIfNullable() +
-                  preloadedData.entries.map((entry) {
-                    return DropdownMenuItem<DocumentReference>(value: FirebaseFirestore.instance.doc(entry.key), child: Text(entry.value));
-                  }).toList(),
+      if (search)
+        return Container(
+          width: 300,
+          child: DropdownSearch<DocumentReference>(
+              maxHeight: 500,
+              selectedItem: value,
               onChanged: column.editable
                   ? (val) {
                       onChange(val);
                     }
                   : null,
-              onSaved: (val) {
-                onChange(val);
+              showSearchBox: search,
+              popupTitle: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                child: Text("Seleccione " + column.label, style: TextStyle(fontSize: 22, color: Colors.black)),
+              ),
+              popupItemBuilder: (context, item, isSelected) {
+                return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                    child: Text(
+                      preloadedData[item.path]?.toString() ?? "-",
+                      style: TextStyle(color: Colors.black),
+                    ));
               },
-              validator: (value) {
-                print("validamos campo...");
-                if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
-                return null;
-              },
-            ),*/
-            )
-      ]);
+              itemAsString: (item) => preloadedData[item!.path]?.toString() ?? "-",
+              items: //getIfNullable() +
+                  preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList()),
+        );
+      else
+        return Row(
+          children: [
+            Container(
+              width: 300,
+              child: DropdownButtonFormField<DocumentReference>(
+                value: value,
+                isExpanded: true,
+                items: getIfNullable() +
+                    preloadedData.entries.map((entry) {
+                      return DropdownMenuItem<DocumentReference>(value: FirebaseFirestore.instance.doc(entry.key), child: Text(entry.value));
+                    }).toList(),
+                onChanged: column.editable
+                    ? (val) {
+                        onChange(val);
+                      }
+                    : null,
+                onSaved: (val) {
+                  onChange(val);
+                },
+                validator: (value) {
+                  print("validamos campo...");
+                  if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
+                  return null;
+                },
+              ),
+            ),
+            SizedBox.shrink(),
+          ],
+        );
     } else {
       return StreamBuilder(
           stream: getStream == null ? getQuery().snapshots() : getStream!(),
