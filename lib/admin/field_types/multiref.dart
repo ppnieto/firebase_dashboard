@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:dashboard/admin/admin_modules.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
@@ -69,7 +70,7 @@ class FieldTypeMultiref extends FieldType {
   @override
   getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var tmp = values[column.field];
-    List<DocumentReference> value = [];
+    List<DocumentReference>? value = [];
     if (tmp is List) {
       for (var obj in tmp) {
         value.add(obj);
@@ -89,7 +90,13 @@ class FieldTypeMultiref extends FieldType {
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
 
-          return MultiSelectDialogField(
+          return MultiSelectDialogField<DocumentReference?>(
+            //selectedColor: DashboardMainScreen.dashboardTheme!.iconButtonColor,
+            /*colorator: (_) {
+              return Colors.red;
+            },
+            */
+            //unselectedColor: Colors.red,
             buttonText: Text("Seleccione " + column.label),
             title: Text("Seleccione " + column.label),
             initialValue: value,

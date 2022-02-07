@@ -9,8 +9,9 @@ import 'package:intl/intl.dart';
 class FieldTypeDateTime extends FieldType {
   final bool showTime;
   final String format;
+  final ThemeData? themeData;
 
-  FieldTypeDateTime({this.showTime = true, this.format = "dd/MM/yyyy HH:mm"});
+  FieldTypeDateTime({this.showTime = true, this.format = "dd/MM/yyyy HH:mm", this.themeData});
 
   @override
   String getSyncStringContent(DocumentSnapshot _object, ColumnModule column) {
@@ -41,7 +42,7 @@ class FieldTypeDateTime extends FieldType {
     }
     //Timestamp? value = _object?.getFieldAdm(column.field, Timestamp.fromDate(DateTime.now()));
     print(value);
-    return DateTimePicker(
+    var dtp = DateTimePicker(
         enabled: column.editable,
         //locale: Locale('es'),
         type: showTime ? DateTimePickerType.dateTimeSeparate : DateTimePickerType.date,
@@ -67,6 +68,11 @@ class FieldTypeDateTime extends FieldType {
             onChange(Timestamp.fromDate(tmp));
           }
         });
+    if (themeData == null)
+      return dtp;
+    else {
+      return Theme(data: themeData!, child: dtp);
+    }
   }
 
   @override

@@ -2,6 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ProfileButton extends StatelessWidget {
+  final Color? backgroundColor;
+
+  const ProfileButton({Key? key, this.backgroundColor}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
@@ -10,7 +14,7 @@ class ProfileButton extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Container(
             decoration: BoxDecoration(
-                color: Theme.of(context).secondaryHeaderColor,
+                color: backgroundColor ?? Theme.of(context).secondaryHeaderColor,
                 border: Border.all(
                   color: Colors.white54,
                 ),

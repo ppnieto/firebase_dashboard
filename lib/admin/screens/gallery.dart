@@ -1,4 +1,5 @@
-import 'package:universal_html/html.dart';
+import 'package:universal_html/html.dart' as html;
+
 import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
@@ -21,7 +22,7 @@ class GalleryScreenState extends State<GalleryScreen> {
   @override
   void addFile() {
     Uint8List uploadedImage;
-    FileUploadInputElement uploadInput = FileUploadInputElement();
+    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
     uploadInput.click();
 
     uploadInput.onChange.listen((e) {
@@ -29,7 +30,7 @@ class GalleryScreenState extends State<GalleryScreen> {
       final files = uploadInput.files;
       if (files != null && files.length == 1) {
         final file = files[0];
-        FileReader reader = FileReader();
+        html.FileReader reader = html.FileReader();
 
         reader.onLoadEnd.listen((e) async {
           uploadedImage = reader.result! as Uint8List;

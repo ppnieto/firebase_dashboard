@@ -21,9 +21,10 @@ class FieldTypeNumber extends FieldType {
           min: this.minValue,
           max: this.maxValue,
           step: this.step,
+          enabled: column.editable,
           value: value ?? 0,
           onChanged: (value) {
-            if (onChange != null) onChange(value);
+            onChange(value);
           },
         ),
       ),

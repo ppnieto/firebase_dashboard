@@ -7,7 +7,6 @@ import 'package:dashboard/dashboard.dart';
 //import 'package:data_table_2/paginated_data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
@@ -211,49 +210,50 @@ class AdminScreenState extends State<AdminScreen> {
         /*
         if (USE_DATA_TABLE_V2) {
           return PaginatedDataTable2(
-              onPageChanged: (page) {
-                print("onpagechanged... $page");
-                setState(() {});
-                //scrollController.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.ease);
-              },
-              sortAscending: sortAscending,
-              sortColumnIndex: sortColumnIndex,
-              showCheckboxColumn: false,
-              columnSpacing: 0.0,
-              dataRowHeight: 38,
-              minWidth: widget.minWidth,
-              lmRatio: 1.8,
-              autoRowsToHeight: true,
-              columns: widget.module.columns
-                      .where((element) =>
-                          element.listable && this.columnasSeleccionadas.containsKey(element.field) && this.columnasSeleccionadas[element.field]!)
-                      .map((column) {
-                    return DataColumn2(
-                      onSort: (int column, bool ascending) {
-                        if (widget.module.canSort) {
-                          setState(() {
-                            sortAscending = ascending;
-                            sortColumnIndex = column;
-                          });
-                        }
-                      },
-                      size: column.size,
-                      label: Text(column.label),
-                    );
-                  }).toList() +
-                  (widget.module.canRemove || widget.module.getActions != null ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)] : []),
-              source: MyDataTableSource(
-                  docs: docs!,
-                  context: context,
-                  screen: this,
-                  onTap: (index) {
-                    setState(() {
-                      detalle = docs![index];
-                      updateData = detalle?.data() as Map<String, dynamic>?;
-                      tipo = TipoPantalla.detalle;
-                    });
-                  },
-                  showFields: this.columnasSeleccionadas));
+            onPageChanged: (page) {
+              print("onpagechanged... $page");
+              setState(() {});
+              //scrollController.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.ease);
+            },
+            sortAscending: sortAscending,
+            sortColumnIndex: sortColumnIndex,
+            showCheckboxColumn: false,
+            columnSpacing: 0.0,
+            dataRowHeight: 38,
+            minWidth: widget.minWidth,
+            lmRatio: 1.8,
+            autoRowsToHeight: true,
+            columns: widget.module.columns
+                    .where((element) =>
+                        element.listable && this.columnasSeleccionadas.containsKey(element.field) && this.columnasSeleccionadas[element.field]!)
+                    .map((column) {
+                  return DataColumn2(
+                    onSort: (int column, bool ascending) {
+                      if (widget.module.canSort) {
+                        setState(() {
+                          sortAscending = ascending;
+                          sortColumnIndex = column;
+                        });
+                      }
+                    },
+                    size: column.size,
+                    label: Text(column.label),
+                  );
+                }).toList() +
+                (widget.module.canRemove || widget.module.getActions != null ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)] : []),
+            source: MyDataTableSource(
+                docs: docs!,
+                context: context,
+                screen: this,
+                onTap: (index) {
+                  setState(() {
+                    detalle = docs![index];
+                    updateData = detalle?.data() as Map<String, dynamic>?;
+                    tipo = TipoPantalla.detalle;
+                  });
+                },
+                showFields: this.columnasSeleccionadas),
+          );
         } else {
           return ListView(
             children: [
@@ -665,30 +665,36 @@ class AdminScreenState extends State<AdminScreen> {
       return result;
     }
 
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).secondaryHeaderColor,
-          title: Text(widget.module.title),
-          leading: getLeading(),
-          actions: <Widget>[] +
-              widget.module.columns.map<Widget>((ColumnModule columnModule) {
-                if (columnModule.filter && tipo == TipoPantalla.listado) {
-                  if (filtro.containsKey(columnModule.field) == false) {
-                    filtro[columnModule.field] = "";
-                  }
-                  return Row(children: [
-                    columnModule.getFilterContent(filtro[columnModule.field], (val) {
-                      setState(() {
-                        filtro[columnModule.field] = val;
-                      });
-                    })
-                  ]);
-                } else
-                  return Container();
-              }).toList() +
-              getActions(),
-        ),
-        body: content);
+    return Theme(
+      data: ThemeData.light().copyWith(
+        highlightColor: DashboardMainScreen.dashboardTheme!.iconButtonColor,
+        primaryColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor,
+      ),
+      child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+            title: Text(widget.module.title),
+            leading: getLeading(),
+            actions: <Widget>[] +
+                widget.module.columns.map<Widget>((ColumnModule columnModule) {
+                  if (columnModule.filter && tipo == TipoPantalla.listado) {
+                    if (filtro.containsKey(columnModule.field) == false) {
+                      filtro[columnModule.field] = "";
+                    }
+                    return Row(children: [
+                      columnModule.getFilterContent(filtro[columnModule.field], (val) {
+                        setState(() {
+                          filtro[columnModule.field] = val;
+                        });
+                      })
+                    ]);
+                  } else
+                    return Container();
+                }).toList() +
+                getActions(),
+          ),
+          body: content),
+    );
   }
 }
 
@@ -742,6 +748,16 @@ class MyDataTableSource extends DataTableSource {
     DocumentSnapshot _object = docs[index];
 
     return DataRow2.byIndex(
+        /*
+        color: MaterialStateProperty.resolveWith((states) {
+          print(states);
+          return states.contains(MaterialState.hovered)
+              ? Colors.blue
+              : index % 2 == 0
+                  ? Colors.red
+                  : Colors.amber;
+        }),
+        */
         selected: screen.indexSelected == index,
         index: index,
         cells: module.columns

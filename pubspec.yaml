@@ -19,7 +19,7 @@ dependencies:
   firebase_storage: any
   firebase_auth: any
   cloud_firestore: any
-  intl: any
+  #intl: any
   uuid: any
   google_maps_flutter: any
   package_info_plus: any
@@ -31,9 +31,10 @@ dependencies:
   flutter_tags: ^0.4.9+1
   flutter_typeahead: ^3.2.0
   excel: any
-  data_table_2:
+  data_table_2: any
+  textfield_tags: any
   syncfusion_flutter_datagrid: ^19.3.48
-  dropdown_search:
+  dropdown_search: any
 
 
 

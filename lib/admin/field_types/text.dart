@@ -54,6 +54,8 @@ class FieldTypeText extends FieldType {
   @override
   getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
+    value = showTextFunction == null ? value : showTextFunction!(value);
+
     controller.text = value ?? "";
     return Focus(
         onFocusChange: (hasFocus) {
