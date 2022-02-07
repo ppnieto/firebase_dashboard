@@ -22,8 +22,12 @@ abstract class FieldType {
     return true;
   }
 
-  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
+  String getSyncStringContent(DocumentSnapshot _object, ColumnModule column) {
     return _object.getFieldAdm(column.field, "-").toString();
+  }
+
+  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
+    return getSyncStringContent(_object, column);
   }
 
   Future<void> preloadData() async {}

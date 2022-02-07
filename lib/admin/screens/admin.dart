@@ -72,24 +72,26 @@ class AdminScreenState extends State<AdminScreen> {
     widget.module.indexSelected = [];
 
     SharedPreferences.getInstance().then((SharedPreferences prefs) {
-      String key = 'admin_columns_' + widget.module.name;
-      if (prefs.containsKey(key)) {
-        List<String> sel = prefs.getStringList(key)!;
-        for (var col in widget.module.columns) {
-          columnasSeleccionadas[col.field] = false;
+      try {
+        String key = 'admin_columns_' + widget.module.name;
+        if (prefs.containsKey(key)) {
+          List<String> sel = prefs.getStringList(key)!;
+          for (var col in widget.module.columns) {
+            columnasSeleccionadas[col.field] = false;
+          }
+          for (var s in sel) {
+            columnasSeleccionadas[s] = true;
+          }
+        } else {
+          for (var col in widget.module.columns) {
+            columnasSeleccionadas[col.field] = true;
+          }
         }
-        for (var s in sel) {
-          columnasSeleccionadas[s] = true;
-        }
-        String json = prefs.getString(key)!;
-        print("json = ${json}");
-        var tmp = jsonDecode(json);
-      } else {
-        for (var col in widget.module.columns) {
-          columnasSeleccionadas[col.field] = true;
-        }
+        onUpdateColumnasSeleccionadas();
+      } catch (e) {
+        print("error: ");
+        print(e);
       }
-      onUpdateColumnasSeleccionadas();
     });
 
     preloadReferences();
@@ -132,9 +134,9 @@ class AdminScreenState extends State<AdminScreen> {
     for (DocumentSnapshot doc in docs ?? []) {
       for (var column in widget.module.columns) {
         if (doc.hasFieldAdm(column.field)) {
-          String value = column.getStringContent(doc);
+          String value = column.type.getSyncStringContent(doc, column);
+
           bool encontrado = value.toLowerCase().contains(this.globalSearch!.toLowerCase());
-          //print("$value contains ${this.globalSearch} ? $encontrado");
           if (encontrado) {
             result.add(doc);
             break;

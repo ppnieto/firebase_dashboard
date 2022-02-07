@@ -9,7 +9,7 @@ class FieldTypeDate extends FieldType {
   FieldTypeDate({this.format = "dd/MM/yyyy"});
 
   @override
-  Future<String> getStringContent(DocumentSnapshot _object, ColumnModule column) async {
+  String getSyncStringContent(DocumentSnapshot _object, ColumnModule column) {
     final f = new DateFormat(this.format);
     if (_object.hasFieldAdm(column.field)) {
       return f.format(_object.get(column.field).toDate());

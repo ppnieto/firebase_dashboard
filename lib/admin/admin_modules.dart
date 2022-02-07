@@ -128,7 +128,7 @@ class ColumnModule {
   }
 
   getFilterContent(value, Function onFilter) => type.getFilterContent(value, this, onFilter);
-  getStringContent(DocumentSnapshot _object) => type.getStringContent(_object, this);
+  Future<String> getStringContent(DocumentSnapshot _object) => type.getStringContent(_object, this);
 }
 
 abstract class MenuBase {
