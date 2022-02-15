@@ -618,12 +618,15 @@ class AdminScreenState extends State<AdminScreen> {
       }
 
       if (tipo == TipoPantalla.listado && widget.module.exportExcel) {
-        result.add(IconButton(
-          padding: EdgeInsets.all(0),
-          icon: Icon(FontAwesomeIcons.fileExcel),
-          onPressed: () {
-            exportExcel();
-          },
+        result.add(Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: IconButton(
+            padding: EdgeInsets.all(0),
+            icon: Icon(FontAwesomeIcons.download),
+            onPressed: () {
+              exportExcel();
+            },
+          ),
         ));
       }
       if (tipo == TipoPantalla.listado && widget.module.canAdd) {
