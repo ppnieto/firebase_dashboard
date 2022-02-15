@@ -666,7 +666,7 @@ class AdminScreenState extends State<AdminScreen> {
     }
 
     return Theme(
-      data: ThemeData.light().copyWith(
+      data: Theme.of(context). /* ThemeData.light()*/ copyWith(
         highlightColor: DashboardMainScreen.dashboardTheme!.iconButtonColor,
         primaryColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor,
       ),
