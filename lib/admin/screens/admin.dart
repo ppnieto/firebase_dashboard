@@ -665,36 +665,38 @@ class AdminScreenState extends State<AdminScreen> {
       return result;
     }
 
-    return Theme(
+    return /*Theme(
       data: ThemeData.light().copyWith(
         highlightColor: DashboardMainScreen.dashboardTheme!.iconButtonColor,
         primaryColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor,
       ),
-      child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
-            title: Text(widget.module.title),
-            leading: getLeading(),
-            actions: <Widget>[] +
-                widget.module.columns.map<Widget>((ColumnModule columnModule) {
-                  if (columnModule.filter && tipo == TipoPantalla.listado) {
-                    if (filtro.containsKey(columnModule.field) == false) {
-                      filtro[columnModule.field] = "";
-                    }
-                    return Row(children: [
-                      columnModule.getFilterContent(filtro[columnModule.field], (val) {
-                        setState(() {
-                          filtro[columnModule.field] = val;
-                        });
-                      })
-                    ]);
-                  } else
-                    return Container();
-                }).toList() +
-                getActions(),
-          ),
-          body: content),
-    );
+      child: */
+        Scaffold(
+            appBar: AppBar(
+              backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+              title: Text(widget.module.title),
+              leading: getLeading(),
+              actions: <Widget>[] +
+                  widget.module.columns.map<Widget>((ColumnModule columnModule) {
+                    if (columnModule.filter && tipo == TipoPantalla.listado) {
+                      if (filtro.containsKey(columnModule.field) == false) {
+                        filtro[columnModule.field] = "";
+                      }
+                      return Row(children: [
+                        columnModule.getFilterContent(filtro[columnModule.field], (val) {
+                          setState(() {
+                            filtro[columnModule.field] = val;
+                          });
+                        })
+                      ]);
+                    } else
+                      return Container();
+                  }).toList() +
+                  getActions(),
+            ),
+            body: content
+            //),
+            );
   }
 }
 
