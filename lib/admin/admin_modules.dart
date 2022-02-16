@@ -218,20 +218,21 @@ class MenuInfo extends Menu {
       },
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
-        color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).backgroundColor,
+        //color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).backgroundColor,
+        color: isSelected ? theme.menuSelectedBackgroundColor : theme.menuBackgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
+              Icon(iconData, color: isSelected ? theme.menuSelectedTextColor : theme.menuTextColor),
               SizedBox(
                 width: 8,
               ),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 18, color: isSelected ? Theme.of(context).canvasColor : Theme.of(context).highlightColor),
+                  style: TextStyle(fontSize: 18, color: isSelected ? theme.menuSelectedTextColor : theme.menuTextColor),
                 ),
               ),
               this.info()
