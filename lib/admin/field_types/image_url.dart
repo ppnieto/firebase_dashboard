@@ -30,8 +30,19 @@ class FieldTypeImageURL extends FieldType {
             height: this.height,
           ),
         );
-      } else
+      } else if (value is String) {
+        print("image url = " + _object.get(column.field));
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2.0),
+          child: Image.network(
+            _object.get(column.field),
+            width: this.width,
+            height: this.height,
+          ),
+        );
+      } else {
         return Text("Error");
+      }
     } else {
       return Text("<No hay imagen>", style: TextStyle(color: Colors.red));
     }

@@ -10,12 +10,34 @@ abstract class FieldType {
     this.context = context;
   }
 
+  dynamic getFieldFromMap(Map<String, dynamic> data, String fieldName, dynamic defValue) {
+    if (fieldName.contains('.')) {
+      List<String> fields = fieldName.split('.');
+      if (fields.length != 2) return "Error con sintaxis de campo $fieldName";
+      return data[fields[0]][fields[1]];
+    } else {
+      return data[fieldName];
+    }
+  }
+
   dynamic getField(DocumentSnapshot object, String fieldName, dynamic defValue) {
+    return getFieldFromMap(object.data() as Map<String, dynamic>, fieldName, defValue);
+    /*
     if (!hasField(object, fieldName)) return defValue;
-    return (object.data() as Map)[fieldName];
+    if (fieldName.contains('.')) {
+      List<String> fields = fieldName.split('.');
+      if (fields.length != 2) return "Error con sintaxis de campo $fieldName";
+      return object.get(fields[0])[fields[1]];
+    } else {
+      return (object.data() as Map)[fieldName];
+    }*/
   }
 
   bool hasField(DocumentSnapshot object, String fieldName) {
+    if (fieldName.contains('.')) {
+      List<String> fields = fieldName.split('.');
+      fieldName = fields[0];
+    }
     if (object.data() == null) return false;
     if (!(object.data() as Map).containsKey(fieldName)) return false;
     if ((object.data() as Map)[fieldName] == null) return false;

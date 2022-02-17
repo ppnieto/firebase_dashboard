@@ -74,4 +74,45 @@ class FieldTypeSelect extends FieldType {
           },
         ));
   }
+
+  @override
+  getFilterContent(value, ColumnModule column, Function onFilter) {
+    List<DropdownMenuItem<String>> items = <DropdownMenuItem<String>>[
+          DropdownMenuItem(
+            value: "",
+            child: Text("Seleccione " + column.label.toLowerCase()),
+          )
+        ] +
+        options.entries.map((e) {
+          return DropdownMenuItem(
+            value: e.key,
+            child: Text(e.value),
+            enabled: !(frozenValue != null && frozenValue == e.key),
+          );
+        }).toList();
+
+    return Theme(
+      data: Theme.of(context).copyWith(inputDecorationTheme: InputDecorationTheme()),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+        child: Container(
+            width: 300,
+            child: DropdownButtonFormField(
+              value: value == null ? initialValue : value,
+              isExpanded: true,
+              items: items,
+              onChanged: (frozenValue != null && value == frozenValue) || column.editable == false
+                  ? null
+                  : (val) {
+                      onFilter(val);
+                    },
+              validator: (val) {
+                if (column.mandatory && val == null) return "Campo obligatorio";
+                if (validate != null) return validate!(initialValue, val);
+                return null;
+              },
+            )),
+      ),
+    );
+  }
 }

@@ -30,8 +30,8 @@ class FieldTypeText extends FieldType {
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
-    if ((_object.data() as Map).containsKey(column.field) && _object.get(column.field) != null) {
-      String texto = showTextFunction == null ? _object[column.field].toString() : showTextFunction!(_object[column.field]);
+    if (hasField(_object, column.field)) {
+      String texto = showTextFunction == null ? getField(_object, column.field, "").toString() : showTextFunction!(_object[column.field]);
       if (this.ellipsisLength > 0 && texto.length >= this.ellipsisLength) {
         return Text(texto);
       } else {
@@ -53,7 +53,7 @@ class FieldTypeText extends FieldType {
 
   @override
   getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
-    var value = values[column.field];
+    var value = getFieldFromMap(values, column.field, null);
     value = showTextFunction == null ? value : showTextFunction!(value);
 
     controller.text = value ?? "";
@@ -69,7 +69,7 @@ class FieldTypeText extends FieldType {
             obscureText: this.obscureText,
             enableSuggestions: this.obscureText,
             autocorrect: this.obscureText,
-            decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Colors.grey[100]),
+            decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Theme.of(context).canvasColor.withAlpha(1)),
             validator: (value) {
               if (regexp != null) {
                 if (!regexp!.hasMatch(value ?? "")) {

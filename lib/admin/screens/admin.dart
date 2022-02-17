@@ -14,7 +14,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweetsheet/sweetsheet.dart';
 import 'package:excel/excel.dart';
 import 'package:universal_html/html.dart' as html;
-//import 'package:data_table_2/data_table_2.dart';
 
 class AdminScreen extends StatefulWidget {
   final Module module;
@@ -23,7 +22,6 @@ class AdminScreen extends StatefulWidget {
   final CollectionReference? collection;
   final double minWidth;
   final double labelWidth;
-  //final List<Widget> actions;
 
   AdminScreen({
     Key? key,
@@ -33,7 +31,6 @@ class AdminScreen extends StatefulWidget {
     this.selectPreEdit = false,
     this.collection,
     this.labelWidth = 120,
-    //this.actions = const []
   }) : super(key: key);
 
   @override
@@ -43,8 +40,7 @@ class AdminScreen extends StatefulWidget {
 enum TipoPantalla { listado, detalle, nuevo, confirmar }
 
 class AdminScreenState extends State<AdminScreen> {
-  late int rowsPerPage;
-  late bool canSelect;
+  bool canSelect = false;
   String? _orderBy;
   List<DocumentSnapshot>? docs;
   String? globalSearch;
@@ -56,44 +52,41 @@ class AdminScreenState extends State<AdminScreen> {
   final scrollController = ScrollController();
   bool sortAscending = true;
   int? sortColumnIndex;
-  late Map<String, bool> columnasSeleccionadas = {};
+  Map<String, bool> columnasSeleccionadas = {};
 
-  @override
-  void initState() {
-    super.initState();
-
+  Future<bool> initAdmin() async {
+    print("init admin " + widget.module.name);
     _orderBy = widget.module.orderBy;
 
-    rowsPerPage = widget.module.rowsPerPage;
+    //rowsPerPage = widget.module.rowsPerPage;
     canSelect = widget.module.canSelect;
 
     widget.module.rowsSelected = [];
     widget.module.indexSelected = [];
 
-    SharedPreferences.getInstance().then((SharedPreferences prefs) {
-      try {
-        String key = 'admin_columns_' + widget.module.name;
-        if (prefs.containsKey(key)) {
-          List<String> sel = prefs.getStringList(key)!;
-          for (var col in widget.module.columns) {
-            columnasSeleccionadas[col.field] = false;
-          }
-          for (var s in sel) {
-            columnasSeleccionadas[s] = true;
-          }
-        } else {
-          for (var col in widget.module.columns) {
-            columnasSeleccionadas[col.field] = true;
-          }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      String key = 'admin_columns_' + widget.module.name;
+      if (prefs.containsKey(key)) {
+        List<String> sel = prefs.getStringList(key)!;
+        for (var col in widget.module.columns) {
+          columnasSeleccionadas[col.field] = false;
         }
-        onUpdateColumnasSeleccionadas();
-      } catch (e) {
-        print("error: ");
-        print(e);
+        for (var s in sel) {
+          columnasSeleccionadas[s] = true;
+        }
+      } else {
+        for (var col in widget.module.columns) {
+          columnasSeleccionadas[col.field] = true;
+        }
       }
-    });
-
+      onUpdateColumnasSeleccionadas();
+    } catch (e) {
+      print("error: ");
+      print(e);
+    }
     preloadReferences();
+    return true;
   }
 
   void onUpdateColumnasSeleccionadas() {
@@ -298,11 +291,6 @@ class AdminScreenState extends State<AdminScreen> {
   }
 
   getEditField(ColumnModule column) {
-    /*
-    print("get edit field " + column.field);
-    print("type = ${column.type}");
-    print("detalle = $detalle");
-    */
     column.type.setContext(context);
 
     Widget? child = column.type.getEditContent(detalle, updateData!, column, (value) {
@@ -323,6 +311,13 @@ class AdminScreenState extends State<AdminScreen> {
       return Padding(padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 5 : 20), child: child);
     } else
       return SizedBox.shrink();
+  }
+
+  void showListado() {
+    print("show listado");
+    setState(() {
+      this.tipo = TipoPantalla.listado;
+    });
   }
 
   showError(e) {
@@ -375,9 +370,7 @@ class AdminScreenState extends State<AdminScreen> {
                 content: Text('Elemento guardado con éxito'),
                 duration: Duration(seconds: 2),
               ));
-              setState(() {
-                this.tipo = TipoPantalla.listado;
-              });
+              showListado();
             }).catchError((e) {
               showError(e);
             });
@@ -420,18 +413,22 @@ class AdminScreenState extends State<AdminScreen> {
           child: Padding(
             padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 32.0 : 5),
             child: Container(
-                child: Builder(
-                    builder: (context) => Form(
-                        key: _formKey,
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: widget.module.columns.map<Widget>((column) {
-                              if (column.showOnEdit) {
-                                return getEditField(column);
-                              } else {
-                                return Container();
-                              }
-                            }).toList())))),
+                child: StreamBuilder(
+                    stream: detalle?.reference.snapshots(),
+                    builder: (context, snapshot) {
+                      return Builder(
+                          builder: (context) => Form(
+                              key: _formKey,
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: widget.module.columns.map<Widget>((column) {
+                                    if (column.showOnEdit) {
+                                      return getEditField(column);
+                                    } else {
+                                      return Container();
+                                    }
+                                  }).toList())));
+                    })),
           ),
         ),
       );
@@ -536,30 +533,36 @@ class AdminScreenState extends State<AdminScreen> {
       }
     }
 
-    Widget getGlobalSearch() => Container(
-          width: 280,
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: TextField(
-            decoration: InputDecoration(
-              suffixIcon: Icon(Icons.search, color: Theme.of(context).canvasColor),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: Theme.of(context).canvasColor, width: 2.0)),
-              hintText: "Buscar...",
-              hintStyle: TextStyle(color: Theme.of(context).canvasColor),
-              contentPadding: EdgeInsets.all(10),
+    Widget getGlobalSearch() {
+      Color highlightColor =
+          context.findAncestorStateOfType<DashboardMainScreenState>()?.widget.theme.appBar1TextColor ?? Theme.of(context).primaryColor;
+
+      return Container(
+        width: 280,
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: TextField(
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Theme.of(context).cardColor,
+            suffixIcon: Icon(Icons.search, color: highlightColor),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+              borderRadius: BorderRadius.circular(6.0),
             ),
-            style: TextStyle(color: Theme.of(context).canvasColor),
-            onChanged: (value) {
-              setState(() {
-                this.globalSearch = value;
-              });
-            },
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: highlightColor, width: 2.0)),
+            hintText: "Buscar...",
+            hintStyle: TextStyle(color: highlightColor),
+            contentPadding: EdgeInsets.all(10),
           ),
-        );
+          style: TextStyle(color: highlightColor),
+          onChanged: (value) {
+            setState(() {
+              this.globalSearch = value;
+            });
+          },
+        ),
+      );
+    }
 
     void exportExcel() async {
       var excelFile = Excel.createExcel();
@@ -669,34 +672,41 @@ class AdminScreenState extends State<AdminScreen> {
     }
 
     return Theme(
-      data: ThemeData.light().copyWith(
+      data: Theme.of(context). /* ThemeData.light()*/ copyWith(
         highlightColor: DashboardMainScreen.dashboardTheme!.iconButtonColor,
         primaryColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor,
       ),
-      child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
-            title: Text(widget.module.title),
-            leading: getLeading(),
-            actions: <Widget>[] +
-                widget.module.columns.map<Widget>((ColumnModule columnModule) {
-                  if (columnModule.filter && tipo == TipoPantalla.listado) {
-                    if (filtro.containsKey(columnModule.field) == false) {
-                      filtro[columnModule.field] = "";
-                    }
-                    return Row(children: [
-                      columnModule.getFilterContent(filtro[columnModule.field], (val) {
-                        setState(() {
-                          filtro[columnModule.field] = val;
-                        });
-                      })
-                    ]);
-                  } else
-                    return Container();
-                }).toList() +
-                getActions(),
-          ),
-          body: content),
+      child: FutureBuilder(
+          future: initAdmin(),
+          builder: (context, snapshot) {
+            print("has data: ${snapshot.hasData}");
+            if (!snapshot.hasData) return SizedBox.shrink();
+            return Scaffold(
+                appBar: AppBar(
+                  backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+                  title: Text(widget.module.title),
+                  leading: getLeading(),
+                  actions: <Widget>[] +
+                      widget.module.columns.map<Widget>((ColumnModule columnModule) {
+                        columnModule.type.context = context;
+                        if (columnModule.filter && tipo == TipoPantalla.listado) {
+                          if (filtro.containsKey(columnModule.field) == false) {
+                            filtro[columnModule.field] = "";
+                          }
+                          return Row(children: [
+                            columnModule.getFilterContent(filtro[columnModule.field], (val) {
+                              setState(() {
+                                filtro[columnModule.field] = val;
+                              });
+                            })
+                          ]);
+                        } else
+                          return Container();
+                      }).toList() +
+                      getActions(),
+                ),
+                body: content);
+          }),
     );
   }
 }
