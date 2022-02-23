@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/admin_modules.dart';
-import 'package:dashboard/admin/field_types/field_type_base.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
@@ -20,17 +20,24 @@ class FieldTypeDouble extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     var value = values[column.field];
     return TextFormField(
         initialValue: value != null ? value.toString() : "",
         enabled: column.editable,
-        decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Colors.grey[100]),
+        decoration: InputDecoration(
+            labelText: column.label,
+            filled: !column.editable,
+            fillColor: Colors.grey[100]),
         validator: (value) {
-          if (column.mandatory && (value == null || value.isEmpty)) return "Campo obligatorio";
+          if (column.mandatory && (value == null || value.isEmpty))
+            return "Campo obligatorio";
 
           if (value != null && value.isNotEmpty) {
-            return double.tryParse(value) == null ? "Error de formato numérico" : null;
+            return double.tryParse(value) == null
+                ? "Error de formato numérico"
+                : null;
           }
           return null;
         },

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/admin_modules.dart';
-import 'package:dashboard/admin/screens/admin.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/screens/admin.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:data_table_2/paginated_data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +15,10 @@ class AdminDataTable extends StatefulWidget {
 class _AdminDataTableState extends State<AdminDataTable> {
   void selectRow(BuildContext context, int index, DocumentSnapshot object) {
     print("select row $index");
-    AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
-    if (adminScreenState == null) throw new Exception("No encuentro AdminScreenState!!!");
+    AdminScreenState? adminScreenState =
+        context.findAncestorStateOfType<AdminScreenState>();
+    if (adminScreenState == null)
+      throw new Exception("No encuentro AdminScreenState!!!");
 
     setState(() {
       adminScreenState.indexSelected.clear();
@@ -26,10 +28,13 @@ class _AdminDataTableState extends State<AdminDataTable> {
     });
   }
 
-  void multiselectRow(BuildContext context, int index, DocumentSnapshot object, bool add) {
+  void multiselectRow(
+      BuildContext context, int index, DocumentSnapshot object, bool add) {
     print("multiSelectRow $index $add");
-    AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
-    if (adminScreenState == null) throw new Exception("No encuentro AdminScreenState!!!");
+    AdminScreenState? adminScreenState =
+        context.findAncestorStateOfType<AdminScreenState>();
+    if (adminScreenState == null)
+      throw new Exception("No encuentro AdminScreenState!!!");
     if (add) {
       setState(() {
         adminScreenState.indexSelected.add(index);
@@ -38,15 +43,18 @@ class _AdminDataTableState extends State<AdminDataTable> {
     } else {
       setState(() {
         adminScreenState.indexSelected.remove(index);
-        adminScreenState.rowsSelected.removeWhere((obj) => obj.reference.path == object.reference.path);
+        adminScreenState.rowsSelected
+            .removeWhere((obj) => obj.reference.path == object.reference.path);
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
-    if (adminScreenState == null) return Text("Error, no encuentro AdminScreen");
+    AdminScreenState? adminScreenState =
+        context.findAncestorStateOfType<AdminScreenState>();
+    if (adminScreenState == null)
+      return Text("Error, no encuentro AdminScreen");
 
     return PaginatedDataTable2(
         onPageChanged: (page) {
@@ -63,7 +71,9 @@ class _AdminDataTableState extends State<AdminDataTable> {
         columns: adminScreenState.widget.module.showingColumns.map((column) {
               return DataColumn2(
                 onSort: (int column, bool ascending) {
-                  if (adminScreenState.widget.module.canSort && adminScreenState.widget.module.showingColumns[column].canSort) {
+                  if (adminScreenState.widget.module.canSort &&
+                      adminScreenState
+                          .widget.module.showingColumns[column].canSort) {
                     adminScreenState.setState(() {
                       adminScreenState.sortAscending = ascending;
                       adminScreenState.sortColumnIndex = column;
@@ -74,7 +84,8 @@ class _AdminDataTableState extends State<AdminDataTable> {
                 label: Text(column.label),
               );
             }).toList() +
-            (adminScreenState.widget.module.canRemove || adminScreenState.widget.module.getActions != null
+            (adminScreenState.widget.module.canRemove ||
+                    adminScreenState.widget.module.getActions != null
                 ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)]
                 : []),
         source: MyDataTableSource(
@@ -95,12 +106,19 @@ class MyDataTableSource extends DataTableSource {
   Function onTap;
   Map<String, bool> showFields;
 
-  MyDataTableSource({required this.docs, required this.context, required this.onTap, required this.showFields, required this.parent});
+  MyDataTableSource(
+      {required this.docs,
+      required this.context,
+      required this.onTap,
+      required this.showFields,
+      required this.parent});
 
   @override
   DataRow getRow(int index) {
-    AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
-    if (adminScreenState == null) throw new Exception("No encuentro admin screen state!!!");
+    AdminScreenState? adminScreenState =
+        context.findAncestorStateOfType<AdminScreenState>();
+    if (adminScreenState == null)
+      throw new Exception("No encuentro admin screen state!!!");
 
     Module module = adminScreenState.widget.module;
 
@@ -113,14 +131,20 @@ class MyDataTableSource extends DataTableSource {
           parent.multiselectRow(context, index, _object, value ?? false);
         },
         cells: module.columns
-                .where((element) => element.listable && this.showFields.containsKey(element.field) && this.showFields[element.field]!)
+                .where((element) =>
+                    element.listable &&
+                    this.showFields.containsKey(element.field) &&
+                    this.showFields[element.field]!)
                 .map<DataCell>((column) {
               // set context
               column.type.setContext(context);
-              return DataCell(column.getListContent(_object) ?? SizedBox.shrink(),
+              return DataCell(
+                  column.getListContent(_object) ?? SizedBox.shrink(),
                   onTap: column.clickToDetail
                       ? () {
-                          if (adminScreenState.widget.selectPreEdit && adminScreenState.indexSelected.contains(index) == false) {
+                          if (adminScreenState.widget.selectPreEdit &&
+                              adminScreenState.indexSelected.contains(index) ==
+                                  false) {
                             parent.selectRow(context, index, _object);
                           } else {
                             if (module.canEdit) {
@@ -135,13 +159,18 @@ class MyDataTableSource extends DataTableSource {
                     DataCell(
                       Row(
                           mainAxisSize: MainAxisSize.max,
-                          children: (module.getActions == null ? <Widget>[] : module.getActions!(_object, context)) +
+                          children: (module.getActions == null
+                                  ? <Widget>[]
+                                  : module.getActions!(_object, context)) +
                               (module.canRemove
                                   ? [
                                       IconButton(
-                                        icon: Icon(Icons.delete, color: Theme.of(context).highlightColor),
+                                        icon: Icon(Icons.delete,
+                                            color: Theme.of(context)
+                                                .highlightColor),
                                         onPressed: () {
-                                          doBorrar(context, _object.reference, () {
+                                          doBorrar(context, _object.reference,
+                                              () {
                                             if (module.onRemove != null) {
                                               module.onRemove!(_object);
                                             }

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/field_types/field_type_base.dart';
-import 'package:dashboard/theme.dart';
+import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
+import 'package:firebase_dashboard/theme.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +25,7 @@ export "field_types/rating.dart";
 export "field_types/select.dart";
 export 'field_types/multi_select.dart';
 
-export "package:dashboard/theme.dart";
+export "package:firebase_dashboard/theme.dart";
 export "field_types/tags.dart";
 export "field_types/widget.dart";
 
@@ -43,7 +43,8 @@ class Module {
   final Function? onUpdated;
   final Function? onRemove;
   final bool globalSearch;
-  final Future<String?> Function(bool isNew, Map<String, dynamic> updateData)? validation;
+  final Future<String?> Function(bool isNew, Map<String, dynamic> updateData)?
+      validation;
   final int rowsPerPage;
   final bool canSelect;
   final bool canAdd;
@@ -51,7 +52,8 @@ class Module {
   final bool canRemove;
   final bool canSort;
   final bool exportExcel;
-  final List<Widget> Function(DocumentSnapshot object, BuildContext context)? getActions;
+  final List<Widget> Function(DocumentSnapshot object, BuildContext context)?
+      getActions;
   final List<Widget> Function(BuildContext context)? getScaffoldActions;
 
   List<ColumnModule> columns;
@@ -123,11 +125,15 @@ class ColumnModule {
     this.canSort = true,
   });
 
-  getListContent(DocumentSnapshot _object) => type.getListContent(_object, this);
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) =>
+  getListContent(DocumentSnapshot _object) =>
+      type.getListContent(_object, this);
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+          ColumnModule column, Function onChange) =>
       type.getEditContent(_object, values, column, onChange);
-  getFilterContent(value, Function onFilter) => type.getFilterContent(value, this, onFilter);
-  Future<String> getStringContent(DocumentSnapshot _object) => type.getStringContent(_object, this);
+  getFilterContent(value, Function onFilter) =>
+      type.getFilterContent(value, this, onFilter);
+  Future<String> getStringContent(DocumentSnapshot _object) =>
+      type.getStringContent(_object, this);
 }
 
 abstract class MenuBase {
@@ -147,7 +153,8 @@ abstract class MenuBase {
     return super == other;
   }
 
-  Widget build(BuildContext context, bool isSelected, DashboardTheme theme, Function press) {
+  Widget build(BuildContext context, bool isSelected, DashboardTheme theme,
+      Function press) {
     return Text("No implemetado para MenuBase");
   }
 }
@@ -163,26 +170,36 @@ class Menu extends MenuBase {
   }) : super(label: label, iconData: iconData, role: role);
 
   @override
-  build(BuildContext context, bool isSelected, DashboardTheme theme, Function press) {
+  build(BuildContext context, bool isSelected, DashboardTheme theme,
+      Function press) {
     bool ident = false;
 
     return InkWell(
       onTap: () => press(),
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
-        color: isSelected ? theme.menuSelectedBackgroundColor : theme.menuBackgroundColor,
+        color: isSelected
+            ? theme.menuSelectedBackgroundColor
+            : theme.menuBackgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData, color: isSelected ? theme.menuSelectedTextColor : theme.menuTextColor),
+              Icon(iconData,
+                  color: isSelected
+                      ? theme.menuSelectedTextColor
+                      : theme.menuTextColor),
               SizedBox(
                 width: 8,
               ),
               Text(
                 label,
-                style: TextStyle(fontSize: 18, color: isSelected ? theme.menuSelectedTextColor : theme.menuTextColor),
+                style: TextStyle(
+                    fontSize: 18,
+                    color: isSelected
+                        ? theme.menuSelectedTextColor
+                        : theme.menuTextColor),
               ),
             ]),
           ),
@@ -195,7 +212,12 @@ class Menu extends MenuBase {
 class MenuGroup extends MenuBase {
   final List<MenuBase>? children;
   final bool open;
-  MenuGroup({this.children, required String label, required IconData iconData, String? role, this.open = false})
+  MenuGroup(
+      {this.children,
+      required String label,
+      required IconData iconData,
+      String? role,
+      this.open = false})
       : super(label: label, iconData: iconData, role: role);
 }
 
@@ -203,11 +225,17 @@ class MenuInfo extends Menu {
   final Widget child;
   final Function info;
 
-  MenuInfo({required this.child, required String label, required IconData iconData, String? role, required this.info})
+  MenuInfo(
+      {required this.child,
+      required String label,
+      required IconData iconData,
+      String? role,
+      required this.info})
       : super(label: label, iconData: iconData, role: role, child: child);
 
   @override
-  build(BuildContext context, bool isSelected, DashboardTheme theme, Function press) {
+  build(BuildContext context, bool isSelected, DashboardTheme theme,
+      Function press) {
     bool ident = false;
 
     return InkWell(
@@ -217,20 +245,29 @@ class MenuInfo extends Menu {
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
         //color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).backgroundColor,
-        color: isSelected ? theme.menuSelectedBackgroundColor : theme.menuBackgroundColor,
+        color: isSelected
+            ? theme.menuSelectedBackgroundColor
+            : theme.menuBackgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData, color: isSelected ? theme.menuSelectedTextColor : theme.menuTextColor),
+              Icon(iconData,
+                  color: isSelected
+                      ? theme.menuSelectedTextColor
+                      : theme.menuTextColor),
               SizedBox(
                 width: 8,
               ),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 18, color: isSelected ? theme.menuSelectedTextColor : theme.menuTextColor),
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: isSelected
+                          ? theme.menuSelectedTextColor
+                          : theme.menuTextColor),
                 ),
               ),
               this.info()

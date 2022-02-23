@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:dashboard/admin/admin_modules.dart';
-import 'package:dashboard/components/admin_datatable.dart';
-import 'package:dashboard/components/syncfusion_datatable.dart';
-import 'package:dashboard/dashboard.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/components/admin_datatable.dart';
+import 'package:firebase_dashboard/components/syncfusion_datatable.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 //import 'package:data_table_2/paginated_data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -93,7 +93,10 @@ class AdminScreenState extends State<AdminScreen> {
 
   void onUpdateColumnasSeleccionadas() {
     widget.module.showingColumns = widget.module.columns
-        .where((col) => col.listable && columnasSeleccionadas.containsKey(col.field) && columnasSeleccionadas[col.field]!)
+        .where((col) =>
+            col.listable &&
+            columnasSeleccionadas.containsKey(col.field) &&
+            columnasSeleccionadas[col.field]!)
         .toList();
   }
 
@@ -107,7 +110,10 @@ class AdminScreenState extends State<AdminScreen> {
     if (widget.module.getQueryCollection != null) {
       return widget.module.getQueryCollection!();
     } else {
-      String collection = widget.collection?.path ?? widget.module.collection ?? widget.collection?.path ?? "";
+      String collection = widget.collection?.path ??
+          widget.module.collection ??
+          widget.collection?.path ??
+          "";
       return FirebaseFirestore.instance.collection(collection);
     }
   }
@@ -115,8 +121,12 @@ class AdminScreenState extends State<AdminScreen> {
   Query addFilters(Map<String, dynamic> filtro, Query query) {
     Query result = query;
     for (MapEntry filterEntry in filtro.entries) {
-      if (filterEntry.value != null && filterEntry.value.toString().isNotEmpty) {
-        print("   add filter " + filterEntry.key + " = " + filterEntry.value.toString());
+      if (filterEntry.value != null &&
+          filterEntry.value.toString().isNotEmpty) {
+        print("   add filter " +
+            filterEntry.key +
+            " = " +
+            filterEntry.value.toString());
         result = result.where(filterEntry.key, isEqualTo: filterEntry.value);
       }
     }
@@ -130,7 +140,8 @@ class AdminScreenState extends State<AdminScreen> {
         if (doc.hasFieldAdm(column.field)) {
           String value = column.type.getSyncStringContent(doc, column);
 
-          bool encontrado = value.toLowerCase().contains(this.globalSearch!.toLowerCase());
+          bool encontrado =
+              value.toLowerCase().contains(this.globalSearch!.toLowerCase());
           if (encontrado) {
             result.add(doc);
             break;
@@ -180,7 +191,9 @@ class AdminScreenState extends State<AdminScreen> {
             var varA = column.type.getCompareValue(a, column);
             var varB = column.type.getCompareValue(b, column);
 
-            return this.sortAscending ? varA?.compareTo(varB) : varB?.compareTo(varA);
+            return this.sortAscending
+                ? varA?.compareTo(varB)
+                : varB?.compareTo(varA);
           });
         }
 
@@ -293,7 +306,8 @@ class AdminScreenState extends State<AdminScreen> {
   getEditField(ColumnModule column) {
     column.type.setContext(context);
 
-    Widget? child = column.type.getEditContent(detalle, updateData!, column, (value) {
+    Widget? child =
+        column.type.getEditContent(detalle, updateData!, column, (value) {
       setState(() {
         updateData![column.field] = value;
         print("actualizamos campo ${column.field} => $value");
@@ -303,12 +317,19 @@ class AdminScreenState extends State<AdminScreen> {
     if (child != null) {
       if (column.showLabelOnEdit) {
         child = Row(children: [
-          ConstrainedBox(constraints: BoxConstraints(minWidth: widget.labelWidth), child: Text(column.label)),
+          ConstrainedBox(
+              constraints: BoxConstraints(minWidth: widget.labelWidth),
+              child: Text(column.label)),
           SizedBox(width: 20),
           Expanded(child: child)
         ]);
       }
-      return Padding(padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 5 : 20), child: child);
+      return Padding(
+          padding: EdgeInsets.all(
+              MediaQuery.of(context).size.width < responsiveDashboardWidth
+                  ? 5
+                  : 20),
+          child: child);
     } else
       return SizedBox.shrink();
   }
@@ -363,18 +384,21 @@ class AdminScreenState extends State<AdminScreen> {
       String? msgValidation;
 
       if (widget.module.validation != null) {
-        msgValidation = await widget.module.validation!(isNew, this.updateData!);
+        msgValidation =
+            await widget.module.validation!(isNew, this.updateData!);
       }
 
       bool doUpdate = true;
       if (widget.module.onSave != null) {
-        doUpdate = widget.module.onSave!(tipo == TipoPantalla.nuevo, this.updateData);
+        doUpdate =
+            widget.module.onSave!(tipo == TipoPantalla.nuevo, this.updateData);
       }
       if (msgValidation == null) {
         if (doUpdate) {
           if (!isNew) {
             detalle!.reference.update(this.updateData!).then((value) {
-              if (widget.module.onUpdated != null) widget.module.onUpdated!(isNew, detalle!.reference);
+              if (widget.module.onUpdated != null)
+                widget.module.onUpdated!(isNew, detalle!.reference);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Elemento guardado con éxito'),
                 duration: Duration(seconds: 2),
@@ -385,7 +409,8 @@ class AdminScreenState extends State<AdminScreen> {
             });
           } else if (tipo == TipoPantalla.nuevo) {
             _getCollection().add(this.updateData!).then((value) {
-              if (widget.module.onUpdated != null) widget.module.onUpdated!(isNew, value);
+              if (widget.module.onUpdated != null)
+                widget.module.onUpdated!(isNew, value);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Elemento guardado con éxito'),
                 duration: Duration(seconds: 2),
@@ -418,9 +443,14 @@ class AdminScreenState extends State<AdminScreen> {
   getDetail() => SingleChildScrollView(
         child: Card(
           elevation: 2,
-          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth ? EdgeInsets.fromLTRB(64, 32, 64, 64) : EdgeInsets.all(5),
+          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth
+              ? EdgeInsets.fromLTRB(64, 32, 64, 64)
+              : EdgeInsets.all(5),
           child: Padding(
-            padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 32.0 : 5),
+            padding: EdgeInsets.all(
+                MediaQuery.of(context).size.width < responsiveDashboardWidth
+                    ? 32.0
+                    : 5),
             child: Container(
                 child: StreamBuilder(
                     stream: detalle?.reference.snapshots(),
@@ -429,8 +459,10 @@ class AdminScreenState extends State<AdminScreen> {
                           builder: (context) => Form(
                               key: _formKey,
                               child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: widget.module.columns.map<Widget>((column) {
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: widget.module.columns
+                                      .map<Widget>((column) {
                                     if (column.showOnEdit) {
                                       return getEditField(column);
                                     } else {
@@ -449,32 +481,38 @@ class AdminScreenState extends State<AdminScreen> {
           child: Padding(
             padding: const EdgeInsets.all(32.0),
             child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 16.0, horizontal: 16.0),
                 child: Builder(
                     builder: (context) => Form(
                         key: _formKey,
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: widget.module.columns.map<Widget>((column) {
-                                  if (column.showOnNew) {
-                                    return getEditField(column);
-                                  } else {
-                                    return Container();
-                                  }
-                                }).toList() +
-                                [])))),
+                            children:
+                                widget.module.columns.map<Widget>((column) {
+                                      if (column.showOnNew) {
+                                        return getEditField(column);
+                                      } else {
+                                        return Container();
+                                      }
+                                    }).toList() +
+                                    [])))),
           ),
         ),
       );
 
   getTitle() {
-    return Text(widget.module.title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold));
+    return Text(widget.module.title,
+        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold));
   }
 
   getConfirmar() => Center(
       child: Padding(
           padding: EdgeInsets.all(40),
-          child: Column(children: [Text("¿Está seguro que desea realizar la operación?"), TextButton(onPressed: () {}, child: Text("SI"))])));
+          child: Column(children: [
+            Text("¿Está seguro que desea realizar la operación?"),
+            TextButton(onPressed: () {}, child: Text("SI"))
+          ])));
 
   @override
   Widget build(BuildContext context) {
@@ -508,8 +546,10 @@ class AdminScreenState extends State<AdminScreen> {
                 context: context,
                 builder: (ctx) {
                   return MultiSelectDialog<String>(
-                    items: widget.module.columns.map((ColumnModule columnModule) {
-                      return MultiSelectItem(columnModule.field, columnModule.label);
+                    items:
+                        widget.module.columns.map((ColumnModule columnModule) {
+                      return MultiSelectItem(
+                          columnModule.field, columnModule.label);
                     }).toList(),
                     initialValue: columnasSeleccionadas.entries.map((e) {
                       if (e.value) return e.key;
@@ -528,7 +568,8 @@ class AdminScreenState extends State<AdminScreen> {
 
                         onUpdateColumnasSeleccionadas();
 
-                        SharedPreferences.getInstance().then((SharedPreferences prefs) {
+                        SharedPreferences.getInstance()
+                            .then((SharedPreferences prefs) {
                           String key = 'admin_columns_' + widget.module.name;
                           prefs.setStringList(key, values);
                         });
@@ -543,8 +584,12 @@ class AdminScreenState extends State<AdminScreen> {
     }
 
     Widget getGlobalSearch() {
-      Color highlightColor =
-          context.findAncestorStateOfType<DashboardMainScreenState>()?.widget.theme.appBar1TextColor ?? Theme.of(context).primaryColor;
+      Color highlightColor = context
+              .findAncestorStateOfType<DashboardMainScreenState>()
+              ?.widget
+              .theme
+              .appBar1TextColor ??
+          Theme.of(context).primaryColor;
 
       return Container(
         width: 280,
@@ -555,10 +600,13 @@ class AdminScreenState extends State<AdminScreen> {
             fillColor: Theme.of(context).cardColor,
             suffixIcon: Icon(Icons.search, color: highlightColor),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+              borderSide:
+                  BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
               borderRadius: BorderRadius.circular(6.0),
             ),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: highlightColor, width: 2.0)),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: BorderSide(color: highlightColor, width: 2.0)),
             hintText: "Buscar...",
             hintStyle: TextStyle(color: highlightColor),
             contentPadding: EdgeInsets.all(10),
@@ -683,7 +731,8 @@ class AdminScreenState extends State<AdminScreen> {
     return Theme(
       data: Theme.of(context). /* ThemeData.light()*/ copyWith(
         highlightColor: DashboardMainScreen.dashboardTheme!.iconButtonColor,
-        primaryColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor,
+        primaryColor:
+            DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor,
       ),
       child: FutureBuilder(
           future: initAdmin(),
@@ -692,18 +741,23 @@ class AdminScreenState extends State<AdminScreen> {
             if (!snapshot.hasData) return SizedBox.shrink();
             return Scaffold(
                 appBar: AppBar(
-                  backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+                  backgroundColor: DashboardMainScreen
+                          .dashboardTheme!.appBar2BackgroundColor ??
+                      Theme.of(context).secondaryHeaderColor,
                   title: Text(widget.module.title),
                   leading: getLeading(),
                   actions: <Widget>[] +
-                      widget.module.columns.map<Widget>((ColumnModule columnModule) {
+                      widget.module.columns
+                          .map<Widget>((ColumnModule columnModule) {
                         columnModule.type.context = context;
-                        if (columnModule.filter && tipo == TipoPantalla.listado) {
+                        if (columnModule.filter &&
+                            tipo == TipoPantalla.listado) {
                           if (filtro.containsKey(columnModule.field) == false) {
                             filtro[columnModule.field] = "";
                           }
                           return Row(children: [
-                            columnModule.getFilterContent(filtro[columnModule.field], (val) {
+                            columnModule.getFilterContent(
+                                filtro[columnModule.field], (val) {
                               setState(() {
                                 filtro[columnModule.field] = val;
                               });

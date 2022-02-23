@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -27,7 +27,8 @@ class FieldTypeDate extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     var value = values[column.field];
     final f = new DateFormat(this.format);
     TextEditingController txt = TextEditingController();
@@ -86,8 +87,11 @@ class FieldTypeDate extends FieldType {
         IconButton(
           icon: Icon(FontAwesomeIcons.calendar),
           onPressed: () async {
-            final DateTime? picked =
-                await showDatePicker(context: context, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);
+            final DateTime? picked = await showDatePicker(
+                context: context,
+                firstDate: DateTime(2020, 1),
+                lastDate: DateTime(2101),
+                initialDate: dateTime);
             if (picked != null) {
               txt.text = f.format(picked);
               onChange(Timestamp.fromDate(picked));

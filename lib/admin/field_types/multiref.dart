@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/dashboard.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
-import 'package:dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
@@ -14,9 +14,15 @@ class FieldTypeMultiref extends FieldType {
   final Function? getQueryCollection;
 
   late DocumentSnapshot object;
-  FieldTypeMultiref({this.collection, required this.refLabel, this.getFilter, this.initialValue, this.getQueryCollection});
+  FieldTypeMultiref(
+      {this.collection,
+      required this.refLabel,
+      this.getFilter,
+      this.initialValue,
+      this.getQueryCollection});
 
-  Widget getListWidget(String content, {TextStyle? style}) => Text(content, style: style);
+  Widget getListWidget(String content, {TextStyle? style}) =>
+      Text(content, style: style);
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
@@ -68,7 +74,8 @@ class FieldTypeMultiref extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     var tmp = values[column.field];
     List<DocumentReference>? value = [];
     if (tmp is List) {
@@ -100,7 +107,10 @@ class FieldTypeMultiref extends FieldType {
             buttonText: Text("Seleccione " + column.label),
             title: Text("Seleccione " + column.label),
             initialValue: value,
-            items: snapshot.data!.docs.map((e) => MultiSelectItem(e.reference, e.get(this.refLabel))).toSet().toList(),
+            items: snapshot.data!.docs
+                .map((e) => MultiSelectItem(e.reference, e.get(this.refLabel)))
+                .toSet()
+                .toList(),
             listType: MultiSelectListType.CHIP,
             onConfirm: (values) {
               onChange(values);

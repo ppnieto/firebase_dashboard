@@ -1,6 +1,6 @@
 library dashboard;
 
-import 'package:dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:flutter/material.dart';
 
 final int responsiveDashboardWidth = 1000;
@@ -31,7 +31,8 @@ class DashboardMainScreen extends StatefulWidget {
   DashboardMainScreenState createState() => DashboardMainScreenState();
 }
 
-class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTickerProviderStateMixin {
+class DashboardMainScreenState extends State<DashboardMainScreen>
+    with SingleTickerProviderStateMixin {
   bool isSidebar = false;
   int active = 0;
   List<Widget> currentWidget = [SizedBox.shrink()];
@@ -73,19 +74,24 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
                 },
               )
             : null,
-        automaticallyImplyLeading: MediaQuery.of(context).size.width < responsiveDashboardWidth ? true : false,
-        title: Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-          Container(
-            child: Text(
-              widget.title, // + " - " + subtitle,
-              style: TextStyle(
-                fontSize: 24,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        automaticallyImplyLeading:
+            MediaQuery.of(context).size.width < responsiveDashboardWidth
+                ? true
+                : false,
+        title: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                child: Text(
+                  widget.title, // + " - " + subtitle,
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
-          ),
-        ]),
+            ]),
         actions: widget.actions +
             (widget.sideBar != null
                 ? [
@@ -101,7 +107,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
       ),
       body: Row(
         children: <Widget>[
-          MediaQuery.of(context).size.width < responsiveDashboardWidth || !isMenu
+          MediaQuery.of(context).size.width < responsiveDashboardWidth ||
+                  !isMenu
               ? Container()
               : Card(
                   elevation: 2.0,
@@ -114,7 +121,9 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
                   ),
                 ),
           Container(
-              width: (MediaQuery.of(context).size.width < responsiveDashboardWidth || !isMenu
+              width: (MediaQuery.of(context).size.width <
+                              responsiveDashboardWidth ||
+                          !isMenu
                       ? MediaQuery.of(context).size.width
                       : MediaQuery.of(context).size.width - 310) -
                   (isSidebar ? widget.sideBarWidth : 0),
@@ -125,10 +134,14 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
             ),
             */
               child: PageView(children: [currentWidget[0]])),
-          isSidebar ? Container(width: widget.sideBarWidth, child: widget.sideBar) : SizedBox.shrink(),
+          isSidebar
+              ? Container(width: widget.sideBarWidth, child: widget.sideBar)
+              : SizedBox.shrink(),
         ],
       ),
-      drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: listDrawerItems(context, true))),
+      drawer: Padding(
+          padding: EdgeInsets.only(top: 56),
+          child: Drawer(child: listDrawerItems(context, true))),
     );
   }
 
@@ -139,7 +152,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
       bool hasRole = true;
 
       if (menu.role != null) {
-        List<String>? roles = widget.getRolesFunction != null ? widget.getRolesFunction!() : [];
+        List<String>? roles =
+            widget.getRolesFunction != null ? widget.getRolesFunction!() : [];
         if (roles == null)
           hasRole = false;
         else
@@ -154,11 +168,15 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
                 childrenPadding: EdgeInsets.only(left: 24),
                 iconColor: widget.theme.menuTextColor,
                 collapsedIconColor: widget.theme.menuTextColor,
-                title: Text(menu.label, style: TextStyle(fontSize: 18, color: widget.theme.menuTextColor)),
+                title: Text(menu.label,
+                    style: TextStyle(
+                        fontSize: 18, color: widget.theme.menuTextColor)),
                 leading: Icon(menu.iconData, color: widget.theme.menuTextColor),
                 children: menu.children!.map<Widget>((submenu) {
                   Menu m = submenu as Menu;
-                  bool isSelected = m.child.hashCode == currentWidget[0].hashCode; //index == indexes[menu.hashCode];
+                  bool isSelected = m.child.hashCode ==
+                      currentWidget[0]
+                          .hashCode; //index == indexes[menu.hashCode];
 
                   return submenu.build(context, isSelected, widget.theme, () {
                     setState(() {
@@ -170,7 +188,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
             : Container();
       } else {
         Menu m = menu as Menu;
-        bool isSelected = m.child.hashCode == currentWidget[0].hashCode; //index == indexes[menu.hashCode];
+        bool isSelected = m.child.hashCode ==
+            currentWidget[0].hashCode; //index == indexes[menu.hashCode];
 
         return hasRole
             ? menu.build(context, isSelected, widget.theme, () {

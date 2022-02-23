@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/admin_modules.dart';
-import 'package:dashboard/admin/field_types/field_type_base.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeBoolean extends FieldType {
@@ -11,16 +11,19 @@ class FieldTypeBoolean extends FieldType {
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     bool value = _object.getFieldAdm(column.field, false);
     return IconButton(
-      icon: Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank),
+      icon: Icon(
+          value ? Icons.check_box_outlined : Icons.check_box_outline_blank),
       onPressed: () {
-        _object.reference.update({column.field: !value}).then((value) => print("updated!!!"));
+        _object.reference.update({column.field: !value}).then(
+            (value) => print("updated!!!"));
       },
     );
     //return Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank);
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     var value = values[column.field];
 
     {

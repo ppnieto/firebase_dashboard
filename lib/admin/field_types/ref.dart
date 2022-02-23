@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:flutter/scheduler.dart';
 
 class FieldTypeRef extends FieldType {
@@ -15,7 +15,8 @@ class FieldTypeRef extends FieldType {
   final String? otherRef;
   final bool search;
 
-  static final DocumentReference nullValue = FirebaseFirestore.instance.doc("/values/null");
+  static final DocumentReference nullValue =
+      FirebaseFirestore.instance.doc("/values/null");
 
   late ColumnModule column;
   FieldTypeRef(
@@ -39,7 +40,9 @@ class FieldTypeRef extends FieldType {
 
   @override
   String getSyncStringContent(DocumentSnapshot _object, ColumnModule column) {
-    var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : null;
+    var _data = (_object.data() as Map).containsKey(column.field)
+        ? _object.get(column.field)
+        : null;
     if (preloadedData.isNotEmpty && _data != null) {
       if (preloadedData.containsKey(_data.path)) {
         return preloadedData[_data.path]!;
@@ -51,30 +54,40 @@ class FieldTypeRef extends FieldType {
     }
   }
 
-  Widget getListWidget(DocumentSnapshot _object, String content, {TextStyle? style}) => Text(content, style: style);
+  Widget getListWidget(DocumentSnapshot _object, String content,
+          {TextStyle? style}) =>
+      Text(content, style: style);
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     this.column = column;
-    var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : "-";
+    var _data = (_object.data() as Map).containsKey(column.field)
+        ? _object.get(column.field)
+        : "-";
     if (_data != null && _data is DocumentReference) {
       if (this.preloadedData.isNotEmpty) {
-        return getListWidget(_object, this.preloadedData[_data.path] ?? this.otherRef ?? "Otro");
+        return getListWidget(
+            _object, this.preloadedData[_data.path] ?? this.otherRef ?? "Otro");
       } else {
         DocumentReference ref = _data;
         return StreamBuilder(
           stream: ref.snapshots(),
           builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
             if (!snapshot.hasData) return SizedBox.shrink();
-            if (snapshot.data!.data() != null && snapshot.data!.get(this.refLabel) != null) {
-              return getListWidget(_object, snapshot.data!.get(this.refLabel) ?? "-");
+            if (snapshot.data!.data() != null &&
+                snapshot.data!.get(this.refLabel) != null) {
+              return getListWidget(
+                  _object, snapshot.data!.get(this.refLabel) ?? "-");
             } else
-              return getListWidget(_object, "<no existe>", style: TextStyle(color: Colors.red));
+              return getListWidget(_object, "<no existe>",
+                  style: TextStyle(color: Colors.red));
           },
         );
       }
     } else {
-      return this.empty ?? getListWidget(_object, "<sin asignar>", style: TextStyle(color: Colors.red));
+      return this.empty ??
+          getListWidget(_object, "<sin asignar>",
+              style: TextStyle(color: Colors.red));
     }
   }
 
@@ -97,7 +110,8 @@ class FieldTypeRef extends FieldType {
     return query;
   }
 
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     var value = values[column.field];
 
     List<DropdownMenuItem<DocumentReference>> getIfNullable() => [
@@ -114,8 +128,10 @@ class FieldTypeRef extends FieldType {
       });
     }
     if (this.preloadedData.isNotEmpty) {
-      if (preloadedData.containsKey(value.path) == false && value != nullValue) {
-        return Text(column.label + ": Este campo no se puede editar", style: TextStyle(color: Colors.red));
+      if (preloadedData.containsKey(value.path) == false &&
+          value != nullValue) {
+        return Text(column.label + ": Este campo no se puede editar",
+            style: TextStyle(color: Colors.red));
       }
 
       if (search)
@@ -131,20 +147,26 @@ class FieldTypeRef extends FieldType {
                   : null,
               showSearchBox: search,
               popupTitle: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                child: Text("Seleccione " + column.label, style: TextStyle(fontSize: 22, color: Colors.black)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                child: Text("Seleccione " + column.label,
+                    style: TextStyle(fontSize: 22, color: Colors.black)),
               ),
               popupItemBuilder: (context, item, isSelected) {
                 return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 10),
                     child: Text(
                       preloadedData[item.path]?.toString() ?? "-",
                       style: TextStyle(color: Colors.black),
                     ));
               },
-              itemAsString: (item) => preloadedData[item!.path]?.toString() ?? "-",
+              itemAsString: (item) =>
+                  preloadedData[item!.path]?.toString() ?? "-",
               items: //getIfNullable() +
-                  preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList()),
+                  preloadedData.entries
+                      .map((e) => FirebaseFirestore.instance.doc(e.key))
+                      .toList()),
         );
       else
         return Row(
@@ -156,7 +178,9 @@ class FieldTypeRef extends FieldType {
                 isExpanded: true,
                 items: getIfNullable() +
                     preloadedData.entries.map((entry) {
-                      return DropdownMenuItem<DocumentReference>(value: FirebaseFirestore.instance.doc(entry.key), child: Text(entry.value));
+                      return DropdownMenuItem<DocumentReference>(
+                          value: FirebaseFirestore.instance.doc(entry.key),
+                          child: Text(entry.value));
                     }).toList(),
                 onChanged: column.editable
                     ? (val) {
@@ -168,7 +192,9 @@ class FieldTypeRef extends FieldType {
                 },
                 validator: (value) {
                   print("validamos campo...");
-                  if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
+                  if (column.mandatory &&
+                      (value == null || value.path == nullValue.path))
+                    return "Campo obligatorio";
                   return null;
                 },
               ),
@@ -200,7 +226,9 @@ class FieldTypeRef extends FieldType {
                     isExpanded: true,
                     items: getIfNullable() +
                         list.map((object) {
-                          return DropdownMenuItem<DocumentReference>(value: object.reference, child: Text(object.get(this.refLabel)));
+                          return DropdownMenuItem<DocumentReference>(
+                              value: object.reference,
+                              child: Text(object.get(this.refLabel)));
                         }).toList(),
                     onChanged: column.editable
                         ? (val) {
@@ -214,7 +242,9 @@ class FieldTypeRef extends FieldType {
                     },
                     validator: (value) {
                       print("validamos campo...");
-                      if (column.mandatory && (value == null || value.path == nullValue.path)) return "Campo obligatorio";
+                      if (column.mandatory &&
+                          (value == null || value.path == nullValue.path))
+                        return "Campo obligatorio";
                       return null;
                     },
                   ))
@@ -246,9 +276,14 @@ class FieldTypeRef extends FieldType {
                 color: Colors.white,
               ),
               value: value,
-              items: <DropdownMenuItem<dynamic>>[DropdownMenuItem(value: "", child: Text("Seleccione " + column.label))] +
+              items: <DropdownMenuItem<dynamic>>[
+                    DropdownMenuItem(
+                        value: "", child: Text("Seleccione " + column.label))
+                  ] +
                   snapshot.data!.docs.map<DropdownMenuItem<dynamic>>((object) {
-                    return DropdownMenuItem(value: object.reference, child: Text(object.get(this.refLabel)));
+                    return DropdownMenuItem(
+                        value: object.reference,
+                        child: Text(object.get(this.refLabel)));
                   }).toList(),
               onChanged: (dynamic val) {
                 if (onFilter != null) onFilter(val);

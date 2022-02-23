@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
@@ -14,9 +14,17 @@ class FieldTypeAutocomplete extends FieldType {
 
   final TextEditingController _typeAheadController = TextEditingController();
 
-  FieldTypeAutocomplete({this.collection, required this.refLabel, this.getFilter, this.initialValue, this.getQueryCollection, this.getStream});
+  FieldTypeAutocomplete(
+      {this.collection,
+      required this.refLabel,
+      this.getFilter,
+      this.initialValue,
+      this.getQueryCollection,
+      this.getStream});
 
-  Widget _getListWidget(DocumentSnapshot _object, String content, {TextStyle? style}) => Text(content, style: style);
+  Widget _getListWidget(DocumentSnapshot _object, String content,
+          {TextStyle? style}) =>
+      Text(content, style: style);
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
@@ -47,7 +55,8 @@ class FieldTypeAutocomplete extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     var value = values[column.field];
 
     if (value == null) {
@@ -99,11 +108,13 @@ class FieldTypeAutocomplete extends FieldType {
                       labelText: column.label,
                     )),
                 suggestionsCallback: (pattern) async {
-                  return items.where((element) => element.toLowerCase().contains(pattern.toLowerCase()));
+                  return items.where((element) =>
+                      element.toLowerCase().contains(pattern.toLowerCase()));
                 },
                 itemBuilder: (context, suggestion) {
                   return ListTile(
-                    title: Text(suggestion != null ? suggestion.toString() : ""),
+                    title:
+                        Text(suggestion != null ? suggestion.toString() : ""),
                   );
                 },
                 onSuggestionSelected: (suggestion) {

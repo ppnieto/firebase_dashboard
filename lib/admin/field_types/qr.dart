@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/admin_modules.dart';
-import 'package:dashboard/admin/field_types/field_type_base.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -14,11 +14,16 @@ class FieldTypeQR extends FieldType {
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
     String code = _object.get(column.field);
-    return code.isEmpty ? SizedBox.shrink() : IconButton(icon: Icon(FontAwesomeIcons.qrcode), onPressed: () => onListTap(_object, column));
+    return code.isEmpty
+        ? SizedBox.shrink()
+        : IconButton(
+            icon: Icon(FontAwesomeIcons.qrcode),
+            onPressed: () => onListTap(_object, column));
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     TextEditingController qr = TextEditingController();
     var value = values[column.field];
 

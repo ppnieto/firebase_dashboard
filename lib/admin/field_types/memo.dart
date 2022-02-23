@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
 
 class FieldTypeMemo extends FieldType {
   int maxLines;
@@ -8,11 +8,17 @@ class FieldTypeMemo extends FieldType {
   FieldTypeMemo({this.maxLines = 4, this.listWidth});
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) =>
-      listWidth != null ? Container(width: this.listWidth, child: super.getListContent(_object, column)) : super.getListContent(_object, column);
+  getListContent(
+          DocumentSnapshot _object, ColumnModule column) =>
+      listWidth != null
+          ? Container(
+              width: this.listWidth,
+              child: super.getListContent(_object, column))
+          : super.getListContent(_object, column);
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     var value = values[column.field];
     return TextFormField(
         enabled: column.editable,

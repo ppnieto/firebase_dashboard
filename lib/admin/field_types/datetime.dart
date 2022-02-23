@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/admin_modules.dart';
-import 'package:dashboard/admin/field_types/field_type_base.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +11,8 @@ class FieldTypeDateTime extends FieldType {
   final String format;
   final ThemeData? themeData;
 
-  FieldTypeDateTime({this.showTime = true, this.format = "dd/MM/yyyy HH:mm", this.themeData});
+  FieldTypeDateTime(
+      {this.showTime = true, this.format = "dd/MM/yyyy HH:mm", this.themeData});
 
   @override
   String getSyncStringContent(DocumentSnapshot _object, ColumnModule column) {
@@ -32,7 +33,8 @@ class FieldTypeDateTime extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     print(column.editable);
     Timestamp? value;
     if (_object?.hasFieldAdm(column.field) ?? false) {
@@ -45,7 +47,9 @@ class FieldTypeDateTime extends FieldType {
     var dtp = DateTimePicker(
         enabled: column.editable,
         //locale: Locale('es'),
-        type: showTime ? DateTimePickerType.dateTimeSeparate : DateTimePickerType.date,
+        type: showTime
+            ? DateTimePickerType.dateTimeSeparate
+            : DateTimePickerType.date,
         dateMask: 'dd/MM/yyyy',
         initialValue: value?.toDate().toString() ?? null,
         firstDate: DateTime(2000),

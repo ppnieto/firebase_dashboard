@@ -1,4 +1,4 @@
-name: dashboard
+name: firebase_dashboard
 description: A new Flutter package project.
 version: 0.0.1
 
@@ -19,7 +19,6 @@ dependencies:
   firebase_storage: any
   firebase_auth: any
   cloud_firestore: any
-  #intl: any
   uuid: any
   google_maps_flutter: any
   package_info_plus: any
@@ -35,7 +34,6 @@ dependencies:
   textfield_tags: any
   syncfusion_flutter_datagrid: ^19.3.48
   dropdown_search: any
-  easy_sidemenu: ^0.1.1+1
 
 
 

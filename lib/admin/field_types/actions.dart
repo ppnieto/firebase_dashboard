@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/admin_modules.dart';
-import 'package:dashboard/admin/field_types/field_type_base.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeActions extends FieldType {
@@ -8,7 +8,8 @@ class FieldTypeActions extends FieldType {
   FieldTypeActions({required this.actions});
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     return Container();
   }
 
@@ -20,7 +21,9 @@ class FieldTypeActions extends FieldType {
         padding: EdgeInsets.symmetric(horizontal: 4),
         child: RaisedButton.icon(
             icon: Icon(action.iconData, color: Colors.white),
-            color: context != null ? Theme.of(this.context).primaryColor : Colors.blue,
+            color: context != null
+                ? Theme.of(this.context).primaryColor
+                : Colors.blue,
             label: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(action.title, style: TextStyle(color: Colors.white)),
@@ -39,5 +42,6 @@ class FieldTypeAction {
   String title;
   IconData iconData;
   Function onTap;
-  FieldTypeAction({this.title = "accion", required this.onTap, required this.iconData});
+  FieldTypeAction(
+      {this.title = "accion", required this.onTap, required this.iconData});
 }

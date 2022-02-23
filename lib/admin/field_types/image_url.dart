@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import "package:universal_html/html.dart" as html;
 
@@ -15,7 +15,12 @@ class FieldTypeImageURL extends FieldType {
   TextEditingController textController = TextEditingController();
   TextEditingController pathController = TextEditingController();
 
-  FieldTypeImageURL({required this.width, required this.height, this.allowURL = true, this.allowUpload = false, required this.storePath});
+  FieldTypeImageURL(
+      {required this.width,
+      required this.height,
+      this.allowURL = true,
+      this.allowUpload = false,
+      required this.storePath});
 
   @override
   getListContent(DocumentSnapshot _object, ColumnModule column) {
@@ -49,7 +54,8 @@ class FieldTypeImageURL extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     var value = values[column.field];
     if (value is Map) {
       textController.text = value['url'] ?? "";
@@ -91,7 +97,8 @@ class _UploadDialog extends StatefulWidget {
   final FieldTypeImageURL parent;
   final String url;
 
-  _UploadDialog({Key? key, required this.parent, required this.url}) : super(key: key);
+  _UploadDialog({Key? key, required this.parent, required this.url})
+      : super(key: key);
 
   @override
   __UploadDialogState createState() => __UploadDialogState();
@@ -122,7 +129,8 @@ class __UploadDialogState extends State<_UploadDialog> {
           uploadedImage = reader.result as Uint8List?;
           String fileName = widget.parent.storePath + "/" + file.name;
           print("subimos " + fileName);
-          firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref(fileName);
+          firebase_storage.Reference ref =
+              firebase_storage.FirebaseStorage.instance.ref(fileName);
           firebase_storage.UploadTask uploadTask = ref.putData(uploadedImage!);
           firebase_storage.TaskSnapshot task = await uploadTask;
           print("subido");
@@ -161,9 +169,14 @@ class __UploadDialogState extends State<_UploadDialog> {
       width: 800,
       height: 700,
       padding: EdgeInsets.all(50),
-      decoration: BoxDecoration(shape: BoxShape.rectangle, color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [
-        BoxShadow(color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
-      ]),
+      decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
+          ]),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[

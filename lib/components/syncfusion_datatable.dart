@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -8,7 +8,12 @@ class SyncfusionDataTable extends StatelessWidget {
   final List<DocumentSnapshot> docs;
   final Function onTap;
   final DataGridController _controller = DataGridController();
-  SyncfusionDataTable({Key? key, required this.columns, required this.docs, required this.onTap}) : super(key: key);
+  SyncfusionDataTable(
+      {Key? key,
+      required this.columns,
+      required this.docs,
+      required this.onTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +23,8 @@ class SyncfusionDataTable extends StatelessWidget {
         allowColumnsResizing: true,
         selectionMode: SelectionMode.single,
         onCellTap: (details) {
-          if (_controller.selectedIndex == details.rowColumnIndex.rowIndex - 1) {
+          if (_controller.selectedIndex ==
+              details.rowColumnIndex.rowIndex - 1) {
             onTap(details.rowColumnIndex.rowIndex - 1);
           }
         },
@@ -28,7 +34,10 @@ class SyncfusionDataTable extends StatelessWidget {
                 allowSorting: true,
                 columnWidthMode: ColumnWidthMode.fill,
                 columnName: col.field,
-                label: Container(padding: EdgeInsets.all(16.0), alignment: Alignment.centerLeft, child: Text(col.label))))
+                label: Container(
+                    padding: EdgeInsets.all(16.0),
+                    alignment: Alignment.centerLeft,
+                    child: Text(col.label))))
             .toList());
   }
 }
@@ -47,7 +56,8 @@ class _DataSource extends DataGridSource {
         }).toList());
       }).toList();
 
-  ColumnModule getColumnModuleByField(String field) => columns.firstWhere((element) => element.field == field);
+  ColumnModule getColumnModuleByField(String field) =>
+      columns.firstWhere((element) => element.field == field);
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
@@ -56,7 +66,8 @@ class _DataSource extends DataGridSource {
       return Container(
           alignment: Alignment.centerRight,
           padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: getColumnModuleByField(dataGridCell.columnName).getListContent(dataGridCell.value));
+          child: getColumnModuleByField(dataGridCell.columnName)
+              .getListContent(dataGridCell.value));
     }).toList());
   }
 }

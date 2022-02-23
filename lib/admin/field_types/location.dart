@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class FieldTypeLocation extends FieldType {
   TextEditingController latitude = TextEditingController();
   TextEditingController longitude = TextEditingController();
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
+      ColumnModule column, Function onChange) {
     var value = values[column.field];
     GeoPoint position;
     if (value == null) {
@@ -38,7 +39,8 @@ class FieldTypeLocation extends FieldType {
                 },
                 */
                 onSaved: (val) {
-                  GeoPoint geoPoint = GeoPoint(double.parse(latitude.text), double.parse(longitude.text));
+                  GeoPoint geoPoint = GeoPoint(double.parse(latitude.text),
+                      double.parse(longitude.text));
                   if (onChange != null) onChange(geoPoint);
                 })),
         SizedBox(
@@ -84,7 +86,8 @@ class _LocationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    newPosition = LatLng(double.parse(parent.latitude.text), double.parse(parent.longitude.text));
+    newPosition = LatLng(double.parse(parent.latitude.text),
+        double.parse(parent.longitude.text));
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -101,9 +104,14 @@ class _LocationDialog extends StatelessWidget {
       width: 800,
       height: 700,
       padding: EdgeInsets.all(50),
-      decoration: BoxDecoration(shape: BoxShape.rectangle, color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [
-        BoxShadow(color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
-      ]),
+      decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
+          ]),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -126,7 +134,11 @@ class _LocationDialog extends StatelessWidget {
             child: Container(
                 child: GoogleMap(
               mapType: MapType.hybrid,
-              initialCameraPosition: CameraPosition(bearing: 192.8334901395799, target: newPosition, tilt: 59.440717697143555, zoom: 15),
+              initialCameraPosition: CameraPosition(
+                  bearing: 192.8334901395799,
+                  target: newPosition,
+                  tilt: 59.440717697143555,
+                  zoom: 15),
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
               },
