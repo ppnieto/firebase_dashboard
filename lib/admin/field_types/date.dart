@@ -60,7 +60,7 @@ class FieldTypeDate extends FieldType {
         },
         onSaved: (val) {
           if (val!.isNotEmpty) {
-            var tmp = new DateFormat('dd/MM/yyyy').parse(val!);
+            var tmp = new DateFormat('dd/MM/yyyy').parse(val);
             onChange(Timestamp.fromDate(tmp));
           }
         },

@@ -6,37 +6,67 @@ import 'package:data_table_2/paginated_data_table_2.dart';
 import 'package:flutter/material.dart';
 
 class AdminDataTable extends StatefulWidget {
-  final AdminScreenState adminScreen;
-  AdminDataTable({Key? key, required this.adminScreen}) : super(key: key);
+  AdminDataTable({Key? key}) : super(key: key);
 
   @override
   State<AdminDataTable> createState() => _AdminDataTableState();
 }
 
 class _AdminDataTableState extends State<AdminDataTable> {
+  void selectRow(BuildContext context, int index, DocumentSnapshot object) {
+    print("select row $index");
+    AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
+    if (adminScreenState == null) throw new Exception("No encuentro AdminScreenState!!!");
+
+    setState(() {
+      adminScreenState.indexSelected.clear();
+      adminScreenState.indexSelected.add(index);
+      adminScreenState.rowsSelected.clear();
+      adminScreenState.rowsSelected.add(object);
+    });
+  }
+
+  void multiselectRow(BuildContext context, int index, DocumentSnapshot object, bool add) {
+    print("multiSelectRow $index $add");
+    AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
+    if (adminScreenState == null) throw new Exception("No encuentro AdminScreenState!!!");
+    if (add) {
+      setState(() {
+        adminScreenState.indexSelected.add(index);
+        adminScreenState.rowsSelected.add(object);
+      });
+    } else {
+      setState(() {
+        adminScreenState.indexSelected.remove(index);
+        adminScreenState.rowsSelected.removeWhere((obj) => obj.reference.path == object.reference.path);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    AdminScreen parent = widget.adminScreen.widget;
+    AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
+    if (adminScreenState == null) return Text("Error, no encuentro AdminScreen");
 
     return PaginatedDataTable2(
         onPageChanged: (page) {
           setState(() {});
         },
-        sortAscending: widget.adminScreen.sortAscending,
-        sortColumnIndex: widget.adminScreen.sortColumnIndex,
-        showCheckboxColumn: widget.adminScreen.canSelect,
+        sortAscending: adminScreenState.sortAscending,
+        sortColumnIndex: adminScreenState.sortColumnIndex,
+        showCheckboxColumn: adminScreenState.canSelect,
         columnSpacing: 0.0,
         dataRowHeight: 38,
-        minWidth: widget.adminScreen.widget.minWidth,
+        minWidth: adminScreenState.widget.minWidth,
         lmRatio: 1.8,
         autoRowsToHeight: true,
-        columns: parent.module.showingColumns.map((column) {
+        columns: adminScreenState.widget.module.showingColumns.map((column) {
               return DataColumn2(
                 onSort: (int column, bool ascending) {
-                  if (parent.module.canSort && parent.module.showingColumns[column].canSort) {
-                    widget.adminScreen.setState(() {
-                      widget.adminScreen.sortAscending = ascending;
-                      widget.adminScreen.sortColumnIndex = column;
+                  if (adminScreenState.widget.module.canSort && adminScreenState.widget.module.showingColumns[column].canSort) {
+                    adminScreenState.setState(() {
+                      adminScreenState.sortAscending = ascending;
+                      adminScreenState.sortColumnIndex = column;
                     });
                   }
                 },
@@ -44,55 +74,43 @@ class _AdminDataTableState extends State<AdminDataTable> {
                 label: Text(column.label),
               );
             }).toList() +
-            (parent.module.canRemove || parent.module.getActions != null ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)] : []),
+            (adminScreenState.widget.module.canRemove || adminScreenState.widget.module.getActions != null
+                ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)]
+                : []),
         source: MyDataTableSource(
-            docs: widget.adminScreen.docs!,
+            docs: adminScreenState.docs!,
             context: context,
-            screen: widget.adminScreen,
+            parent: this,
             onTap: (index) {
-              widget.adminScreen.setState(() {
-                widget.adminScreen.detalle = widget.adminScreen.docs![index];
-                widget.adminScreen.updateData = widget.adminScreen.detalle?.data() as Map<String, dynamic>?;
-                widget.adminScreen.tipo = TipoPantalla.detalle;
-              });
+              adminScreenState.showDetalle(index);
             },
-            showFields: widget.adminScreen.columnasSeleccionadas));
+            showFields: adminScreenState.columnasSeleccionadas));
   }
 }
 
 class MyDataTableSource extends DataTableSource {
+  _AdminDataTableState parent;
   List<DocumentSnapshot> docs;
   BuildContext context;
-  AdminScreenState screen;
   Function onTap;
   Map<String, bool> showFields;
-  MyDataTableSource({
-    required this.docs,
-    required this.screen,
-    required this.context,
-    required this.onTap,
-    required this.showFields,
-  });
+
+  MyDataTableSource({required this.docs, required this.context, required this.onTap, required this.showFields, required this.parent});
+
   @override
   DataRow getRow(int index) {
-    Module module = screen.widget.module;
+    AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
+    if (adminScreenState == null) throw new Exception("No encuentro admin screen state!!!");
+
+    Module module = adminScreenState.widget.module;
 
     DocumentSnapshot _object = docs[index];
 
     return DataRow2.byIndex(
-        selected: screen.widget.module.indexSelected.contains(index),
+        selected: adminScreenState.indexSelected.contains(index),
         index: index,
         onSelectChanged: (value) {
-          print("onSelectChanged ${screen.widget.module.indexSelected}");
-          screen.setState(() {
-            if (value ?? false) {
-              screen.widget.module.indexSelected.add(index);
-              screen.widget.module.rowsSelected.add(_object);
-            } else {
-              screen.widget.module.indexSelected.remove(index);
-              screen.widget.module.rowsSelected.removeWhere((obj) => obj.reference.path == _object.reference.path);
-            }
-          });
+          parent.multiselectRow(context, index, _object, value ?? false);
         },
         cells: module.columns
                 .where((element) => element.listable && this.showFields.containsKey(element.field) && this.showFields[element.field]!)
@@ -102,13 +120,8 @@ class MyDataTableSource extends DataTableSource {
               return DataCell(column.getListContent(_object) ?? SizedBox.shrink(),
                   onTap: column.clickToDetail
                       ? () {
-                          if (screen.widget.selectPreEdit && screen.widget.module.indexSelected.contains(index) == false) {
-                            screen.setState(() {
-                              screen.widget.module.indexSelected.clear();
-                              screen.widget.module.indexSelected.add(index);
-                              screen.widget.module.rowsSelected.clear();
-                              screen.widget.module.rowsSelected.add(_object);
-                            });
+                          if (adminScreenState.widget.selectPreEdit && adminScreenState.indexSelected.contains(index) == false) {
+                            parent.selectRow(context, index, _object);
                           } else {
                             if (module.canEdit) {
                               this.onTap(index);
