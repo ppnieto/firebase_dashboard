@@ -34,19 +34,48 @@ class DashboardMainScreen extends StatefulWidget {
 class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTickerProviderStateMixin {
   bool isSidebar = false;
   int active = 0;
-  List<Widget> currentWidget = [SizedBox.shrink()];
+  List<Widget> currentWidget = [];
   bool isMenu = true;
+  final List<Widget> screens = [];
 
   @override
   void initState() {
     super.initState();
+
     DashboardMainScreen.dashboardTheme = widget.theme;
   }
 
   void showScreen(Widget screen) {
+    print("showScreen");
+    screens.add(screen);
+    setState(() {
+      currentWidget = [screen];
+    });
+  }
+
+  void popScreen() {
+    print("popScreen");
+    screens.remove(screens.last);
+    setState(() {
+      currentWidget = [screens.last];
+    });
+  }
+
+  void setScreen(Widget screen) {
+    print("setScreen");
+    screens.clear();
+    screens.add(screen);
     setState(() {
       currentWidget = [SizedBox.shrink(), screen];
     });
+  }
+
+  MenuBase? findMenu(String id) {
+    Iterable<MenuBase>? itMenus = this.widget.menus.where((element) => element.id == id);
+    if (itMenus.isNotEmpty) {
+      return itMenus.first;
+    }
+    return null;
   }
 
   @override
@@ -60,6 +89,18 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
         // executes after build
       });
     }
+
+    if (currentWidget.length == 0) {
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        if (widget.menus.first is Menu) {
+          Menu m = widget.menus.first as Menu;
+          showScreen(m.child);
+        }
+
+        // executes after build
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: widget.theme.appBar1BackgroundColor!,
@@ -118,13 +159,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
                       ? MediaQuery.of(context).size.width
                       : MediaQuery.of(context).size.width - 310) -
                   (isSidebar ? widget.sideBarWidth : 0),
-              /*
-            child: AnimatedSwitcher(
-              child: currentWidget[0], // mainContents[index],
-              duration: Duration(milliseconds: 20),
-            ),
-            */
-              child: PageView(children: [currentWidget[0]])),
+              child: PageView(children: [currentWidget.isNotEmpty ? currentWidget.first : SizedBox.shrink()])),
           isSidebar ? Container(width: widget.sideBarWidth, child: widget.sideBar) : SizedBox.shrink(),
         ],
       ),
@@ -158,28 +193,24 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
                 leading: Icon(menu.iconData, color: widget.theme.menuTextColor),
                 children: menu.children!.map<Widget>((submenu) {
                   Menu m = submenu as Menu;
-                  bool isSelected = m.child.hashCode == currentWidget[0].hashCode; //index == indexes[menu.hashCode];
+                  bool isSelected = m.child.hashCode == (screens.isNotEmpty ? screens.first.hashCode : ""); //index == indexes[menu.hashCode];
 
                   return submenu.build(context, isSelected, widget.theme, () {
-                    setState(() {
-                      currentWidget = [SizedBox.shrink(), m.child];
-                    });
+                    setScreen(m.child);
+
                     if (drawerStatus) Navigator.pop(context);
                   });
                 }).toList())
             : Container();
       } else {
         Menu m = menu as Menu;
-        bool isSelected = m.child.hashCode == currentWidget[0].hashCode; //index == indexes[menu.hashCode];
-
+        bool isSelected = m.child.hashCode == (screens.isNotEmpty ? screens.first.hashCode : ""); //index == indexes[menu.hashCode];
         return hasRole
             ? menu.build(context, isSelected, widget.theme, () {
-                setState(() {
-                  currentWidget = [SizedBox.shrink(), m.child];
-                });
+                setScreen(m.child);
                 if (drawerStatus) Navigator.pop(context);
               })
-            : Container();
+            : SizedBox.shrink();
       }
     }).toList());
   }

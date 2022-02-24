@@ -101,11 +101,9 @@ class FieldTypeSelect extends FieldType {
               value: value == null ? initialValue : value,
               isExpanded: true,
               items: items,
-              onChanged: (frozenValue != null && value == frozenValue) || column.editable == false
-                  ? null
-                  : (val) {
-                      onFilter(val);
-                    },
+              onChanged: (val) {
+                onFilter(val);
+              },
               validator: (val) {
                 if (column.mandatory && val == null) return "Campo obligatorio";
                 if (validate != null) return validate!(initialValue, val);

@@ -58,7 +58,6 @@ class AdminScreenState extends State<AdminScreen> {
     print("init admin " + widget.module.name);
     _orderBy = widget.module.orderBy;
 
-    //rowsPerPage = widget.module.rowsPerPage;
     canSelect = widget.module.canSelect;
 
     widget.module.rowsSelected = [];

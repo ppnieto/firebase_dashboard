@@ -60,34 +60,23 @@ class FieldTypeDate extends FieldType {
         },
         onSaved: (val) {
           if (val!.isNotEmpty) {
-            var tmp = new DateFormat('dd/MM/yyyy').parse(val!);
+            var tmp = new DateFormat('dd/MM/yyyy').parse(val);
             onChange(Timestamp.fromDate(tmp));
           }
         },
       )),
-      IconButton(
-        icon: Icon(FontAwesomeIcons.calendar),
-        onPressed: () async {
-          final DateTime? picked = await showDatePicker(
-              context: context,
-              firstDate: DateTime(2020, 1),
-              lastDate: DateTime(2101),
-              initialDate: dateTime,
-              builder: (BuildContext context, Widget? child) {
-                return Theme(data: ThemeData(), child: child!);
-              });
-          if (picked != null) {
-            txt.text = f.format(picked);
-            onChange(Timestamp.fromDate(picked));
-          }
-        },
-      ),
       if (column.editable)
         IconButton(
           icon: Icon(FontAwesomeIcons.calendar),
           onPressed: () async {
-            final DateTime? picked =
-                await showDatePicker(context: context, firstDate: DateTime(2020, 1), lastDate: DateTime(2101), initialDate: dateTime);
+            final DateTime? picked = await showDatePicker(
+                context: context,
+                firstDate: DateTime(2020, 1),
+                lastDate: DateTime(2101),
+                initialDate: dateTime,
+                builder: (BuildContext context, Widget? child) {
+                  return Theme(data: ThemeData(), child: child!);
+                });
             if (picked != null) {
               txt.text = f.format(picked);
               onChange(Timestamp.fromDate(picked));

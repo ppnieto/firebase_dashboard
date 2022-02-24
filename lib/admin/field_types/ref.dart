@@ -8,6 +8,7 @@ class FieldTypeRef extends FieldType {
   final String? collection;
   final String refLabel;
   final Function? getFilter;
+  final Query Function(Query)? filterFunction;
   final dynamic initialValue;
   final Function? getQueryCollection;
   final Function? getStream;
@@ -26,6 +27,7 @@ class FieldTypeRef extends FieldType {
       this.getQueryCollection,
       this.getStream,
       this.otherRef,
+      this.filterFunction,
       this.search = false,
       this.empty /* = const Text("<sin asignar>", style: TextStyle(color: Colors.red))*/});
 
@@ -89,11 +91,15 @@ class FieldTypeRef extends FieldType {
   Query getQuery() {
     Query query = getCollection();
     Map<String, dynamic> filters = getFilter != null ? getFilter!() : {};
-    if (filters != null) {
-      for (MapEntry entry in filters.entries) {
-        query = query.where(entry.key, isEqualTo: entry.value);
-      }
+
+    for (MapEntry entry in filters.entries) {
+      query = query.where(entry.key, isEqualTo: entry.value);
     }
+
+    if (this.filterFunction != null) {
+      query = filterFunction!(query);
+    }
+
     return query;
   }
 

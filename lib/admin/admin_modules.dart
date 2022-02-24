@@ -37,7 +37,7 @@ class Module {
   final Function? getQueryCollection;
   final Function? doFilter;
   final String? orderBy;
-  final Function? addFilter;
+  final Query Function(Query)? addFilter;
   final String? reverseOrderBy;
   final Function? onSave;
   final Function? onUpdated;
@@ -136,8 +136,8 @@ abstract class MenuBase {
   String label;
   IconData iconData;
   String? role;
-  //int idx;
-  MenuBase({required this.label, required this.iconData, this.role});
+  String? id;
+  MenuBase({required this.label, required this.iconData, this.role, this.id});
 
   @override
   int get hashCode {
@@ -162,7 +162,8 @@ class Menu extends MenuBase {
     required String label,
     required IconData iconData,
     String? role,
-  }) : super(label: label, iconData: iconData, role: role);
+    String? id,
+  }) : super(label: label, iconData: iconData, role: role, id: id);
 
   @override
   build(BuildContext context, bool isSelected, DashboardTheme theme, Function press) {
