@@ -16,6 +16,7 @@ abstract class FieldType {
       if (fields.length != 2) return "Error con sintaxis de campo $fieldName";
       return data[fields[0]][fields[1]];
     } else {
+      if (!data.containsKey(fieldName)) return defValue;
       return data[fieldName];
     }
   }

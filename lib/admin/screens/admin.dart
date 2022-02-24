@@ -53,6 +53,8 @@ class AdminScreenState extends State<AdminScreen> {
   bool sortAscending = true;
   int? sortColumnIndex;
   Map<String, bool> columnasSeleccionadas = {};
+  List<int> indexSelected = [];
+  List<DocumentSnapshot> rowsSelected = [];
 
   Future<bool> initAdmin() async {
     print("init admin " + widget.module.name);
@@ -60,8 +62,8 @@ class AdminScreenState extends State<AdminScreen> {
 
     canSelect = widget.module.canSelect;
 
-    widget.module.rowsSelected = [];
-    widget.module.indexSelected = [];
+    rowsSelected = [];
+    indexSelected = [];
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
@@ -177,14 +179,12 @@ class AdminScreenState extends State<AdminScreen> {
             var varA = column.type.getCompareValue(a, column);
             var varB = column.type.getCompareValue(b, column);
 
-            //print("$varA === $varB");
-
             return this.sortAscending ? varA?.compareTo(varB) : varB?.compareTo(varA);
           });
         }
 
         if (1 == 1) {
-          return AdminDataTable(adminScreen: this);
+          return AdminDataTable();
         } else {
           return SyncfusionDataTable(
             columns: widget.module.columns,
@@ -316,6 +316,15 @@ class AdminScreenState extends State<AdminScreen> {
     print("show listado");
     setState(() {
       this.tipo = TipoPantalla.listado;
+    });
+  }
+
+  void showDetalle(int index) {
+    print("show detalle");
+    setState(() {
+      this.detalle = this.docs![index];
+      this.updateData = this.detalle?.data() as Map<String, dynamic>?;
+      this.tipo = TipoPantalla.detalle;
     });
   }
 
@@ -612,7 +621,7 @@ class AdminScreenState extends State<AdminScreen> {
       List<Widget> result = [];
 
       if (widget.module.getScaffoldActions != null) {
-        result.addAll(widget.module.getScaffoldActions!(widget.module, context));
+        result.addAll(widget.module.getScaffoldActions!(context));
       }
 
       if (widget.module.globalSearch && tipo == TipoPantalla.listado) {

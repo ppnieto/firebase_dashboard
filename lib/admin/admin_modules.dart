@@ -52,9 +52,7 @@ class Module {
   final bool canSort;
   final bool exportExcel;
   final List<Widget> Function(DocumentSnapshot object, BuildContext context)? getActions;
-  final List<Widget> Function(Module module, BuildContext context)? getScaffoldActions;
-  List<int> indexSelected = [];
-  List<DocumentSnapshot> rowsSelected = [];
+  final List<Widget> Function(BuildContext context)? getScaffoldActions;
 
   List<ColumnModule> columns;
   //List<ColumnModule> get listableColumns => columns.where((col) => col.listable).toList();
