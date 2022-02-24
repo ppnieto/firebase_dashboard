@@ -164,12 +164,10 @@ class Menu extends MenuBase {
 
   @override
   build(BuildContext context, bool isSelected, DashboardTheme? theme, Function press) {
-    bool ident = false;
-
     return InkWell(
       onTap: () => press(),
       child: Container(
-        padding: EdgeInsets.only(left: ident ? 50 : 20),
+        padding: EdgeInsets.only(left: 20),
         color: isSelected ? theme?.menuSelectedBackgroundColor : theme?.menuBackgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,

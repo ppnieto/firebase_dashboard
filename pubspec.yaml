@@ -34,7 +34,6 @@ dependencies:
   textfield_tags: any
   syncfusion_flutter_datagrid: ^19.3.48
   dropdown_search: any
-  fluent_ui: ^3.9.0
 
 
 

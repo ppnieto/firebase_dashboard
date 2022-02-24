@@ -1,4 +1,5 @@
 import 'package:example/listado1.dart';
+import 'package:example/listado2.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class HomeScreen extends StatelessWidget {
         Menu(
           label: "Listado2",
           iconData: Icons.add_business_rounded,
-          child: Listado1Screen(),
+          child: Listado2Screen(),
         )
       ],
     );
