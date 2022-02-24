@@ -42,19 +42,30 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
   @override
   void initState() {
     super.initState();
+
     DashboardMainScreen.dashboardTheme = widget.theme;
   }
 
   void showScreen(Widget screen) {
+    print("showScreen");
     setState(() {
       currentWidget = screen;
     });
+
     _navigatorKey.currentState!.pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (BuildContext context) => screen,
       ),
       (route) => false,
     );
+  }
+
+  MenuBase? findMenu(String id) {
+    Iterable<MenuBase>? itMenus = this.widget.menus.where((element) => element.id == id);
+    if (itMenus.isNotEmpty) {
+      return itMenus.first;
+    }
+    return null;
   }
 
   @override
@@ -169,7 +180,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
                 showScreen(m.child);
                 if (drawerStatus) Navigator.pop(context);
               })
-            : Container();
+            : SizedBox.shrink();
       }
     }).toList());
   }

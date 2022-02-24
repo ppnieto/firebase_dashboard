@@ -10,12 +10,7 @@ class FieldTypeSelect extends FieldType {
   final Function? validate;
   final String? frozenValue;
 
-  FieldTypeSelect(
-      {required this.options,
-      this.unselected,
-      this.initialValue,
-      this.validate,
-      this.frozenValue});
+  FieldTypeSelect({required this.options, this.unselected, this.initialValue, this.validate, this.frozenValue});
 
   @override
   String getSyncStringContent(DocumentSnapshot _object, ColumnModule column) {
@@ -49,8 +44,7 @@ class FieldTypeSelect extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
-      ColumnModule column, Function onChange) {
+  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
     var value = values[column.field];
 
     return Container(
@@ -65,8 +59,7 @@ class FieldTypeSelect extends FieldType {
               enabled: !(frozenValue != null && frozenValue == e.key),
             );
           }).toList(),
-          onChanged: (frozenValue != null && value == frozenValue) ||
-                  column.editable == false
+          onChanged: (frozenValue != null && value == frozenValue) || column.editable == false
               ? null
               : (val) {
                   onChange(val);
@@ -99,8 +92,7 @@ class FieldTypeSelect extends FieldType {
         }).toList();
 
     return Theme(
-      data: Theme.of(context)
-          .copyWith(inputDecorationTheme: InputDecorationTheme()),
+      data: Theme.of(context).copyWith(inputDecorationTheme: InputDecorationTheme()),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
         child: Container(
@@ -109,8 +101,7 @@ class FieldTypeSelect extends FieldType {
               value: value == null ? initialValue : value,
               isExpanded: true,
               items: items,
-              onChanged: (frozenValue != null && value == frozenValue) ||
-                      column.editable == false
+              onChanged: (frozenValue != null && value == frozenValue) || column.editable == false
                   ? null
                   : (val) {
                       onFilter(val);

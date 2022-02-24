@@ -49,6 +49,7 @@ abstract class FieldType {
   }
 
   String getSyncStringContent(DocumentSnapshot _object, ColumnModule column) {
+    //return getFieldFromMap(_object.data() as Map<String, dynamic>, column.field, "-");
     return _object.getFieldAdm(column.field, "-").toString();
   }
 
@@ -83,8 +84,18 @@ abstract class FieldType {
 
 extension SafeFieldAdmin on DocumentSnapshot {
   dynamic getFieldAdm(String fieldName, dynamic defValue) {
+    bool hasdot = false;
+    String subfield = "";
+    if (fieldName.contains('.')) {
+      List<String> fields = fieldName.split('.');
+      fieldName = fields[0];
+      subfield = fields[1];
+      hasdot = true;
+    }
+
     if (!hasFieldAdm(fieldName)) return defValue;
-    return (this.data() as Map)[fieldName];
+    Map data = this.data() as Map;
+    return hasdot ? data[fieldName][subfield] : data[fieldName];
   }
 
   bool hasFieldAdm(String fieldName) {
