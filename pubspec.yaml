@@ -30,10 +30,11 @@ dependencies:
   flutter_tags: ^0.4.9+1
   flutter_typeahead: ^3.2.0
   excel: any
-  data_table_2: any
+  data_table_2: ^2.2.1
   textfield_tags: any
   syncfusion_flutter_datagrid: ^19.3.48
   dropdown_search: any
+  fluent_ui: ^3.9.0
 
 
 

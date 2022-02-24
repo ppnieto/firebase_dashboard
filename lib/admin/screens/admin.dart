@@ -587,7 +587,7 @@ class AdminScreenState extends State<AdminScreen> {
       Color highlightColor = context
               .findAncestorStateOfType<DashboardMainScreenState>()
               ?.widget
-              .theme
+              .theme!
               .appBar1TextColor ??
           Theme.of(context).primaryColor;
 
