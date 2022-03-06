@@ -8,17 +8,12 @@ class FieldTypeMemo extends FieldType {
   FieldTypeMemo({this.maxLines = 4, this.listWidth});
 
   @override
-  getListContent(
-          DocumentSnapshot _object, ColumnModule column) =>
-      listWidth != null
-          ? Container(
-              width: this.listWidth,
-              child: super.getListContent(_object, column))
-          : super.getListContent(_object, column);
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) => listWidth != null
+      ? Container(width: this.listWidth, child: super.getListContent(context, _object, column))
+      : super.getListContent(context, _object, column);
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
-      ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
     return TextFormField(
         enabled: column.editable,
@@ -36,7 +31,7 @@ class FieldTypeMemo extends FieldType {
         },
         */
         onSaved: (val) {
-          if (onChange != null) onChange(val);
+          updateData(context, column, val);
         });
   }
 }

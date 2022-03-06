@@ -11,7 +11,7 @@ class FieldTypeTags extends FieldType {
   FieldTypeTags({this.hint = ""});
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
     List<String> valueString = [];
     if (value is List) {
@@ -34,11 +34,11 @@ class FieldTypeTags extends FieldType {
         onTag: (tag) {
           print("new tag $tag");
           valueString.add(tag);
-          onChange(valueString);
+          updateData(context, column, valueString);
         },
         onDelete: (tag) {
           valueString.remove(tag);
-          onChange(valueString);
+          updateData(context, column, valueString);
         },
         validator: (tag) {
           /*
@@ -51,7 +51,7 @@ class FieldTypeTags extends FieldType {
   }
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
       var value = _object[column.field];
       List<String> valueString = [];

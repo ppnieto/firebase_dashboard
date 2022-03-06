@@ -12,7 +12,7 @@ class FieldTypeChips extends FieldType {
   FieldTypeChips({this.hint = "", required this.options});
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
     List<String> valueString = [];
     if (value is List) {
@@ -30,7 +30,7 @@ class FieldTypeChips extends FieldType {
         textStyle: TextStyle(color: Theme.of(context).primaryColor),
         headerColor: Theme.of(context).primaryColor,
         onSaved: (val) {
-          onChange(val);
+          updateData(context, column, val);
         },
         items: this.options.entries.map((entry) => MultiSelectItem(entry.key, entry.value)).toList(),
       ),
@@ -38,7 +38,7 @@ class FieldTypeChips extends FieldType {
   }
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
       var value = _object[column.field];
       List<String> valueString = [];

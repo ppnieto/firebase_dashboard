@@ -29,11 +29,9 @@ class FieldTypeText extends FieldType {
       this.nullWidget});
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (hasField(_object, column.field)) {
-      String texto = showTextFunction == null
-          ? getField(_object, column.field, "").toString()
-          : showTextFunction!(_object[column.field]);
+      String texto = showTextFunction == null ? getField(_object, column.field, "").toString() : showTextFunction!(_object[column.field]);
       if (this.ellipsisLength > 0 && texto.length >= this.ellipsisLength) {
         return Text(texto);
       } else {
@@ -54,8 +52,7 @@ class FieldTypeText extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
-      ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = getFieldFromMap(values, column.field, null);
     value = showTextFunction == null ? value : showTextFunction!(value);
 
@@ -63,7 +60,7 @@ class FieldTypeText extends FieldType {
     return Focus(
         onFocusChange: (hasFocus) {
           if (!hasFocus) {
-            if (onChange != null) onChange(controller.text);
+            updateData(context, column, controller.text);
           }
         },
         child: TextFormField(
@@ -72,10 +69,7 @@ class FieldTypeText extends FieldType {
             obscureText: this.obscureText,
             enableSuggestions: this.obscureText,
             autocorrect: this.obscureText,
-            decoration: InputDecoration(
-                labelText: column.label,
-                filled: !column.editable,
-                fillColor: Theme.of(context).canvasColor.withAlpha(1)),
+            decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Theme.of(context).canvasColor.withAlpha(1)),
             validator: (value) {
               if (regexp != null) {
                 if (!regexp!.hasMatch(value ?? "")) {
@@ -83,28 +77,24 @@ class FieldTypeText extends FieldType {
                 }
               }
 
-              if (column.mandatory && (value == null || value.isEmpty))
-                return "Campo obligatorio";
+              if (column.mandatory && (value == null || value.isEmpty)) return "Campo obligatorio";
               return null;
             },
             onSaved: (val) {
               if (emptyNull) {
                 val = (val ?? "").isEmpty ? null : val;
               }
-              if (onChange != null) onChange(val);
+              updateData(context, column, val);
             }));
   }
 
   @override
-  getFilterContent(value, ColumnModule column, Function onFilter) {
+  getFilterContent(BuildContext context, value, ColumnModule column, Function onFilter) {
     return Container(
       padding: EdgeInsets.all(10),
       width: 250,
       child: TextField(
-        decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            hintText: "Filtrar por " + column.label),
+        decoration: InputDecoration(filled: true, fillColor: Colors.white, hintText: "Filtrar por " + column.label),
         onChanged: (val) {
           if (onFilter != null) onFilter(val);
         },

@@ -2,17 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_dashboard/admin/screens/admin.dart';
 import 'package:data_table_2/data_table_2.dart';
-import 'package:data_table_2/paginated_data_table_2.dart';
 import 'package:flutter/material.dart';
 
-class AdminDataTable extends StatefulWidget {
-  AdminDataTable({Key? key}) : super(key: key);
+class AsyncAdminDataTable extends StatefulWidget {
+  AsyncAdminDataTable({Key? key}) : super(key: key);
 
   @override
-  State<AdminDataTable> createState() => _AdminDataTableState();
+  State<AsyncAdminDataTable> createState() => _AsyncAdminDataTableState();
 }
 
-class _AdminDataTableState extends State<AdminDataTable> {
+class _AsyncAdminDataTableState extends State<AsyncAdminDataTable> {
   void selectRow(BuildContext context, int index, DocumentSnapshot object) {
     print("select row $index");
     AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
@@ -48,9 +47,11 @@ class _AdminDataTableState extends State<AdminDataTable> {
     AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
     if (adminScreenState == null) return Text("Error, no encuentro AdminScreen");
 
-    return PaginatedDataTable2(
+    print("columnas en lista: " + adminScreenState.widget.module.showingColumns.length.toString());
+
+    return AsyncPaginatedDataTable2(
         onPageChanged: (page) {
-          setState(() {});
+          //setState(() {});
         },
         sortAscending: adminScreenState.sortAscending,
         sortColumnIndex: adminScreenState.sortColumnIndex,
@@ -78,7 +79,6 @@ class _AdminDataTableState extends State<AdminDataTable> {
                 ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)]
                 : []),
         source: MyDataTableSource(
-            docs: adminScreenState.docs!,
             context: context,
             parent: this,
             onTap: (index) {
@@ -89,80 +89,72 @@ class _AdminDataTableState extends State<AdminDataTable> {
   }
 }
 
-class MyDataTableSource extends DataTableSource {
-  _AdminDataTableState parent;
-  List<DocumentSnapshot> docs;
+class MyDataTableSource extends AsyncDataTableSource {
+  _AsyncAdminDataTableState parent;
   BuildContext context;
   Function onTap;
   Map<String, bool> showFields;
 
-  MyDataTableSource({required this.docs, required this.context, required this.onTap, required this.showFields, required this.parent});
+  MyDataTableSource({required this.context, required this.onTap, required this.showFields, required this.parent});
 
   @override
-  DataRow getRow(int index) {
+  Future<AsyncRowsResponse> getRows(int start, int end) async {
+    print("get rows $start / $end");
     AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
     if (adminScreenState == null) throw new Exception("No encuentro admin screen state!!!");
 
-    Module module = adminScreenState.widget.module;
+    Query query = adminScreenState.getQuery().limit(adminScreenState.docs!.length + end);
+    if (adminScreenState.docs?.isNotEmpty ?? false) {
+      print("start after " + adminScreenState.docs!.last.reference.path);
+    }
+    QuerySnapshot qs = await query.get();
+    List<DataRow> rows = [];
 
-    DocumentSnapshot _object = docs[index];
+    adminScreenState.docs?.clear();
+    adminScreenState.docs?.addAll(qs.docs);
+    try {
+      for (int i = start; i < start + end; i++) {
+        DocumentSnapshot doc = adminScreenState.docs![i];
+        //adminScreenState.docs!.where((element) => element.reference.path == doc.reference.path).isEmpty) {
+        print(doc.reference.path);
+        rows.add(DataRow2(
+            cells: adminScreenState.widget.module.showingColumns.map((column) {
+          //cells: module.columns.where((element) => element.listable && this.showFields.containsKey(element.field) && this.showFields[element.field]!).map<DataCell>((column) {
+          // set context
+          return DataCell(column.type.getListContent(context, doc, column) ?? SizedBox.shrink(),
+              onTap: column.clickToDetail
+                  ? () {
+                      /*
+                    if (adminScreenState.widget.selectPreEdit && adminScreenState.indexSelected.contains(index) == false) {
+                      parent.selectRow(context, index, _object);
+                    } else {
+                      if (module.canEdit) {
+                        this.onTap(index);
+                      }
+                    }
+                    */
+                    }
+                  : null);
+        }).toList()));
+      }
+    } catch (e) {
+      print("error");
+    }
 
-    return DataRow2.byIndex(
-        selected: adminScreenState.indexSelected.contains(index),
-        index: index,
-        onSelectChanged: (value) {
-          parent.multiselectRow(context, index, _object, value ?? false);
-        },
-        cells: module.columns
-                .where((element) => element.listable && this.showFields.containsKey(element.field) && this.showFields[element.field]!)
-                .map<DataCell>((column) {
-              // set context
-              return DataCell(column.type.getListContent(context, _object, column) ?? SizedBox.shrink(),
-                  onTap: column.clickToDetail
-                      ? () {
-                          if (adminScreenState.widget.selectPreEdit && adminScreenState.indexSelected.contains(index) == false) {
-                            parent.selectRow(context, index, _object);
-                          } else {
-                            if (module.canEdit) {
-                              this.onTap(index);
-                            }
-                          }
-                        }
-                      : null);
-            }).toList() +
-            (module.canRemove || module.getActions != null
-                ? [
-                    DataCell(
-                      Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: (module.getActions == null ? <Widget>[] : module.getActions!(_object, context)) +
-                              (module.canRemove
-                                  ? [
-                                      IconButton(
-                                        icon: Icon(Icons.delete, color: Theme.of(context).highlightColor),
-                                        onPressed: () {
-                                          /*
-                                          doBorrar(context, _object.reference, () {
-                                            if (module.onRemove != null) {
-                                              module.onRemove!(_object);
-                                            }
-                                          });
-                                          */
-                                        },
-                                      ),
-                                    ]
-                                  : [])),
-                    )
-                  ]
-                : []));
+    for (var row in rows) {
+      print("columnas en fila: " + row.cells.length.toString());
+    }
+
+    return AsyncRowsResponse(rows.length, rows);
+    //return AsyncRowsResponse(rows.length < (end - start) ? rows.length : 150, rows);
   }
 
   @override
-  bool get isRowCountApproximate => false;
-
+  bool get isRowCountApproximate => true;
+/*
   @override
   int get rowCount => docs.length;
 
   @override
-  int get selectedRowCount => 0;
+  int get selectedRowCount => 0;*/
 }

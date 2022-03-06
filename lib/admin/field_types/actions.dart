@@ -8,19 +8,19 @@ class FieldTypeActions extends FieldType {
   FieldTypeActions({required this.actions});
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     return Container();
   }
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     return Row(
         children: actions.map((action) {
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 4),
         child: RaisedButton.icon(
             icon: Icon(action.iconData, color: Colors.white),
-            color: context != null ? Theme.of(this.context).primaryColor : Colors.blue,
+            color: context != null ? Theme.of(context).primaryColor : Colors.blue,
             label: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(action.title, style: TextStyle(color: Colors.white)),

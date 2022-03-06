@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
+import 'package:firebase_dashboard/admin/screens/admin.dart';
 import 'package:firebase_dashboard/theme.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -51,8 +52,10 @@ class Module {
   final bool canRemove;
   final bool canSort;
   final bool exportExcel;
+  final double? actionColumnWidth;
+  final List<String> fieldsForShowInSearchResult;
   final List<Widget> Function(DocumentSnapshot object, BuildContext context)? getActions;
-  final List<Widget> Function(BuildContext context)? getScaffoldActions;
+  final List<Widget> Function(BuildContext context, AdminScreenState state)? getScaffoldActions;
 
   List<ColumnModule> columns;
   //List<ColumnModule> get listableColumns => columns.where((col) => col.listable).toList();
@@ -80,11 +83,13 @@ class Module {
       this.canRemove = true,
       this.canSort = true,
       this.canSelect = false,
+      this.actionColumnWidth,
       this.onSave,
       this.onUpdated,
       this.onRemove,
       this.validation,
       this.getActions,
+      this.fieldsForShowInSearchResult = const [],
       this.getScaffoldActions}) {
     this.showingColumns = this.columns;
   }
@@ -103,6 +108,7 @@ class ColumnModule {
   bool filter;
   bool mandatory;
   ColumnSize size;
+  double? width;
   bool showLabelOnEdit;
   bool canSort;
 
@@ -118,16 +124,20 @@ class ColumnModule {
     this.showOnEdit = true,
     this.showLabelOnEdit = true,
     this.size = ColumnSize.M,
+    this.width,
     this.showOnNew = true,
     this.excellable = true,
     this.canSort = true,
   });
 
-  getListContent(DocumentSnapshot _object) => type.getListContent(_object, this);
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) =>
-      type.getEditContent(_object, values, column, onChange);
-  getFilterContent(value, Function onFilter) => type.getFilterContent(value, this, onFilter);
-  Future<String> getStringContent(DocumentSnapshot _object) => type.getStringContent(_object, this);
+  double getWidth() {
+    const Map<ColumnSize, double> widths = {
+      ColumnSize.S: 80,
+      ColumnSize.M: 140,
+      ColumnSize.L: 220,
+    };
+    return widths[this.size] ?? 80;
+  }
 }
 
 abstract class MenuBase {

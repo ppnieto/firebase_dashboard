@@ -14,18 +14,12 @@ class FieldTypeMultiref extends FieldType {
   final Function? getQueryCollection;
 
   late DocumentSnapshot object;
-  FieldTypeMultiref(
-      {this.collection,
-      required this.refLabel,
-      this.getFilter,
-      this.initialValue,
-      this.getQueryCollection});
+  FieldTypeMultiref({this.collection, required this.refLabel, this.getFilter, this.initialValue, this.getQueryCollection});
 
-  Widget getListWidget(String content, {TextStyle? style}) =>
-      Text(content, style: style);
+  Widget getListWidget(String content, {TextStyle? style}) => Text(content, style: style);
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
       var value = _object[column.field];
       if (value is List) {
@@ -74,8 +68,7 @@ class FieldTypeMultiref extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
-      ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var tmp = values[column.field];
     List<DocumentReference>? value = [];
     if (tmp is List) {
@@ -107,13 +100,10 @@ class FieldTypeMultiref extends FieldType {
             buttonText: Text("Seleccione " + column.label),
             title: Text("Seleccione " + column.label),
             initialValue: value,
-            items: snapshot.data!.docs
-                .map((e) => MultiSelectItem(e.reference, e.get(this.refLabel)))
-                .toSet()
-                .toList(),
+            items: snapshot.data!.docs.map((e) => MultiSelectItem(e.reference, e.get(this.refLabel))).toSet().toList(),
             listType: MultiSelectListType.CHIP,
             onConfirm: (values) {
-              onChange(values);
+              updateData(context, column, values);
             },
           );
         });

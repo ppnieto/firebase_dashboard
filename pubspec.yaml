@@ -22,18 +22,21 @@ dependencies:
   uuid: any
   google_maps_flutter: any
   package_info_plus: any
-  universal_html: ^2.0.8
-  shared_preferences: ^2.0.5
-  date_time_picker: ^2.0.0
+  universal_html: any
+  shared_preferences: any
+  date_time_picker: any
   badges:
-  multi_select_flutter: ^4.0.0
-  flutter_tags: ^0.4.9+1
-  flutter_typeahead: ^3.2.0
-  excel: any
-  data_table_2: ^2.2.1
-  textfield_tags: any
+  multi_select_flutter: any
+  flutter_tags: any
+  flutter_typeahead: any
+  #excel: ^1.1.5
+  syncfusion_flutter_xlsio: any
+  syncfusion_flutter_datagrid_export: ^19.4.53-beta
   syncfusion_flutter_datagrid: ^19.3.48
+  data_table_2: any
+  textfield_tags: any
   dropdown_search: any
+  
 
 
 

@@ -18,7 +18,7 @@ class FieldTypeDate extends FieldType {
   }
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     final f = new DateFormat(this.format);
     if (_object.hasFieldAdm(column.field)) {
       return Text(f.format(_object.get(column.field).toDate()));
@@ -27,7 +27,7 @@ class FieldTypeDate extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
     final f = new DateFormat(this.format);
     TextEditingController txt = TextEditingController();
@@ -61,7 +61,7 @@ class FieldTypeDate extends FieldType {
         onSaved: (val) {
           if (val!.isNotEmpty) {
             var tmp = new DateFormat('dd/MM/yyyy').parse(val);
-            onChange(Timestamp.fromDate(tmp));
+            updateData(context, column, Timestamp.fromDate(tmp));
           }
         },
       )),
@@ -79,7 +79,7 @@ class FieldTypeDate extends FieldType {
                 });
             if (picked != null) {
               txt.text = f.format(picked);
-              onChange(Timestamp.fromDate(picked));
+              updateData(context, column, Timestamp.fromDate(picked));
             }
           },
         )

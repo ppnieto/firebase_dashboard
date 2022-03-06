@@ -12,18 +12,13 @@ class FieldTypeQR extends FieldType {
   FieldTypeQR({required this.onListTap});
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     String code = _object.get(column.field);
-    return code.isEmpty
-        ? SizedBox.shrink()
-        : IconButton(
-            icon: Icon(FontAwesomeIcons.qrcode),
-            onPressed: () => onListTap(_object, column));
+    return code.isEmpty ? SizedBox.shrink() : IconButton(icon: Icon(FontAwesomeIcons.qrcode), onPressed: () => onListTap(_object, column));
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
-      ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     TextEditingController qr = TextEditingController();
     var value = values[column.field];
 
@@ -43,7 +38,7 @@ class FieldTypeQR extends FieldType {
                 labelText: column.label,
               ),
               onSaved: (val) {
-                if (onChange != null) onChange(val);
+                updateData(context, column, val);
               })),
       IconButton(
           icon: Icon(FontAwesomeIcons.sync),
@@ -52,7 +47,7 @@ class FieldTypeQR extends FieldType {
             String nuevo = uuid.v4();
             print(nuevo);
             qr.text = nuevo;
-            onChange(nuevo);
+            updateData(context, column, nuevo);
           })
     ]);
   }

@@ -10,8 +10,7 @@ class FieldTypeNumber extends FieldType {
   FieldTypeNumber({this.maxValue = 100, this.minValue = 0, this.step = 1});
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
-      ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       //Text(column.label),
@@ -25,7 +24,7 @@ class FieldTypeNumber extends FieldType {
           enabled: column.editable,
           value: value ?? 0,
           onChanged: (value) {
-            onChange(value);
+            updateData(context, column, value);
           },
         ),
       ),

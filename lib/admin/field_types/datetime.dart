@@ -11,8 +11,7 @@ class FieldTypeDateTime extends FieldType {
   final String format;
   final ThemeData? themeData;
 
-  FieldTypeDateTime(
-      {this.showTime = true, this.format = "dd/MM/yyyy HH:mm", this.themeData});
+  FieldTypeDateTime({this.showTime = true, this.format = "dd/MM/yyyy HH:mm", this.themeData});
 
   @override
   String getSyncStringContent(DocumentSnapshot _object, ColumnModule column) {
@@ -24,7 +23,7 @@ class FieldTypeDateTime extends FieldType {
   }
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     final f = new DateFormat(this.format);
     if (_object.hasFieldAdm(column.field)) {
       return Text(f.format(_object.get(column.field).toDate()));
@@ -33,8 +32,7 @@ class FieldTypeDateTime extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
-      ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     print(column.editable);
     Timestamp? value;
     if (_object?.hasFieldAdm(column.field) ?? false) {
@@ -47,9 +45,7 @@ class FieldTypeDateTime extends FieldType {
     var dtp = DateTimePicker(
         enabled: column.editable,
         //locale: Locale('es'),
-        type: showTime
-            ? DateTimePickerType.dateTimeSeparate
-            : DateTimePickerType.date,
+        type: showTime ? DateTimePickerType.dateTimeSeparate : DateTimePickerType.date,
         dateMask: 'dd/MM/yyyy',
         initialValue: value?.toDate().toString() ?? null,
         firstDate: DateTime(2000),
@@ -69,7 +65,7 @@ class FieldTypeDateTime extends FieldType {
 //          print("onSaved");
           if (val?.isNotEmpty ?? false) {
             DateTime tmp = DateTime.parse(val!);
-            onChange(Timestamp.fromDate(tmp));
+            updateData(context, column, Timestamp.fromDate(tmp));
           }
         });
     if (themeData == null)

@@ -8,17 +8,10 @@ class FieldTypeRating extends FieldType {
   final Color color;
   final double iconSize;
 
-  FieldTypeRating(
-      {this.startCount = 5,
-      this.color = Colors.yellow,
-      this.showCount = true,
-      this.iconSize = 16});
+  FieldTypeRating({this.startCount = 5, this.color = Colors.yellow, this.showCount = true, this.iconSize = 16});
 
   Widget buildCount(var rating) {
-    if (this.showCount &&
-        rating != null &&
-        rating is Map &&
-        rating.containsKey('count')) {
+    if (this.showCount && rating != null && rating is Map && rating.containsKey('count')) {
       return Text("(${rating['count']})");
     } else
       return SizedBox.shrink();
@@ -54,21 +47,14 @@ class FieldTypeRating extends FieldType {
   }
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     var rating = _object.getFieldAdm(column.field, 0);
-    return Row(
-        children: List.generate(
-                this.startCount, (index) => buildStar(index, rating)) +
-            [buildCount(rating)]);
+    return Row(children: List.generate(this.startCount, (index) => buildStar(index, rating)) + [buildCount(rating)]);
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
-      ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var rating = _object?.getFieldAdm(column.field, 0) ?? 0;
-    return Row(
-        children: List.generate(
-                this.startCount, (index) => buildStar(index, rating)) +
-            [buildCount(rating)]);
+    return Row(children: List.generate(this.startCount, (index) => buildStar(index, rating)) + [buildCount(rating)]);
   }
 }

@@ -1,10 +1,10 @@
-import 'dart:convert';
-
 import 'package:firebase_dashboard/admin/admin_modules.dart';
+import 'package:firebase_dashboard/admin/screens/detalle.dart';
 import 'package:firebase_dashboard/components/admin_datatable.dart';
+import 'package:firebase_dashboard/components/async_datatable.dart';
 import 'package:firebase_dashboard/components/syncfusion_datatable.dart';
 import 'package:firebase_dashboard/dashboard.dart';
-//import 'package:data_table_2/paginated_data_table_2.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweetsheet/sweetsheet.dart';
-import 'package:excel/excel.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import 'package:universal_html/html.dart' as html;
 
 class AdminScreen extends StatefulWidget {
@@ -37,17 +37,11 @@ class AdminScreen extends StatefulWidget {
   State<StatefulWidget> createState() => AdminScreenState();
 }
 
-enum TipoPantalla { listado, detalle, nuevo, confirmar }
-
 class AdminScreenState extends State<AdminScreen> {
   bool canSelect = false;
   String? _orderBy;
   List<DocumentSnapshot>? docs;
   String? globalSearch;
-  TipoPantalla tipo = TipoPantalla.listado;
-  DocumentSnapshot? detalle;
-  Map<String, dynamic>? updateData;
-  final _formKey = GlobalKey<FormState>();
   Map<String, dynamic> filtro = {};
   final scrollController = ScrollController();
   bool sortAscending = true;
@@ -64,6 +58,8 @@ class AdminScreenState extends State<AdminScreen> {
 
     rowsSelected = [];
     indexSelected = [];
+
+    docs = [];
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
@@ -87,15 +83,13 @@ class AdminScreenState extends State<AdminScreen> {
       print(e);
     }
     preloadReferences();
+
     return true;
   }
 
   void onUpdateColumnasSeleccionadas() {
     widget.module.showingColumns = widget.module.columns
-        .where((col) =>
-            col.listable &&
-            columnasSeleccionadas.containsKey(col.field) &&
-            columnasSeleccionadas[col.field]!)
+        .where((col) => col.listable && columnasSeleccionadas.containsKey(col.field) && columnasSeleccionadas[col.field]!)
         .toList();
   }
 
@@ -109,10 +103,7 @@ class AdminScreenState extends State<AdminScreen> {
     if (widget.module.getQueryCollection != null) {
       return widget.module.getQueryCollection!();
     } else {
-      String collection = widget.collection?.path ??
-          widget.module.collection ??
-          widget.collection?.path ??
-          "";
+      String collection = widget.collection?.path ?? widget.module.collection ?? widget.collection?.path ?? "";
       return FirebaseFirestore.instance.collection(collection);
     }
   }
@@ -120,12 +111,8 @@ class AdminScreenState extends State<AdminScreen> {
   Query addFilters(Map<String, dynamic> filtro, Query query) {
     Query result = query;
     for (MapEntry filterEntry in filtro.entries) {
-      if (filterEntry.value != null &&
-          filterEntry.value.toString().isNotEmpty) {
-        print("   add filter " +
-            filterEntry.key +
-            " = " +
-            filterEntry.value.toString());
+      if (filterEntry.value != null && filterEntry.value.toString().isNotEmpty) {
+        print("   add filter " + filterEntry.key + " = " + filterEntry.value.toString());
         result = result.where(filterEntry.key, isEqualTo: filterEntry.value);
       }
     }
@@ -139,8 +126,7 @@ class AdminScreenState extends State<AdminScreen> {
         if (doc.hasFieldAdm(column.field)) {
           String value = column.type.getSyncStringContent(doc, column);
 
-          bool encontrado =
-              value.toLowerCase().contains(this.globalSearch!.toLowerCase());
+          bool encontrado = value.toLowerCase().contains(this.globalSearch!.toLowerCase());
           if (encontrado) {
             result.add(doc);
             break;
@@ -151,7 +137,27 @@ class AdminScreenState extends State<AdminScreen> {
     this.docs = result;
   }
 
-  getList() {
+  showDetalle(index) {
+    print("showDetalle " + index.toString());
+    showDetalleObject(docs![index]);
+  }
+
+  showDetalleObject(object) {
+    print("showDetalleObjec");
+    if (widget.module.canEdit) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => DetalleScreen(
+                  object: object,
+                  module: widget.module,
+                  labelWidth: widget.labelWidth,
+                )),
+      );
+    }
+  }
+
+  Query getQuery() {
     Query query = _getCollection();
     query = addFilters(filtro, query);
     if (widget.module.addFilter != null) {
@@ -165,9 +171,15 @@ class AdminScreenState extends State<AdminScreen> {
     if (widget.module.reverseOrderBy != null) {
       query = query.orderBy(widget.module.reverseOrderBy!, descending: true);
     }
+    return query;
+  }
+/*
+  getList() {
+    return AsyncAdminDataTable();
+    
 
     return StreamBuilder(
-      stream: query.snapshots(),
+      stream: getQuery().snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) {
           return SizedBox.shrink();
@@ -190,24 +202,26 @@ class AdminScreenState extends State<AdminScreen> {
             var varA = column.type.getCompareValue(a, column);
             var varB = column.type.getCompareValue(b, column);
 
-            return this.sortAscending
-                ? varA?.compareTo(varB)
-                : varB?.compareTo(varA);
+            return this.sortAscending ? varA?.compareTo(varB) : varB?.compareTo(varA);
           });
         }
 
         if (1 == 1) {
-          return AdminDataTable();
+          return AsyncDataTable();
+          //return AdminDataTable();
         } else {
           return SyncfusionDataTable(
             columns: widget.module.columns,
             docs: docs!,
             onTap: (index) {
+              /*
               setState(() {
                 detalle = docs![index];
                 updateData = detalle?.data() as Map<String, dynamic>?;
                 tipo = TipoPantalla.detalle;
               });
+              */
+              this.showDetalle(index);
             },
           );
         }
@@ -300,295 +314,86 @@ class AdminScreenState extends State<AdminScreen> {
         */
       },
     );
+    
   }
+  */
 
-  getEditField(ColumnModule column) {
-    column.type.setContext(context);
+  GlobalKey<SyncfusionDataTableState> keyDataTable = GlobalKey<SyncfusionDataTableState>();
 
-    Widget? child =
-        column.type.getEditContent(detalle, updateData!, column, (value) {
-      setState(() {
-        updateData![column.field] = value;
-        print("actualizamos campo ${column.field} => $value");
-      });
-    });
-
-    if (child != null) {
-      if (column.showLabelOnEdit) {
-        child = Row(children: [
-          ConstrainedBox(
-              constraints: BoxConstraints(minWidth: widget.labelWidth),
-              child: Text(column.label)),
-          SizedBox(width: 20),
-          Expanded(child: child)
-        ]);
-      }
-      return Padding(
-          padding: EdgeInsets.all(
-              MediaQuery.of(context).size.width < responsiveDashboardWidth
-                  ? 5
-                  : 20),
-          child: child);
-    } else
-      return SizedBox.shrink();
-  }
-
-  void showListado() {
-    print("show listado");
-    setState(() {
-      this.tipo = TipoPantalla.listado;
-    });
-  }
-
-  void showDetalle(int index) {
-    print("show detalle");
-    setState(() {
-      this.detalle = this.docs![index];
-      this.updateData = this.detalle?.data() as Map<String, dynamic>?;
-      this.tipo = TipoPantalla.detalle;
-    });
-  }
-
-  showError(e) {
-    String message = "Error al guardar";
-    if (e is FirebaseException) {
-      print(e.code);
-      if (e.code == "permission-denied") {
-        message = "Error, no tiene permisos para realizar esta acción";
-      }
-    }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: Colors.red,
-      duration: Duration(seconds: 2),
-    ));
-  }
-
-  doGuardar() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      // ñapa para guardar el documentref /values/null como nulo!!!
-      for (var entry in this.updateData!.entries) {
-        if (entry.value is DocumentReference) {
-          DocumentReference tmp = entry.value;
-          if (tmp.path == FieldTypeRef.nullValue.path) {
-            this.updateData![entry.key] = null;
-          }
-        }
-      }
-
-      bool isNew = tipo == TipoPantalla.nuevo;
-
-      String? msgValidation;
-
-      if (widget.module.validation != null) {
-        msgValidation =
-            await widget.module.validation!(isNew, this.updateData!);
-      }
-
-      bool doUpdate = true;
-      if (widget.module.onSave != null) {
-        doUpdate =
-            widget.module.onSave!(tipo == TipoPantalla.nuevo, this.updateData);
-      }
-      if (msgValidation == null) {
-        if (doUpdate) {
-          if (!isNew) {
-            detalle!.reference.update(this.updateData!).then((value) {
-              if (widget.module.onUpdated != null)
-                widget.module.onUpdated!(isNew, detalle!.reference);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('Elemento guardado con éxito'),
-                duration: Duration(seconds: 2),
-              ));
-              showListado();
-            }).catchError((e) {
-              showError(e);
-            });
-          } else if (tipo == TipoPantalla.nuevo) {
-            _getCollection().add(this.updateData!).then((value) {
-              if (widget.module.onUpdated != null)
-                widget.module.onUpdated!(isNew, value);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('Elemento guardado con éxito'),
-                duration: Duration(seconds: 2),
-              ));
-              setState(() {
-                this.tipo = TipoPantalla.listado;
-              });
-            }).catchError((e) {
-              showError(e);
-            });
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Elemento guardado con éxito'),
-            duration: Duration(seconds: 2),
-          ));
-          setState(() {
-            this.tipo = TipoPantalla.listado;
-          });
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(msgValidation),
-          duration: Duration(seconds: 2),
-        ));
-      }
-    }
-  }
-
-  getDetail() => SingleChildScrollView(
-        child: Card(
-          elevation: 2,
-          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth
-              ? EdgeInsets.fromLTRB(64, 32, 64, 64)
-              : EdgeInsets.all(5),
+  Future<void> loading(BuildContext context, String message) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      useRootNavigator: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.black.withAlpha(140),
           child: Padding(
-            padding: EdgeInsets.all(
-                MediaQuery.of(context).size.width < responsiveDashboardWidth
-                    ? 32.0
-                    : 5),
-            child: Container(
-                child: StreamBuilder(
-                    stream: detalle?.reference.snapshots(),
-                    builder: (context, snapshot) {
-                      return Builder(
-                          builder: (context) => Form(
-                              key: _formKey,
-                              child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: widget.module.columns
-                                      .map<Widget>((column) {
-                                    if (column.showOnEdit) {
-                                      return getEditField(column);
-                                    } else {
-                                      return Container();
-                                    }
-                                  }).toList())));
-                    })),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: new Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                new CircularProgressIndicator(),
+                SizedBox(width: 10),
+                new Text(message, style: TextStyle(color: Colors.white, fontSize: 13.0, fontFamily: "AvenirBlack"))
+              ],
+            ),
           ),
-        ),
-      );
-
-  getNuevo() => SingleChildScrollView(
-        child: Card(
-          elevation: 2,
-          margin: EdgeInsets.fromLTRB(64, 32, 64, 64),
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Container(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 16.0, horizontal: 16.0),
-                child: Builder(
-                    builder: (context) => Form(
-                        key: _formKey,
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children:
-                                widget.module.columns.map<Widget>((column) {
-                                      if (column.showOnNew) {
-                                        return getEditField(column);
-                                      } else {
-                                        return Container();
-                                      }
-                                    }).toList() +
-                                    [])))),
-          ),
-        ),
-      );
-
-  getTitle() {
-    return Text(widget.module.title,
-        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold));
+        );
+      },
+    ); // bajamos la resolucion
   }
-
-  getConfirmar() => Center(
-      child: Padding(
-          padding: EdgeInsets.all(40),
-          child: Column(children: [
-            Text("¿Está seguro que desea realizar la operación?"),
-            TextButton(onPressed: () {}, child: Text("SI"))
-          ])));
 
   @override
   Widget build(BuildContext context) {
-    Widget content;
-    if (tipo == TipoPantalla.listado) {
-      content = getList();
-    } else if (tipo == TipoPantalla.detalle) {
-      content = getDetail();
-    } else if (tipo == TipoPantalla.nuevo) {
-      content = getNuevo();
-    } else if (tipo == TipoPantalla.confirmar) {
-      content = getConfirmar();
-    } else
-      content = Container();
+    //Widget content = getList();
 
     getLeading() {
       if (widget.showScaffoldBack) return null;
-      if (tipo != TipoPantalla.listado) {
-        return IconButton(
-            icon: Icon(FontAwesomeIcons.arrowLeft),
-            onPressed: () {
-              setState(() {
-                tipo = TipoPantalla.listado;
-              });
-            });
-      } else {
-        return IconButton(
-            icon: Icon(FontAwesomeIcons.listUl),
-            onPressed: () async {
-              await showDialog(
-                context: context,
-                builder: (ctx) {
-                  return MultiSelectDialog<String>(
-                    items:
-                        widget.module.columns.map((ColumnModule columnModule) {
-                      return MultiSelectItem(
-                          columnModule.field, columnModule.label);
-                    }).toList(),
-                    initialValue: columnasSeleccionadas.entries.map((e) {
-                      if (e.value) return e.key;
-                      return "";
-                    }).toList(),
-                    searchable: false,
-                    confirmText: Text('Aceptar'),
-                    cancelText: Text('Cancelar'),
-                    title: Text("Seleccione las columnas para mostrar"),
-                    onConfirm: (values) {
-                      setState(() {
-                        columnasSeleccionadas.clear();
-                        for (var value in values) {
-                          columnasSeleccionadas[value] = true;
-                        }
+      return IconButton(
+          icon: Icon(FontAwesomeIcons.listUl),
+          onPressed: () async {
+            await showDialog(
+              context: context,
+              builder: (ctx) {
+                return MultiSelectDialog<String>(
+                  items: widget.module.columns.map((ColumnModule columnModule) {
+                    return MultiSelectItem(columnModule.field, columnModule.label);
+                  }).toList(),
+                  initialValue: columnasSeleccionadas.entries.map((e) {
+                    if (e.value) return e.key;
+                    return "";
+                  }).toList(),
+                  searchable: false,
+                  confirmText: Text('Aceptar'),
+                  cancelText: Text('Cancelar'),
+                  title: Text("Seleccione las columnas para mostrar"),
+                  onConfirm: (values) {
+                    setState(() {
+                      columnasSeleccionadas.clear();
+                      for (var value in values) {
+                        columnasSeleccionadas[value] = true;
+                      }
 
-                        onUpdateColumnasSeleccionadas();
+                      onUpdateColumnasSeleccionadas();
 
-                        SharedPreferences.getInstance()
-                            .then((SharedPreferences prefs) {
-                          String key = 'admin_columns_' + widget.module.name;
-                          prefs.setStringList(key, values);
-                        });
+                      SharedPreferences.getInstance().then((SharedPreferences prefs) {
+                        String key = 'admin_columns_' + widget.module.name;
+                        prefs.setStringList(key, values);
                       });
-                    },
-                  );
-                },
-              );
-            });
-//        return Container();
-      }
+                    });
+                  },
+                );
+              },
+            );
+          });
     }
 
+/*
     Widget getGlobalSearch() {
-      Color highlightColor = context
-              .findAncestorStateOfType<DashboardMainScreenState>()
-              ?.widget
-              .theme!
-              .appBar1TextColor ??
-          Theme.of(context).primaryColor;
+      
+      Color highlightColor =
+          context.findAncestorStateOfType<DashboardMainScreenState>()?.widget.theme!.appBar1TextColor ?? Theme.of(context).primaryColor;
 
       return Container(
         width: 280,
@@ -599,13 +404,10 @@ class AdminScreenState extends State<AdminScreen> {
             fillColor: Theme.of(context).cardColor,
             suffixIcon: Icon(Icons.search, color: highlightColor),
             focusedBorder: OutlineInputBorder(
-              borderSide:
-                  BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
               borderRadius: BorderRadius.circular(6.0),
             ),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6),
-                borderSide: BorderSide(color: highlightColor, width: 2.0)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: highlightColor, width: 2.0)),
             hintText: "Buscar...",
             hintStyle: TextStyle(color: highlightColor),
             contentPadding: EdgeInsets.all(10),
@@ -618,11 +420,57 @@ class AdminScreenState extends State<AdminScreen> {
           },
         ),
       );
+      
     }
-
+*/
     void exportExcel() async {
+      await loading(context, "Por favor espere...");
+      try {
+        List<DocumentSnapshot> allDocs = await keyDataTable.currentState!.loadAll();
+
+        final xlsio.Workbook workbook = new xlsio.Workbook();
+        final xlsio.Worksheet sheet = workbook.worksheets[0];
+
+        List<xlsio.ExcelDataRow> rows = [];
+
+        List<ColumnModule> columnasExportables = widget.module.columns.where((e) => e.listable && e.excellable).toList();
+
+        for (var doc in allDocs) {
+          List<xlsio.ExcelDataCell> cells = [];
+          for (var column in columnasExportables) {
+            //var value = await column.type.getStringContent(doc, column);
+            var value = column.type.getSyncStringContent(doc, column);
+            cells.add(xlsio.ExcelDataCell(value: value, columnHeader: column.label));
+          }
+
+          rows.add(xlsio.ExcelDataRow(cells: cells));
+        }
+
+        sheet.importData(rows, 1, 1);
+
+        List<int> bytes = workbook.saveAsStream();
+        final blob = html.Blob([bytes]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        DateTime now = DateTime.now();
+        String suffix = DateFormat('yyyyMMdd').format(now);
+        final anchor = html.document.createElement('a') as html.AnchorElement
+          ..href = url
+          ..style.display = 'none'
+          ..download = widget.module.name + '_$suffix.xls';
+        html.document.body!.children.add(anchor);
+// download
+        anchor.click();
+
+// cleanup
+        html.document.body!.children.remove(anchor);
+        html.Url.revokeObjectUrl(url);
+      } finally {
+        Navigator.of(context).pop();
+      }
+
+/*
       var excelFile = Excel.createExcel();
-      String? sheetObjectName = excelFile.getDefaultSheet();
+      String? sheetObjectName = await excelFile.getDefaultSheet();
       Sheet sheetObject = excelFile[sheetObjectName!];
 
       if (docs != null) {
@@ -640,12 +488,14 @@ class AdminScreenState extends State<AdminScreen> {
           row = [];
           for (var column in widget.module.columns) {
             if (column.listable && column.excellable) {
-              row.add(await column.type.getStringContent(doc, column));
+              var value = await column.type.getStringContent(doc, column);
+              row.add(value);
             }
           }
           sheetObject.appendRow(row);
         }
       }
+
       var bytes = excelFile.encode();
       final blob = html.Blob([bytes]);
       final url = html.Url.createObjectUrlFromBlob(blob);
@@ -656,6 +506,7 @@ class AdminScreenState extends State<AdminScreen> {
         ..style.display = 'none'
         ..download = widget.module.name + '_$suffix.xls';
       html.document.body!.children.add(anchor);
+      
 
 // download
       anchor.click();
@@ -663,100 +514,78 @@ class AdminScreenState extends State<AdminScreen> {
 // cleanup
       html.document.body!.children.remove(anchor);
       html.Url.revokeObjectUrl(url);
+      */
     }
 
     getActions() {
       List<Widget> result = [];
 
       if (widget.module.getScaffoldActions != null) {
-        result.addAll(widget.module.getScaffoldActions!(context));
+        result.addAll(widget.module.getScaffoldActions!(context, this));
       }
 
-      if (widget.module.globalSearch && tipo == TipoPantalla.listado) {
-        result.add(getGlobalSearch());
-      }
-
-      if (tipo == TipoPantalla.listado && widget.module.exportExcel) {
+      if (widget.module.exportExcel) {
         result.add(Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: IconButton(
-            padding: EdgeInsets.all(0),
-            icon: Icon(FontAwesomeIcons.download),
-            onPressed: () {
-              exportExcel();
-            },
-          ),
-        ));
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton.icon(
+              label: Text("Exportar a excel"),
+              icon: Icon(FontAwesomeIcons.fileExcel),
+              onPressed: () {
+                exportExcel();
+              },
+            )));
       }
-      if (tipo == TipoPantalla.listado && widget.module.canAdd) {
+      if (widget.module.canAdd) {
         result.add(IconButton(
           padding: EdgeInsets.all(0),
           icon: Icon(Icons.add),
           onPressed: () {
-            setState(() {
-              detalle = null;
-              updateData = {};
-              tipo = TipoPantalla.nuevo;
-            });
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => DetalleScreen(
+                        module: widget.module,
+                        labelWidth: widget.labelWidth,
+                      )),
+            );
+          },
+        ));
+      }
+      if (widget.module.globalSearch) {
+        result.add(IconButton(
+          icon: Icon(Icons.search),
+          onPressed: () async {
+            List<DocumentSnapshot> allDocs = await keyDataTable.currentState!.loadAll();
+            showSearch(context: context, delegate: _Search(parentState: this, allDocs: allDocs));
           },
         ));
       }
 
-      if (tipo == TipoPantalla.detalle || tipo == TipoPantalla.nuevo) {
-        result.add(IconButton(
-          padding: EdgeInsets.all(0),
-          icon: Icon(FontAwesomeIcons.save),
-          onPressed: () {
-            doGuardar();
-          },
-        ));
-      }
-      if (tipo == TipoPantalla.detalle && widget.module.canRemove) {
-        result.add(IconButton(
-          padding: EdgeInsets.all(0),
-          icon: Icon(Icons.delete),
-          onPressed: () async {
-            doBorrar(context, detalle!.reference, () {
-              setState(() {
-                tipo = TipoPantalla.listado;
-              });
-            });
-          },
-        ));
-      }
       return result;
     }
 
     return Theme(
       data: Theme.of(context). /* ThemeData.light()*/ copyWith(
         highlightColor: DashboardMainScreen.dashboardTheme!.iconButtonColor,
-        primaryColor:
-            DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor,
+        primaryColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor,
       ),
       child: FutureBuilder(
           future: initAdmin(),
           builder: (context, snapshot) {
-            print("has data: ${snapshot.hasData}");
             if (!snapshot.hasData) return SizedBox.shrink();
             return Scaffold(
                 appBar: AppBar(
-                  backgroundColor: DashboardMainScreen
-                          .dashboardTheme!.appBar2BackgroundColor ??
-                      Theme.of(context).secondaryHeaderColor,
+                  backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
                   title: Text(widget.module.title),
                   leading: getLeading(),
                   actions: <Widget>[] +
-                      widget.module.columns
-                          .map<Widget>((ColumnModule columnModule) {
-                        columnModule.type.context = context;
-                        if (columnModule.filter &&
-                            tipo == TipoPantalla.listado) {
+                      widget.module.columns.map<Widget>((ColumnModule columnModule) {
+                        if (columnModule.filter) {
                           if (filtro.containsKey(columnModule.field) == false) {
                             filtro[columnModule.field] = "";
                           }
                           return Row(children: [
-                            columnModule.getFilterContent(
-                                filtro[columnModule.field], (val) {
+                            columnModule.type.getFilterContent(context, filtro[columnModule.field], columnModule, (val) {
                               setState(() {
                                 filtro[columnModule.field] = val;
                               });
@@ -767,125 +596,104 @@ class AdminScreenState extends State<AdminScreen> {
                       }).toList() +
                       getActions(),
                 ),
-                body: content);
+                body: SyncfusionDataTable(key: keyDataTable));
           }),
+    );
+  }
+
+  doBorrar(BuildContext context, DocumentReference ref, Function postDelete) {
+    final SweetSheet _sweetSheet = SweetSheet();
+    _sweetSheet.show(
+      context: context,
+      title: Text("¿Está seguro de borrar el elemento?"),
+      description: Text("Esta acción no podrá deshacerse después"),
+      color: SweetSheetColor.DANGER,
+      icon: Icons.delete,
+      positive: SweetSheetAction(
+        onPressed: () {
+          ref.delete();
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('El elemento ha sido borrado'),
+            duration: Duration(seconds: 2),
+          ));
+          postDelete();
+        },
+        title: 'Borrar',
+      ),
+      negative: SweetSheetAction(
+        onPressed: () {
+          Navigator.of(context).pop();
+          return;
+        },
+        title: 'Cancelar',
+      ),
     );
   }
 }
 
-doBorrar(BuildContext context, DocumentReference ref, Function postDelete) {
-  final SweetSheet _sweetSheet = SweetSheet();
-  _sweetSheet.show(
-    context: context,
-    title: Text("¿Está seguro de borrar el elemento?"),
-    description: Text("Esta acción no podrá deshacerse después"),
-    color: SweetSheetColor.DANGER,
-    icon: Icons.delete,
-    positive: SweetSheetAction(
-      onPressed: () {
-        ref.delete();
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('El elemento ha sido borrado'),
-          duration: Duration(seconds: 2),
-        ));
-        postDelete();
-      },
-      title: 'Borrar',
-    ),
-    negative: SweetSheetAction(
-      onPressed: () {
-        Navigator.of(context).pop();
-        return;
-      },
-      title: 'Cancelar',
-    ),
-  );
-}
-/*
-class MyDataTableSource extends DataTableSource {
-  List<DocumentSnapshot> docs;
-  BuildContext context;
-  AdminScreenState screen;
-  Function onTap;
-  Map<String, bool> showFields;
-  MyDataTableSource({
-    required this.docs,
-    required this.screen,
-    required this.context,
-    required this.onTap,
-    required this.showFields,
-  });
+class _Search extends SearchDelegate {
+  final AdminScreenState parentState;
+  final List<DocumentSnapshot> allDocs;
+
+  _Search({required this.parentState, required this.allDocs});
+
   @override
-  DataRow getRow(int index) {
-    Module module = screen.widget.module;
+  Widget? buildLeading(BuildContext context) => IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          close(context, null);
+        },
+      );
 
-    DocumentSnapshot _object = docs[index];
+  @override
+  List<Widget>? buildActions(BuildContext context) => [];
 
-    return DataRow2.byIndex(
-        /*
-        color: MaterialStateProperty.resolveWith((states) {
-          print(states);
-          return states.contains(MaterialState.hovered)
-              ? Colors.blue
-              : index % 2 == 0
-                  ? Colors.red
-                  : Colors.amber;
-        }),
-        */
-        selected: screen.indexSelected == index,
-        index: index,
-        cells: module.columns
-                .where((element) => element.listable && this.showFields.containsKey(element.field) && this.showFields[element.field]!)
-                .map<DataCell>((column) {
-              // set context
-              column.type.setContext(context);
-              return DataCell(column.getListContent(_object),
-                  onTap: column.clickToDetail
-                      ? () {
-                          if (screen.widget.selectPreEdit && (screen.indexSelected == null || screen.indexSelected != index)) {
-                            screen.setState(() {
-                              screen.indexSelected = index;
-                            });
-                          } else {
-                            if (module.canEdit) {
-                              this.onTap(index);
-                            }
-                          }
-                        }
-                      : null);
-            }).toList() +
-            (module.canRemove || module.getActions != null
-                ? [
-                    DataCell(
-                      Row(
-                          children: (module.getActions == null ? <Widget>[] : module.getActions!(_object, context)) +
-                              (module.canRemove
-                                  ? [
-                                      IconButton(
-                                        icon: Icon(Icons.delete, color: Theme.of(context).highlightColor),
-                                        onPressed: () {
-                                          doBorrar(context, _object.reference, () {
-                                            if (module.onRemove != null) {
-                                              module.onRemove!(_object);
-                                            }
-                                          });
-                                        },
-                                      ),
-                                    ]
-                                  : [])),
-                    )
-                  ]
-                : []));
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    print("buildSuggestions");
+
+    List<DocumentSnapshot> suggesstions = [];
+    for (DocumentSnapshot doc in allDocs) {
+      for (var column in parentState.widget.module.columns) {
+        if (doc.hasFieldAdm(column.field)) {
+          String value = column.type.getSyncStringContent(doc, column);
+
+          bool encontrado = value.toLowerCase().contains(query.toLowerCase());
+          if (encontrado) {
+            suggesstions.add(doc);
+            break;
+          }
+        }
+      }
+    }
+    return ListView.builder(
+        itemCount: suggesstions.length,
+        itemBuilder: (context, index) {
+          final suggestion = suggesstions[index];
+          List<String> suggestionText = [];
+          parentState.widget.module.fieldsForShowInSearchResult.forEach((fieldName) {
+            ColumnModule column = parentState.widget.module.columns.where((col) => col.field == fieldName).first;
+
+            suggestionText.add(column.type.getSyncStringContent(suggestion, column));
+            // suggestion.getFieldAdm(fieldName, "").toString());
+          });
+          return ListTile(
+            title: Text(suggestionText.join(" - ")),
+            onTap: () {
+              /*query = suggestion;
+              */
+              close(context, null);
+              parentState.showDetalleObject(suggestion);
+            },
+          );
+        });
   }
 
   @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => docs.length;
-
-  @override
-  int get selectedRowCount => 0;
+  Widget buildResults(BuildContext context) => Center(
+        child: Text(
+          query, // query will hold user selected search query
+        ),
+      );
 }
-*/

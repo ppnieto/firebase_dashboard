@@ -14,20 +14,12 @@ class FieldTypeAutocomplete extends FieldType {
 
   final TextEditingController _typeAheadController = TextEditingController();
 
-  FieldTypeAutocomplete(
-      {this.collection,
-      required this.refLabel,
-      this.getFilter,
-      this.initialValue,
-      this.getQueryCollection,
-      this.getStream});
+  FieldTypeAutocomplete({this.collection, required this.refLabel, this.getFilter, this.initialValue, this.getQueryCollection, this.getStream});
 
-  Widget _getListWidget(DocumentSnapshot _object, String content,
-          {TextStyle? style}) =>
-      Text(content, style: style);
+  Widget _getListWidget(DocumentSnapshot _object, String content, {TextStyle? style}) => Text(content, style: style);
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if ((_object.data() as Map).containsKey(column.field)) {
       return Text(_object[column.field].toString());
     }
@@ -55,15 +47,14 @@ class FieldTypeAutocomplete extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
-      ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
 
     if (value == null) {
       value = initialValue ?? "";
       //values[column.field] = value;
       SchedulerBinding.instance!.addPostFrameCallback((_) {
-        onChange(value);
+        updateData(context, column, value);
       });
     }
 
@@ -89,7 +80,7 @@ class FieldTypeAutocomplete extends FieldType {
           return Focus(
               onFocusChange: (hasFocus) {
                 if (!hasFocus) {
-                  onChange(this._typeAheadController.text);
+                  updateData(context, column, this._typeAheadController.text);
                 }
               },
               child: TypeAheadFormField(
@@ -100,7 +91,7 @@ class FieldTypeAutocomplete extends FieldType {
                   );
                 },
                 onSaved: (value) {
-                  onChange(value);
+                  updateData(context, column, value);
                 },
                 textFieldConfiguration: TextFieldConfiguration(
                     controller: this._typeAheadController,
@@ -108,13 +99,11 @@ class FieldTypeAutocomplete extends FieldType {
                       labelText: column.label,
                     )),
                 suggestionsCallback: (pattern) async {
-                  return items.where((element) =>
-                      element.toLowerCase().contains(pattern.toLowerCase()));
+                  return items.where((element) => element.toLowerCase().contains(pattern.toLowerCase()));
                 },
                 itemBuilder: (context, suggestion) {
                   return ListTile(
-                    title:
-                        Text(suggestion != null ? suggestion.toString() : ""),
+                    title: Text(suggestion != null ? suggestion.toString() : ""),
                   );
                 },
                 onSuggestionSelected: (suggestion) {

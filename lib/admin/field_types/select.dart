@@ -28,7 +28,7 @@ class FieldTypeSelect extends FieldType {
   }
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
       String key = _object.get(column.field);
       if (this.options.containsKey(key)) {
@@ -44,7 +44,7 @@ class FieldTypeSelect extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
 
     return Container(
@@ -62,10 +62,10 @@ class FieldTypeSelect extends FieldType {
           onChanged: (frozenValue != null && value == frozenValue) || column.editable == false
               ? null
               : (val) {
-                  onChange(val);
+                  updateData(context, column, val);
                 },
           onSaved: (val) {
-            onChange(val);
+            updateData(context, column, val);
           },
           validator: (val) {
             if (column.mandatory && val == null) return "Campo obligatorio";
@@ -76,7 +76,7 @@ class FieldTypeSelect extends FieldType {
   }
 
   @override
-  getFilterContent(value, ColumnModule column, Function onFilter) {
+  getFilterContent(BuildContext context, value, ColumnModule column, Function onFilter) {
     List<DropdownMenuItem<String>> items = <DropdownMenuItem<String>>[
           DropdownMenuItem(
             value: "",

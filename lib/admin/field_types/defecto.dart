@@ -9,7 +9,7 @@ class FieldTypeDefecto extends FieldType {
   FieldTypeDefecto(this.defaultField);
 
   @override
-  getListContent(DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     return StreamBuilder(
         stream: FirebaseFirestore.instance.doc("config/parameters").snapshots(),
         builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
@@ -23,13 +23,12 @@ class FieldTypeDefecto extends FieldType {
   }
 
   @override
-  getEditContent(DocumentSnapshot? _object, Map<String, dynamic> values,
-      ColumnModule column, Function onChange) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     return Container();
   }
 
   @override
-  getFilterContent(value, ColumnModule column, Function onFilter) {
+  getFilterContent(BuildContext context, value, ColumnModule column, Function onFilter) {
     return Container();
   }
 }
