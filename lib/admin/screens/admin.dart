@@ -349,7 +349,6 @@ class AdminScreenState extends State<AdminScreen> {
     //Widget content = getList();
 
     getLeading() {
-      if (widget.showScaffoldBack) return null;
       return IconButton(
           icon: Icon(FontAwesomeIcons.listUl),
           onPressed: () async {
@@ -576,8 +575,14 @@ class AdminScreenState extends State<AdminScreen> {
             return Scaffold(
                 appBar: AppBar(
                   backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
-                  title: Text(widget.module.title),
-                  leading: getLeading(),
+                  title: Row(
+                    children: [
+                      getLeading(),
+                      SizedBox(width: 10),
+                      Text(widget.module.title),
+                    ],
+                  ),
+                  //leading: getLeading(),
                   actions: <Widget>[] +
                       widget.module.columns.map<Widget>((ColumnModule columnModule) {
                         if (columnModule.filter) {
