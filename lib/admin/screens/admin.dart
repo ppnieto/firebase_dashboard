@@ -51,7 +51,6 @@ class AdminScreenState extends State<AdminScreen> {
   List<DocumentSnapshot> rowsSelected = [];
 
   Future<bool> initAdmin() async {
-    print("init admin " + widget.module.name);
     _orderBy = widget.module.orderBy;
 
     canSelect = widget.module.canSelect;

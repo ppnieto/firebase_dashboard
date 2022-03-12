@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_dashboard/dashboard.dart';
@@ -21,6 +23,8 @@ class DetalleScreenState extends State<DetalleScreen> {
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic>? updateData;
 
+  StreamSubscription<DocumentSnapshot>? changesSubscription;
+
   @override
   initState() {
     super.initState();
@@ -28,6 +32,18 @@ class DetalleScreenState extends State<DetalleScreen> {
     if (this.updateData == null) {
       this.updateData = {};
     }
+
+    changesSubscription = widget.object?.reference.snapshots().listen((value) {
+      setState(() {
+        this.updateData = value.data() as Map<String, dynamic>?;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    changesSubscription?.cancel();
   }
 
   getEditField(BuildContext context, ColumnModule column) {
