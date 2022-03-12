@@ -70,8 +70,6 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
 
   @override
   Widget build(BuildContext context) {
-    print("build");
-
     Widget drawerItems = listDrawerItems(context);
     return Scaffold(
       key: _scaffoldKey,
