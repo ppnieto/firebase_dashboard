@@ -174,6 +174,12 @@ class _MenuTile extends StatelessWidget {
           trailing: menuInfo?.info(),
           onTap: () {
             if (!selected) parentState.showScreen((menu as Menu).child);
+            ScaffoldState? scaffolsState = context.findAncestorStateOfType<ScaffoldState>();
+            if (scaffolsState != null) {
+              if (scaffolsState.isDrawerOpen) {
+                Navigator.of(context).pop();
+              }
+            }
           },
           selected: selected,
           leading: Icon(menu.iconData, color: selected ? theme?.menuSelectedTextColor : theme?.menuTextColor),

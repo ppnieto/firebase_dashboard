@@ -137,12 +137,10 @@ class AdminScreenState extends State<AdminScreen> {
   }
 
   showDetalle(index) {
-    print("showDetalle " + index.toString());
     showDetalleObject(docs![index]);
   }
 
   showDetalleObject(object) {
-    print("showDetalleObjec");
     if (widget.module.canEdit) {
       Navigator.push(
         context,

@@ -20,6 +20,7 @@ export "field_types/boolean.dart";
 export "field_types/text.dart";
 export "field_types/ref_childs.dart";
 export "field_types/defecto.dart";
+export "field_types/subcollection.dart";
 export "field_types/memo.dart";
 export "field_types/qr.dart";
 export "field_types/rating.dart";
@@ -34,7 +35,7 @@ class Module {
   final String name;
   final String title;
   //IconData icon;
-  final String? collection;
+  String? collection;
   final Function? getQueryCollection;
   final Function? doFilter;
   final String? orderBy;

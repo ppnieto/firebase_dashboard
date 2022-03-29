@@ -11,7 +11,7 @@ class FieldTypeMultiref extends FieldType {
   final String refLabel;
   final Function? getFilter;
   final dynamic? initialValue;
-  final Function? getQueryCollection;
+  final CollectionReference Function(DocumentSnapshot?)? getQueryCollection;
 
   late DocumentSnapshot object;
   FieldTypeMultiref({this.collection, required this.refLabel, this.getFilter, this.initialValue, this.getQueryCollection});
@@ -48,16 +48,16 @@ class FieldTypeMultiref extends FieldType {
     return SizedBox.shrink();
   }
 
-  CollectionReference getCollection() {
+  CollectionReference getCollection(DocumentSnapshot? _object) {
     if (getQueryCollection != null) {
-      return getQueryCollection!();
+      return getQueryCollection!(_object);
     } else {
       return FirebaseFirestore.instance.collection(collection!);
     }
   }
 
-  Query _getQuery() {
-    Query query = getCollection();
+  Query _getQuery(DocumentSnapshot? _object) {
+    Query query = getCollection(_object);
     Map<String, dynamic> filters = getFilter != null ? getFilter!() : {};
     if (filters != null) {
       for (MapEntry entry in filters.entries) {
@@ -86,7 +86,7 @@ class FieldTypeMultiref extends FieldType {
     }
 */
     return StreamBuilder(
-        stream: _getQuery().snapshots(),
+        stream: _getQuery(_object).snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
 

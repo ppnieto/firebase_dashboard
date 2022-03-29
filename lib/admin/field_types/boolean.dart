@@ -12,25 +12,31 @@ class FieldTypeBoolean extends FieldType {
     bool value = _object.getFieldAdm(column.field, false);
     return IconButton(
       icon: Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank),
-      onPressed: () {
-        _object.reference.update({column.field: !value}).then((value) => print("updated!!!"));
-      },
+      onPressed: column.editable && editOnList
+          ? () {
+              _object.reference.update({column.field: !value}).then((value) => print("updated!!!"));
+            }
+          : null,
     );
     //return Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank);
   }
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
-
     {
-      return CheckboxListTile(
-          value: value ?? false,
-          onChanged: column.editable
-              ? (val) {
-                  updateData(context, column, val);
-                }
-              : null);
+      return StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        var value = values[column.field];
+        return CheckboxListTile(
+            value: value ?? false,
+            onChanged: column.editable
+                ? (val) {
+                    updateData(context, column, val);
+                    setState(() {
+                      value = !value;
+                    });
+                  }
+                : null);
+      });
     }
   }
 
