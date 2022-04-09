@@ -78,7 +78,7 @@ class DetalleScreenState extends State<DetalleScreen> {
                               child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: widget.module.columns.map<Widget>((column) {
-                                    if (column.showOnEdit) {
+                                    if ((widget.object == null && column.showOnNew) || (widget.object != null && column.showOnEdit)) {
                                       return getEditField(context, column);
                                     } else {
                                       return Container();

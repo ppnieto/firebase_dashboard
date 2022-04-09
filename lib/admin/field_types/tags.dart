@@ -14,6 +14,10 @@ class FieldTypeTags extends FieldType {
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
     List<String> valueString = [];
+    if (value is String) {
+      value = value.split(",");
+    }
+
     if (value is List) {
       for (var v in value) {
         valueString.add(v.toString());
@@ -55,6 +59,9 @@ class FieldTypeTags extends FieldType {
     if (_object.hasFieldAdm(column.field)) {
       var value = _object[column.field];
       List<String> valueString = [];
+      if (value is String) {
+        value = value.split(",");
+      }
       if (value is List) {
         for (var v in value) {
           valueString.add(v.toString());

@@ -7,14 +7,17 @@ class FieldTypeNumber extends FieldType {
   final double maxValue;
   final double minValue;
   final double step;
-  FieldTypeNumber({this.maxValue = 100, this.minValue = 0, this.step = 1});
+  final double? defaultValue;
+  FieldTypeNumber({this.maxValue = 100, this.minValue = 0, this.step = 1, this.defaultValue});
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
+    if (value == null && defaultValue != null) {
+      value = defaultValue;
+      updateData(context, column, value);
+    }
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      //Text(column.label),
-      //SizedBox(width: 20),
       Container(
         width: 200,
         child: SpinBox(
@@ -22,7 +25,7 @@ class FieldTypeNumber extends FieldType {
           max: this.maxValue,
           step: this.step,
           enabled: column.editable,
-          value: value ?? 0,
+          value: value ?? minValue,
           onChanged: (value) {
             updateData(context, column, value);
           },
