@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin/screens/detalle.dart';
-import 'package:firebase_dashboard/components/syncfusion_datatable.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 

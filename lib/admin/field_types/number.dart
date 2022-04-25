@@ -8,11 +8,23 @@ class FieldTypeNumber extends FieldType {
   final double minValue;
   final double step;
   final double? defaultValue;
-  FieldTypeNumber({this.maxValue = 100, this.minValue = 0, this.step = 1, this.defaultValue});
+  final int? decimals;
+  FieldTypeNumber({this.maxValue = 100, this.minValue = 0, this.step = 1, this.defaultValue, this.decimals});
+
+  @override
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+    if (decimals != null) {
+      double num = getField(_object, column.field, 0).toDouble();
+
+      return Text(num.toStringAsFixed(decimals!));
+    } else {
+      return super.getListContent(context, _object, column);
+    }
+  }
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+    var value = _object?.hasFieldAdm(column.field) ?? false ? _object?.get(column.field) : defaultValue;
     if (value == null && defaultValue != null) {
       value = defaultValue;
       updateData(context, column, value);

@@ -60,7 +60,7 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
     } else {
       columns = [];
     }
-    if (adminScreenState!.widget.module.canRemove) {
+    if (adminScreenState!.widget.module.canRemove || adminScreenState!.widget.module.getActions != null) {
       columns!.add(ColumnModule(
           field: "_acciones",
           label: "",
@@ -70,12 +70,13 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
               return Row(
                 children: [
                   ...adminScreenState!.widget.module.getActions != null ? adminScreenState!.widget.module.getActions!(object!, context) : [],
-                  IconButton(
-                    icon: Icon(Icons.delete, color: Theme.of(context).highlightColor),
-                    onPressed: () {
-                      adminScreenState?.doBorrar(context, object!.reference, () {});
-                    },
-                  ),
+                  if (adminScreenState!.widget.module.canRemove)
+                    IconButton(
+                      icon: Icon(Icons.delete, color: Theme.of(context).highlightColor),
+                      onPressed: () {
+                        adminScreenState?.doBorrar(context, object!.reference, () {});
+                      },
+                    ),
                   SizedBox(width: 15)
                 ],
               );

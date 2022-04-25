@@ -14,7 +14,6 @@ class DashboardMainScreen extends StatefulWidget {
   final double sideBarWidth;
   final IconData? sideBarIcon;
   final DashboardTheme? theme;
-  late Widget currentWidget;
   static DashboardTheme? dashboardTheme;
 
   DashboardMainScreen(
@@ -26,9 +25,7 @@ class DashboardMainScreen extends StatefulWidget {
       this.sideBar,
       this.sideBarWidth = 100,
       this.theme,
-      this.sideBarIcon = Icons.view_sidebar}) {
-    currentWidget = (menus.first as Menu).child;
-  }
+      this.sideBarIcon = Icons.view_sidebar}) {}
 
   @override
   DashboardMainScreenState createState() => DashboardMainScreenState();
@@ -40,16 +37,18 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
   bool isMenu = true;
   final _navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late Widget currentWidget;
 
   @override
   void initState() {
     super.initState();
+    currentWidget = (widget.menus.first as Menu).child;
     DashboardMainScreen.dashboardTheme = widget.theme;
   }
 
   void showScreen(Widget screen) {
     setState(() {
-      widget.currentWidget = screen;
+      currentWidget = screen;
     });
 
     _navigatorKey.currentState!.pushAndRemoveUntil(
@@ -127,8 +126,7 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
                   ),
                 ),
           Expanded(
-            child:
-                Navigator(key: _navigatorKey, onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(builder: (_) => widget.currentWidget)),
+            child: Navigator(key: _navigatorKey, onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(builder: (_) => currentWidget)),
           ),
           isSidebar ? Container(width: widget.sideBarWidth, child: widget.sideBar) : SizedBox.shrink(),
         ],
@@ -166,7 +164,7 @@ class _MenuTile extends StatelessWidget {
     if (menu is Menu) {
       MenuInfo? menuInfo = menu is MenuInfo ? menu as MenuInfo : null;
 
-      bool selected = (menu as Menu).child.hashCode == parentState!.widget.currentWidget.hashCode;
+      bool selected = (menu as Menu).child.hashCode == parentState!.currentWidget.hashCode;
 
       return Container(
         color: selected ? theme?.menuSelectedBackgroundColor : theme?.menuBackgroundColor,

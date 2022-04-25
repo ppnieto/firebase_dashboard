@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
-import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:textfield_tags/textfield_tags.dart';
 
 class FieldTypeTags extends FieldType {
@@ -12,7 +10,11 @@ class FieldTypeTags extends FieldType {
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+    var value;
+    if (_object != null && hasField(_object, column.field)) {
+      value = _object.get(column.field);
+    }
+
     List<String> valueString = [];
     if (value is String) {
       value = value.split(",");
@@ -57,7 +59,7 @@ class FieldTypeTags extends FieldType {
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
-      var value = _object[column.field];
+      var value = _object.get(column.field);
       List<String> valueString = [];
       if (value is String) {
         value = value.split(",");
