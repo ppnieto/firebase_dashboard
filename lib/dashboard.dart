@@ -27,7 +27,12 @@ class DashboardMainScreen extends StatefulWidget {
       this.sideBarWidth = 100,
       this.theme,
       this.sideBarIcon = Icons.view_sidebar}) {
-    currentWidget = (menus.first as Menu).child;
+    if (menus.first is Menu) {
+      currentWidget = (menus.first as Menu).child;
+    } else if (menus.first is MenuGroup) {
+      MenuGroup mg = menus.first as MenuGroup;
+      currentWidget = (mg.children?.first as Menu).child;
+    }
   }
 
   @override

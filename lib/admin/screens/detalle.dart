@@ -215,7 +215,7 @@ class DetalleScreenState extends State<DetalleScreen> {
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.module.title + (widget.object == null ? " / nuevo" : " / detalle")),
-          backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+          backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
           centerTitle: false,
           actions: [
             IconButton(

@@ -18,8 +18,8 @@ class _AsyncAdminDataTableState extends State<AsyncAdminDataTable> {
     if (adminScreenState == null) throw new Exception("No encuentro AdminScreenState!!!");
 
     setState(() {
-      adminScreenState.indexSelected.clear();
-      adminScreenState.indexSelected.add(index);
+      //adminScreenState.indexSelected.clear();
+      //adminScreenState.indexSelected.add(index);
       adminScreenState.rowsSelected.clear();
       adminScreenState.rowsSelected.add(object);
     });
@@ -31,12 +31,12 @@ class _AsyncAdminDataTableState extends State<AsyncAdminDataTable> {
     if (adminScreenState == null) throw new Exception("No encuentro AdminScreenState!!!");
     if (add) {
       setState(() {
-        adminScreenState.indexSelected.add(index);
+        //adminScreenState.indexSelected.add(index);
         adminScreenState.rowsSelected.add(object);
       });
     } else {
       setState(() {
-        adminScreenState.indexSelected.remove(index);
+        //adminScreenState.indexSelected.remove(index);
         adminScreenState.rowsSelected.removeWhere((obj) => obj.reference.path == object.reference.path);
       });
     }

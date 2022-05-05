@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_dashboard/admin/screens/detalle.dart';
 import 'package:firebase_dashboard/components/admin_datatable.dart';
@@ -15,6 +17,8 @@ import 'package:sweetsheet/sweetsheet.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import 'package:universal_html/html.dart' as html;
 
+enum DataTableImplementation { AdminDataTable, AsyncDataTable, SyncfusionDataTable }
+
 class AdminScreen extends StatefulWidget {
   final Module module;
   final bool showScaffoldBack;
@@ -22,16 +26,18 @@ class AdminScreen extends StatefulWidget {
   final CollectionReference? collection;
   final double minWidth;
   final double labelWidth;
+  final DataTableImplementation dataTableImplementation;
 
-  AdminScreen({
-    Key? key,
-    required this.module,
-    this.showScaffoldBack = false,
-    this.minWidth = 200,
-    this.selectPreEdit = false,
-    this.collection,
-    this.labelWidth = 120,
-  }) : super(key: key);
+  AdminScreen(
+      {Key? key,
+      required this.module,
+      this.showScaffoldBack = false,
+      this.minWidth = 200,
+      this.selectPreEdit = false,
+      this.collection,
+      this.labelWidth = 120,
+      this.dataTableImplementation = DataTableImplementation.SyncfusionDataTable})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => AdminScreenState();
@@ -47,16 +53,15 @@ class AdminScreenState extends State<AdminScreen> {
   bool sortAscending = true;
   int? sortColumnIndex;
   Map<String, bool> columnasSeleccionadas = {};
-  List<int> indexSelected = [];
   List<DocumentSnapshot> rowsSelected = [];
 
   Future<bool> initAdmin() async {
+    print("init admin");
     _orderBy = widget.module.orderBy;
 
     canSelect = widget.module.canSelect;
 
     rowsSelected = [];
-    indexSelected = [];
 
     docs = [];
 
@@ -172,150 +177,6 @@ class AdminScreenState extends State<AdminScreen> {
     }
     return query;
   }
-/*
-  getList() {
-    return AsyncAdminDataTable();
-    
-
-    return StreamBuilder(
-      stream: getQuery().snapshots(),
-      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData) {
-          return SizedBox.shrink();
-        }
-
-        docs = List.from(snapshot.data!.docs);
-
-        if (widget.module.doFilter != null) {
-          docs = widget.module.doFilter!(docs);
-        }
-
-        if (this.globalSearch != null) {
-          doGlobalSearch();
-        }
-
-        if (widget.module.canSort && sortColumnIndex != null) {
-          var column = widget.module.showingColumns[sortColumnIndex!];
-          //print("ordenamos por columna " + column.label);
-          this.docs?.sort((a, b) {
-            var varA = column.type.getCompareValue(a, column);
-            var varB = column.type.getCompareValue(b, column);
-
-            return this.sortAscending ? varA?.compareTo(varB) : varB?.compareTo(varA);
-          });
-        }
-
-        if (1 == 1) {
-          return AsyncDataTable();
-          //return AdminDataTable();
-        } else {
-          return SyncfusionDataTable(
-            columns: widget.module.columns,
-            docs: docs!,
-            onTap: (index) {
-              /*
-              setState(() {
-                detalle = docs![index];
-                updateData = detalle?.data() as Map<String, dynamic>?;
-                tipo = TipoPantalla.detalle;
-              });
-              */
-              this.showDetalle(index);
-            },
-          );
-        }
-
-        /*
-        if (USE_DATA_TABLE_V2) {
-          return PaginatedDataTable2(
-            onPageChanged: (page) {
-              print("onpagechanged... $page");
-              setState(() {});
-              //scrollController.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.ease);
-            },
-            sortAscending: sortAscending,
-            sortColumnIndex: sortColumnIndex,
-            showCheckboxColumn: false,
-            columnSpacing: 0.0,
-            dataRowHeight: 38,
-            minWidth: widget.minWidth,
-            lmRatio: 1.8,
-            autoRowsToHeight: true,
-            columns: widget.module.columns
-                    .where((element) =>
-                        element.listable && this.columnasSeleccionadas.containsKey(element.field) && this.columnasSeleccionadas[element.field]!)
-                    .map((column) {
-                  return DataColumn2(
-                    onSort: (int column, bool ascending) {
-                      if (widget.module.canSort) {
-                        setState(() {
-                          sortAscending = ascending;
-                          sortColumnIndex = column;
-                        });
-                      }
-                    },
-                    size: column.size,
-                    label: Text(column.label),
-                  );
-                }).toList() +
-                (widget.module.canRemove || widget.module.getActions != null ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)] : []),
-            source: MyDataTableSource(
-                docs: docs!,
-                context: context,
-                screen: this,
-                onTap: (index) {
-                  setState(() {
-                    detalle = docs![index];
-                    updateData = detalle?.data() as Map<String, dynamic>?;
-                    tipo = TipoPantalla.detalle;
-                  });
-                },
-                showFields: this.columnasSeleccionadas),
-          );
-        } else {
-          return ListView(
-            children: [
-              PaginatedDataTable(
-                  onPageChanged: (page) {
-                    print("onpagechanged... $page");
-                    scrollController.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.ease);
-                  },
-                  showCheckboxColumn: false,
-                  columnSpacing: 0.0,
-                  dataRowHeight: 38,
-                  columns: widget.module.columns
-                          .where((element) =>
-                              element.listable && this.columnasSeleccionadas.containsKey(element.field) && this.columnasSeleccionadas[element.field]!)
-                          .map((column) {
-                        return DataColumn2(
-                          size: column.size,
-                          label: Text(column.label),
-                        );
-                      }).toList() +
-                      (widget.module.canRemove || widget.module.getActions != null
-                          ? [DataColumn2(label: SizedBox.shrink(), size: ColumnSize.L)]
-                          : []),
-                  source: MyDataTableSource(
-                      docs: docs!,
-                      context: context,
-                      screen: this,
-                      onTap: (index) {
-                        setState(() {
-                          detalle = docs![index];
-                          updateData = detalle?.data() as Map<String, dynamic>?;
-                          tipo = TipoPantalla.detalle;
-                        });
-                      },
-                      showFields: this.columnasSeleccionadas)),
-            ],
-          );
-        }
-        */
-      },
-    );
-    
-  }
-  */
 
   GlobalKey<SyncfusionDataTableState> keyDataTable = GlobalKey<SyncfusionDataTableState>();
 
@@ -343,10 +204,46 @@ class AdminScreenState extends State<AdminScreen> {
     ); // bajamos la resolucion
   }
 
+  GlobalKey<AdminDataTableState>? adminDataTableKey;
+
+  Widget getDataTable(BuildContext context) {
+    if (widget.dataTableImplementation == DataTableImplementation.SyncfusionDataTable) {
+      return SyncfusionDataTable(key: keyDataTable);
+    } else {
+      // if (widget.dataTableImplementation == DataTableImplementation.AdminDataTable) {
+
+      return StreamBuilder(
+          stream: getQuery().snapshots(),
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (!snapshot.hasData) {
+              return SizedBox.shrink();
+            }
+            print("reload docs...");
+            docs = List.from(snapshot.data!.docs);
+            if (widget.module.doFilter != null) {
+              docs = widget.module.doFilter!(docs);
+            }
+            if (this.globalSearch != null) {
+              doGlobalSearch();
+            }
+
+            if (widget.module.canSort && sortColumnIndex != null) {
+              var column = widget.module.showingColumns[sortColumnIndex!];
+              //print("ordenamos por columna " + column.label);
+              this.docs?.sort((a, b) {
+                var varA = column.type.getCompareValue(a, column);
+                var varB = column.type.getCompareValue(b, column);
+                return this.sortAscending ? varA?.compareTo(varB) : varB?.compareTo(varA);
+              });
+            }
+            adminDataTableKey = GlobalKey<AdminDataTableState>();
+            return AdminDataTable(key: adminDataTableKey);
+          });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    //Widget content = getList();
-
     getLeading() {
       if (widget.showScaffoldBack) return null;
       return IconButton(
@@ -388,11 +285,9 @@ class AdminScreenState extends State<AdminScreen> {
           });
     }
 
-/*
     Widget getGlobalSearch() {
-      
       Color highlightColor =
-          context.findAncestorStateOfType<DashboardMainScreenState>()?.widget.theme!.appBar1TextColor ?? Theme.of(context).primaryColor;
+          context.findAncestorStateOfType<DashboardMainScreenState>()?.widget.theme?.appBar1TextColor ?? Theme.of(context).primaryColor;
 
       return Container(
         width: 280,
@@ -419,13 +314,17 @@ class AdminScreenState extends State<AdminScreen> {
           },
         ),
       );
-      
     }
-*/
+
     void exportExcel() async {
       await loading(context, "Por favor espere...");
       try {
-        List<DocumentSnapshot> allDocs = await keyDataTable.currentState!.loadAll();
+        List<DocumentSnapshot> allDocs = [];
+        if (widget.dataTableImplementation == DataTableImplementation.SyncfusionDataTable) {
+          allDocs = await keyDataTable.currentState!.loadAll();
+        } else {
+          allDocs = docs ?? [];
+        }
 
         final xlsio.Workbook workbook = new xlsio.Workbook();
         final xlsio.Worksheet sheet = workbook.worksheets[0];
@@ -437,7 +336,6 @@ class AdminScreenState extends State<AdminScreen> {
         for (var doc in allDocs) {
           List<xlsio.ExcelDataCell> cells = [];
           for (var column in columnasExportables) {
-            //var value = await column.type.getStringContent(doc, column);
             var value = column.type.getSyncStringContent(doc, column);
             cells.add(xlsio.ExcelDataCell(value: value, columnHeader: column.label));
           }
@@ -466,54 +364,6 @@ class AdminScreenState extends State<AdminScreen> {
       } finally {
         Navigator.of(context).pop();
       }
-
-/*
-      var excelFile = Excel.createExcel();
-      String? sheetObjectName = await excelFile.getDefaultSheet();
-      Sheet sheetObject = excelFile[sheetObjectName!];
-
-      if (docs != null) {
-        // cabecera
-        List<String> row = [];
-        for (var column in widget.module.columns) {
-          if (column.listable && column.excellable) {
-            row.add(column.label);
-          }
-        }
-        sheetObject.appendRow(row);
-
-        // datos
-        for (var doc in docs!) {
-          row = [];
-          for (var column in widget.module.columns) {
-            if (column.listable && column.excellable) {
-              var value = await column.type.getStringContent(doc, column);
-              row.add(value);
-            }
-          }
-          sheetObject.appendRow(row);
-        }
-      }
-
-      var bytes = excelFile.encode();
-      final blob = html.Blob([bytes]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      DateTime now = DateTime.now();
-      String suffix = DateFormat('yyyyMMdd').format(now);
-      final anchor = html.document.createElement('a') as html.AnchorElement
-        ..href = url
-        ..style.display = 'none'
-        ..download = widget.module.name + '_$suffix.xls';
-      html.document.body!.children.add(anchor);
-      
-
-// download
-      anchor.click();
-
-// cleanup
-      html.document.body!.children.remove(anchor);
-      html.Url.revokeObjectUrl(url);
-      */
     }
 
     getActions() {
@@ -521,6 +371,10 @@ class AdminScreenState extends State<AdminScreen> {
 
       if (widget.module.getScaffoldActions != null) {
         result.addAll(widget.module.getScaffoldActions!(context, this));
+      }
+
+      if (widget.module.globalSearch && widget.dataTableImplementation == DataTableImplementation.AdminDataTable) {
+        result.add(getGlobalSearch());
       }
 
       if (widget.module.exportExcel) {
@@ -550,7 +404,7 @@ class AdminScreenState extends State<AdminScreen> {
           },
         ));
       }
-      if (widget.module.globalSearch) {
+      if (widget.module.globalSearch && widget.dataTableImplementation == DataTableImplementation.SyncfusionDataTable) {
         result.add(IconButton(
           icon: Icon(Icons.search),
           onPressed: () async {
@@ -563,39 +417,41 @@ class AdminScreenState extends State<AdminScreen> {
       return result;
     }
 
+    print("build admin");
     return Theme(
       data: Theme.of(context). /* ThemeData.light()*/ copyWith(
-        highlightColor: DashboardMainScreen.dashboardTheme!.iconButtonColor,
-        primaryColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor,
+        highlightColor: DashboardMainScreen.dashboardTheme?.iconButtonColor,
+        primaryColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
       ),
       child: FutureBuilder(
           future: initAdmin(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) return SizedBox.shrink();
             return Scaffold(
-                appBar: AppBar(
-                  backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
-                  title: Text(widget.module.title),
-                  leading: getLeading(),
-                  actions: <Widget>[] +
-                      widget.module.columns.map<Widget>((ColumnModule columnModule) {
-                        if (columnModule.filter) {
-                          if (filtro.containsKey(columnModule.field) == false) {
-                            filtro[columnModule.field] = "";
-                          }
-                          return Row(children: [
-                            columnModule.type.getFilterContent(context, filtro[columnModule.field], columnModule, (val) {
-                              setState(() {
-                                filtro[columnModule.field] = val;
-                              });
-                            })
-                          ]);
-                        } else
-                          return Container();
-                      }).toList() +
-                      getActions(),
-                ),
-                body: SyncfusionDataTable(key: keyDataTable));
+              appBar: AppBar(
+                backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+                title: Text(widget.module.title),
+                leading: getLeading(),
+                actions: <Widget>[] +
+                    widget.module.columns.map<Widget>((ColumnModule columnModule) {
+                      if (columnModule.filter) {
+                        if (filtro.containsKey(columnModule.field) == false) {
+                          filtro[columnModule.field] = "";
+                        }
+                        return Row(children: [
+                          columnModule.type.getFilterContent(context, filtro[columnModule.field], columnModule, (val) {
+                            setState(() {
+                              filtro[columnModule.field] = val;
+                            });
+                          })
+                        ]);
+                      } else
+                        return Container();
+                    }).toList() +
+                    getActions(),
+              ),
+              body: getDataTable(context),
+            );
           }),
     );
   }

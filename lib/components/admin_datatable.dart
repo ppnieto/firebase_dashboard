@@ -9,35 +9,43 @@ class AdminDataTable extends StatefulWidget {
   AdminDataTable({Key? key}) : super(key: key);
 
   @override
-  State<AdminDataTable> createState() => _AdminDataTableState();
+  State<AdminDataTable> createState() => AdminDataTableState();
 }
 
-class _AdminDataTableState extends State<AdminDataTable> {
-  void selectRow(BuildContext context, int index, DocumentSnapshot object) {
-    print("select row $index");
+class AdminDataTableState extends State<AdminDataTable> {
+  void selectRow(BuildContext context, DocumentSnapshot object) {
     AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
     if (adminScreenState == null) throw new Exception("No encuentro AdminScreenState!!!");
 
     setState(() {
-      adminScreenState.indexSelected.clear();
-      adminScreenState.indexSelected.add(index);
+      //adminScreenState.indexSelected.clear();
+      //adminScreenState.indexSelected.add(index);
       adminScreenState.rowsSelected.clear();
       adminScreenState.rowsSelected.add(object);
     });
   }
 
-  void multiselectRow(BuildContext context, int index, DocumentSnapshot object, bool add) {
-    print("multiSelectRow $index $add");
+  void unselectAll() {
+    AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
+    if (adminScreenState == null) throw new Exception("No encuentro AdminScreenState!!!");
+
+    setState(() {
+      adminScreenState.rowsSelected.clear();
+    });
+  }
+
+  void multiselectRow(BuildContext context, DocumentSnapshot object, bool add) {
+    print("multiSelectRow " + object.reference.path);
     AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
     if (adminScreenState == null) throw new Exception("No encuentro AdminScreenState!!!");
     if (add) {
       setState(() {
-        adminScreenState.indexSelected.add(index);
+        //adminScreenState.indexSelected.add(index);
         adminScreenState.rowsSelected.add(object);
       });
     } else {
       setState(() {
-        adminScreenState.indexSelected.remove(index);
+        //adminScreenState.indexSelected.remove(index);
         adminScreenState.rowsSelected.removeWhere((obj) => obj.reference.path == object.reference.path);
       });
     }
@@ -61,6 +69,15 @@ class _AdminDataTableState extends State<AdminDataTable> {
         lmRatio: 1.8,
         autoRowsToHeight: true,
         columns: adminScreenState.widget.module.showingColumns.map((column) {
+              ColumnSize cs = column.size;
+              if (column.width != null) {
+                if (column.width! <= 120)
+                  cs = ColumnSize.S;
+                else if (column.width! <= 150)
+                  cs = ColumnSize.M;
+                else
+                  cs = ColumnSize.L;
+              }
               return DataColumn2(
                 onSort: (int column, bool ascending) {
                   if (adminScreenState.widget.module.canSort && adminScreenState.widget.module.showingColumns[column].canSort) {
@@ -70,7 +87,7 @@ class _AdminDataTableState extends State<AdminDataTable> {
                     });
                   }
                 },
-                size: column.size,
+                size: cs, //column.size,
                 label: Text(column.label),
               );
             }).toList() +
@@ -90,7 +107,7 @@ class _AdminDataTableState extends State<AdminDataTable> {
 }
 
 class MyDataTableSource extends DataTableSource {
-  _AdminDataTableState parent;
+  AdminDataTableState parent;
   List<DocumentSnapshot> docs;
   BuildContext context;
   Function onTap;
@@ -107,11 +124,13 @@ class MyDataTableSource extends DataTableSource {
 
     DocumentSnapshot _object = docs[index];
 
+    bool isSelected = adminScreenState.rowsSelected.where((element) => element.reference.path == _object.reference.path).isNotEmpty;
+
     return DataRow2.byIndex(
-        selected: adminScreenState.indexSelected.contains(index),
+        selected: isSelected, //  adminScreenState.indexSelected.contains(index),
         index: index,
         onSelectChanged: (value) {
-          parent.multiselectRow(context, index, _object, value ?? false);
+          parent.multiselectRow(context, _object, value ?? false);
         },
         cells: module.columns
                 .where((element) => element.listable && this.showFields.containsKey(element.field) && this.showFields[element.field]!)
@@ -120,8 +139,8 @@ class MyDataTableSource extends DataTableSource {
               return DataCell(column.type.getListContent(context, _object, column) ?? SizedBox.shrink(),
                   onTap: column.clickToDetail
                       ? () {
-                          if (adminScreenState.widget.selectPreEdit && adminScreenState.indexSelected.contains(index) == false) {
-                            parent.selectRow(context, index, _object);
+                          if (adminScreenState.widget.selectPreEdit && isSelected == false) {
+                            parent.selectRow(context, _object);
                           } else {
                             if (module.canEdit) {
                               this.onTap(index);
@@ -141,13 +160,11 @@ class MyDataTableSource extends DataTableSource {
                                       IconButton(
                                         icon: Icon(Icons.delete, color: Theme.of(context).highlightColor),
                                         onPressed: () {
-                                          /*
-                                          doBorrar(context, _object.reference, () {
+                                          adminScreenState.doBorrar(context, _object.reference, () {
                                             if (module.onRemove != null) {
                                               module.onRemove!(_object);
                                             }
                                           });
-                                          */
                                         },
                                       ),
                                     ]
