@@ -14,7 +14,6 @@ class DashboardMainScreen extends StatefulWidget {
   final double sideBarWidth;
   final IconData? sideBarIcon;
   final DashboardTheme? theme;
-  late Widget currentWidget;
   static DashboardTheme? dashboardTheme;
 
   DashboardMainScreen(
@@ -26,35 +25,31 @@ class DashboardMainScreen extends StatefulWidget {
       this.sideBar,
       this.sideBarWidth = 100,
       this.theme,
-      this.sideBarIcon = Icons.view_sidebar}) {
-    if (menus.first is Menu) {
-      currentWidget = (menus.first as Menu).child;
-    } else if (menus.first is MenuGroup) {
-      MenuGroup mg = menus.first as MenuGroup;
-      currentWidget = (mg.children?.first as Menu).child;
-    }
-  }
+      this.sideBarIcon = Icons.view_sidebar}) {}
 
   @override
   DashboardMainScreenState createState() => DashboardMainScreenState();
 }
 
-class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTickerProviderStateMixin {
+class DashboardMainScreenState extends State<DashboardMainScreen>
+    with SingleTickerProviderStateMixin {
   bool isSidebar = false;
   int active = 0;
   bool isMenu = true;
   final _navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late Widget currentWidget;
 
   @override
   void initState() {
     super.initState();
+    currentWidget = (widget.menus.first as Menu).child;
     DashboardMainScreen.dashboardTheme = widget.theme;
   }
 
   void showScreen(Widget screen) {
     setState(() {
-      widget.currentWidget = screen;
+      currentWidget = screen;
     });
 
     _navigatorKey.currentState!.pushAndRemoveUntil(
@@ -66,7 +61,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
   }
 
   MenuBase? findMenu(String id) {
-    Iterable<MenuBase>? itMenus = this.widget.menus.where((element) => element.id == id);
+    Iterable<MenuBase>? itMenus =
+        this.widget.menus.where((element) => element.id == id);
     if (itMenus.isNotEmpty) {
       return itMenus.first;
     }
@@ -90,19 +86,24 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
                 },
               )
             : null,
-        automaticallyImplyLeading: MediaQuery.of(context).size.width < responsiveDashboardWidth ? true : false,
-        title: Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-          Container(
-            child: Text(
-              widget.title, // + " - " + subtitle,
-              style: TextStyle(
-                fontSize: 24,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        automaticallyImplyLeading:
+            MediaQuery.of(context).size.width < responsiveDashboardWidth
+                ? true
+                : false,
+        title: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                child: Text(
+                  widget.title, // + " - " + subtitle,
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
-          ),
-        ]),
+            ]),
         actions: widget.actions ??
             <Widget>[] +
                 (widget.sideBar != null
@@ -119,7 +120,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
       ),
       body: Row(
         children: <Widget>[
-          MediaQuery.of(context).size.width < responsiveDashboardWidth || !isMenu
+          MediaQuery.of(context).size.width < responsiveDashboardWidth ||
+                  !isMenu
               ? Container()
               : Card(
                   elevation: 2.0,
@@ -132,13 +134,18 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
                   ),
                 ),
           Expanded(
-            child:
-                Navigator(key: _navigatorKey, onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(builder: (_) => widget.currentWidget)),
+            child: Navigator(
+                key: _navigatorKey,
+                onGenerateRoute: (RouteSettings settings) =>
+                    MaterialPageRoute(builder: (_) => currentWidget)),
           ),
-          isSidebar ? Container(width: widget.sideBarWidth, child: widget.sideBar) : SizedBox.shrink(),
+          isSidebar
+              ? Container(width: widget.sideBarWidth, child: widget.sideBar)
+              : SizedBox.shrink(),
         ],
       ),
-      drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: drawerItems)),
+      drawer: Padding(
+          padding: EdgeInsets.only(top: 56), child: Drawer(child: drawerItems)),
     );
   }
 
@@ -149,7 +156,8 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
       bool hasRole = true;
 
       if (menu.role != null) {
-        List<String>? roles = widget.getRolesFunction != null ? widget.getRolesFunction!() : [];
+        List<String>? roles =
+            widget.getRolesFunction != null ? widget.getRolesFunction!() : [];
         if (roles == null)
           hasRole = false;
         else
@@ -166,25 +174,43 @@ class _MenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DashboardMainScreenState? parentState = context.findAncestorStateOfType<DashboardMainScreenState>();
+    DashboardMainScreenState? parentState =
+        context.findAncestorStateOfType<DashboardMainScreenState>();
     DashboardTheme? theme = parentState?.widget.theme;
     if (menu is Menu) {
       MenuInfo? menuInfo = menu is MenuInfo ? menu as MenuInfo : null;
 
-      bool selected = (menu as Menu).child.hashCode == parentState!.widget.currentWidget.hashCode;
+      bool selected =
+          (menu as Menu).child.hashCode == parentState!.currentWidget.hashCode;
 
       return Container(
-        color: selected ? theme?.menuSelectedBackgroundColor : theme?.menuBackgroundColor,
+        color: selected
+            ? theme?.menuSelectedBackgroundColor
+            : theme?.menuBackgroundColor,
         child: ListTile(
           trailing: menuInfo?.info(),
           onTap: () {
             if (!selected) parentState.showScreen((menu as Menu).child);
+            ScaffoldState? scaffolsState =
+                context.findAncestorStateOfType<ScaffoldState>();
+            if (scaffolsState != null) {
+              if (scaffolsState.isDrawerOpen) {
+                Navigator.of(context).pop();
+              }
+            }
           },
           selected: selected,
-          leading: Icon(menu.iconData, color: selected ? theme?.menuSelectedTextColor : theme?.menuTextColor),
+          leading: Icon(menu.iconData,
+              color: selected
+                  ? theme?.menuSelectedTextColor
+                  : theme?.menuTextColor),
           title: Text(
             menu.label,
-            style: TextStyle(fontSize: 18, color: selected ? theme?.menuSelectedTextColor : theme?.menuTextColor),
+            style: TextStyle(
+                fontSize: 18,
+                color: selected
+                    ? theme?.menuSelectedTextColor
+                    : theme?.menuTextColor),
           ),
         ),
       );
@@ -196,7 +222,8 @@ class _MenuTile extends StatelessWidget {
           childrenPadding: EdgeInsets.only(left: 24),
           iconColor: theme?.menuTextColor,
           collapsedIconColor: theme?.menuTextColor,
-          title: Text(menu.label, style: TextStyle(fontSize: 18, color: theme?.menuTextColor)),
+          title: Text(menu.label,
+              style: TextStyle(fontSize: 18, color: theme?.menuTextColor)),
           leading: Icon(menu.iconData, color: theme?.menuTextColor),
           children: (menu as MenuGroup).children!.map<Widget>((submenu) {
             Menu m = submenu as Menu;

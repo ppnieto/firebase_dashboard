@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
-import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeSelect extends FieldType {
@@ -9,8 +8,9 @@ class FieldTypeSelect extends FieldType {
   final Widget? unselected;
   final Function? validate;
   final String? frozenValue;
+  final bool editInList;
 
-  FieldTypeSelect({required this.options, this.unselected, this.initialValue, this.validate, this.frozenValue});
+  FieldTypeSelect({required this.options, this.unselected, this.initialValue, this.validate, this.frozenValue, this.editInList = false});
 
   @override
   String getSyncStringContent(DocumentSnapshot _object, ColumnModule column) {
@@ -29,18 +29,69 @@ class FieldTypeSelect extends FieldType {
 
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
-    if (_object.hasFieldAdm(column.field)) {
-      String key = _object.get(column.field);
-      if (this.options.containsKey(key)) {
-        return Text(this.options[key] ?? "");
-      } else {
-        if (this.unselected != null) {
-          return this.unselected;
+    if (editInList) {
+      String content = getSyncStringContent(_object, column);
+
+      return Container(
+          width: 300,
+          child: PopupMenuButton<String>(
+              tooltip: content,
+              child: Text(
+                content,
+                //style: style,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              itemBuilder: (context) {
+                return <PopupMenuItem<String>>[PopupMenuItem<String>(value: "", child: Text("<sin asignar>", style: TextStyle(color: Colors.red)))] +
+                    options.entries.map((e) {
+                      return PopupMenuItem<String>(value: e.key, child: Text(e.value));
+                    }).toList();
+              },
+              onSelected: (String ref) {
+                _object.reference.update({column.field: ref}).then((value) => print("updated!!!"));
+              })
+
+          /*
+          child: DropdownButtonFormField(
+            value: value == null ? initialValue : value,
+            isExpanded: true,
+            items: options.entries.map((e) {
+              return DropdownMenuItem(
+                value: e.key,
+                child: Text(e.value),
+                enabled: !(frozenValue != null && frozenValue == e.key),
+              );
+            }).toList(),
+            onChanged: (frozenValue != null && value == frozenValue) || column.editable == false
+                ? null
+                : (val) {
+                    updateData(context, column, val);
+                  },
+            onSaved: (val) {
+              updateData(context, column, val);
+            },
+            validator: (val) {
+              if (column.mandatory && val == null) return "Campo obligatorio";
+              if (validate != null) return validate!(initialValue, val);
+              return null;
+            },
+          )*/
+          );
+    } else {
+      if (_object.hasFieldAdm(column.field)) {
+        String key = _object.get(column.field);
+        if (this.options.containsKey(key)) {
+          return Text(this.options[key] ?? "");
+        } else {
+          if (this.unselected != null) {
+            return this.unselected;
+          }
         }
       }
-    }
 
-    return Text("<sin asignar>", style: TextStyle(color: Colors.red));
+      return Text("<sin asignar>", style: TextStyle(color: Colors.red));
+    }
   }
 
   @override

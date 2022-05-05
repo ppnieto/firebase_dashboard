@@ -54,7 +54,7 @@ class FieldTypeRating extends FieldType {
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var rating = _object?.getFieldAdm(column.field, 0) ?? 0;
+    var rating = _object?.getFieldAdm(column.field, 0);
     return Row(children: List.generate(this.startCount, (index) => buildStar(index, rating)) + [buildCount(rating)]);
   }
 }

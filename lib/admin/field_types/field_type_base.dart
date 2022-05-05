@@ -7,13 +7,17 @@ abstract class FieldType {
   final Map<String, String> preloadedData = {};
 
   dynamic getFieldFromMap(Map<String, dynamic> data, String fieldName, dynamic defValue) {
-    if (fieldName.contains('.')) {
-      List<String> fields = fieldName.split('.');
-      if (fields.length != 2) return "Error con sintaxis de campo $fieldName";
-      return data[fields[0]][fields[1]];
-    } else {
-      if (!data.containsKey(fieldName)) return defValue;
-      return data[fieldName];
+    try {
+      if (fieldName.contains('.')) {
+        List<String> fields = fieldName.split('.');
+        if (fields.length != 2) return "Error con sintaxis de campo $fieldName";
+        return data[fields[0]][fields[1]];
+      } else {
+        if (!data.containsKey(fieldName)) return defValue;
+        return data[fieldName];
+      }
+    } catch (e) {
+      return defValue;
     }
   }
 
@@ -86,9 +90,19 @@ extension SafeFieldAdmin on DocumentSnapshot {
   }
 
   bool hasFieldAdm(String fieldName) {
-    if (this.data() == null) return false;
-    if (!(this.data() as Map).containsKey(fieldName)) return false;
-    if ((this.data() as Map)[fieldName] == null) return false;
-    return true;
+    if (fieldName.contains('.')) {
+      List<String> split = fieldName.split('.');
+      if (this.hasFieldAdm(split[0])) {
+        Map data = this.get(split[0]);
+        if (data.containsKey(split[1])) return true;
+      }
+      return false;
+    } else {
+      Map data = this.data() as Map;
+      //if (data == null) return false;
+      if (!data.containsKey(fieldName)) return false;
+      if (data[fieldName] == null) return false;
+      return true;
+    }
   }
 }

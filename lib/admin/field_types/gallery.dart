@@ -103,7 +103,7 @@ class __GalleryState extends State<_Gallery> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 250,
+      height: 280,
       child: Card(
           child: Column(
         children: [

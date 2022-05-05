@@ -142,12 +142,10 @@ class AdminScreenState extends State<AdminScreen> {
   }
 
   showDetalle(index) {
-    print("showDetalle " + index.toString());
     showDetalleObject(docs![index]);
   }
 
   showDetalleObject(object) {
-    print("showDetalleObjec");
     if (widget.module.canEdit) {
       Navigator.push(
         context,
@@ -245,7 +243,6 @@ class AdminScreenState extends State<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     getLeading() {
-      if (widget.showScaffoldBack) return null;
       return IconButton(
           icon: Icon(FontAwesomeIcons.listUl),
           onPressed: () async {
@@ -428,6 +425,7 @@ class AdminScreenState extends State<AdminScreen> {
           builder: (context, snapshot) {
             if (!snapshot.hasData) return SizedBox.shrink();
             return Scaffold(
+<<<<<<< HEAD
               appBar: AppBar(
                 backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
                 title: Text(widget.module.title),
@@ -452,6 +450,37 @@ class AdminScreenState extends State<AdminScreen> {
               ),
               body: getDataTable(context),
             );
+=======
+                appBar: AppBar(
+                  backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+                  title: Row(
+                    children: [
+                      getLeading(),
+                      SizedBox(width: 10),
+                      Text(widget.module.title),
+                    ],
+                  ),
+                  //leading: getLeading(),
+                  actions: <Widget>[] +
+                      widget.module.columns.map<Widget>((ColumnModule columnModule) {
+                        if (columnModule.filter) {
+                          if (filtro.containsKey(columnModule.field) == false) {
+                            filtro[columnModule.field] = "";
+                          }
+                          return Row(children: [
+                            columnModule.type.getFilterContent(context, filtro[columnModule.field], columnModule, (val) {
+                              setState(() {
+                                filtro[columnModule.field] = val;
+                              });
+                            })
+                          ]);
+                        } else
+                          return Container();
+                      }).toList() +
+                      getActions(),
+                ),
+                body: SyncfusionDataTable(key: keyDataTable));
+>>>>>>> 47b176d1ce282afa631e68c1da65f770838ada6b
           }),
     );
   }
