@@ -17,7 +17,11 @@ import 'package:sweetsheet/sweetsheet.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import 'package:universal_html/html.dart' as html;
 
-enum DataTableImplementation { AdminDataTable, AsyncDataTable, SyncfusionDataTable }
+enum DataTableImplementation {
+  AdminDataTable,
+  AsyncDataTable,
+  SyncfusionDataTable
+}
 
 class AdminScreen extends StatefulWidget {
   final Module module;
@@ -36,7 +40,8 @@ class AdminScreen extends StatefulWidget {
       this.selectPreEdit = false,
       this.collection,
       this.labelWidth = 120,
-      this.dataTableImplementation = DataTableImplementation.SyncfusionDataTable})
+      this.dataTableImplementation =
+          DataTableImplementation.SyncfusionDataTable})
       : super(key: key);
 
   @override
@@ -93,7 +98,10 @@ class AdminScreenState extends State<AdminScreen> {
 
   void onUpdateColumnasSeleccionadas() {
     widget.module.showingColumns = widget.module.columns
-        .where((col) => col.listable && columnasSeleccionadas.containsKey(col.field) && columnasSeleccionadas[col.field]!)
+        .where((col) =>
+            col.listable &&
+            columnasSeleccionadas.containsKey(col.field) &&
+            columnasSeleccionadas[col.field]!)
         .toList();
   }
 
@@ -107,7 +115,10 @@ class AdminScreenState extends State<AdminScreen> {
     if (widget.module.getQueryCollection != null) {
       return widget.module.getQueryCollection!();
     } else {
-      String collection = widget.collection?.path ?? widget.module.collection ?? widget.collection?.path ?? "";
+      String collection = widget.collection?.path ??
+          widget.module.collection ??
+          widget.collection?.path ??
+          "";
       return FirebaseFirestore.instance.collection(collection);
     }
   }
@@ -115,8 +126,12 @@ class AdminScreenState extends State<AdminScreen> {
   Query addFilters(Map<String, dynamic> filtro, Query query) {
     Query result = query;
     for (MapEntry filterEntry in filtro.entries) {
-      if (filterEntry.value != null && filterEntry.value.toString().isNotEmpty) {
-        print("   add filter " + filterEntry.key + " = " + filterEntry.value.toString());
+      if (filterEntry.value != null &&
+          filterEntry.value.toString().isNotEmpty) {
+        print("   add filter " +
+            filterEntry.key +
+            " = " +
+            filterEntry.value.toString());
         result = result.where(filterEntry.key, isEqualTo: filterEntry.value);
       }
     }
@@ -130,7 +145,8 @@ class AdminScreenState extends State<AdminScreen> {
         if (doc.hasFieldAdm(column.field)) {
           String value = column.type.getSyncStringContent(doc, column);
 
-          bool encontrado = value.toLowerCase().contains(this.globalSearch!.toLowerCase());
+          bool encontrado =
+              value.toLowerCase().contains(this.globalSearch!.toLowerCase());
           if (encontrado) {
             result.add(doc);
             break;
@@ -176,7 +192,8 @@ class AdminScreenState extends State<AdminScreen> {
     return query;
   }
 
-  GlobalKey<SyncfusionDataTableState> keyDataTable = GlobalKey<SyncfusionDataTableState>();
+  GlobalKey<SyncfusionDataTableState> keyDataTable =
+      GlobalKey<SyncfusionDataTableState>();
 
   Future<void> loading(BuildContext context, String message) async {
     showDialog(
@@ -193,7 +210,11 @@ class AdminScreenState extends State<AdminScreen> {
               children: [
                 new CircularProgressIndicator(),
                 SizedBox(width: 10),
-                new Text(message, style: TextStyle(color: Colors.white, fontSize: 13.0, fontFamily: "AvenirBlack"))
+                new Text(message,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13.0,
+                        fontFamily: "AvenirBlack"))
               ],
             ),
           ),
@@ -205,7 +226,8 @@ class AdminScreenState extends State<AdminScreen> {
   GlobalKey<AdminDataTableState>? adminDataTableKey;
 
   Widget getDataTable(BuildContext context) {
-    if (widget.dataTableImplementation == DataTableImplementation.SyncfusionDataTable) {
+    if (widget.dataTableImplementation ==
+        DataTableImplementation.SyncfusionDataTable) {
       return SyncfusionDataTable(key: keyDataTable);
     } else {
       // if (widget.dataTableImplementation == DataTableImplementation.AdminDataTable) {
@@ -231,7 +253,9 @@ class AdminScreenState extends State<AdminScreen> {
               this.docs?.sort((a, b) {
                 var varA = column.type.getCompareValue(a, column);
                 var varB = column.type.getCompareValue(b, column);
-                return this.sortAscending ? varA?.compareTo(varB) : varB?.compareTo(varA);
+                return this.sortAscending
+                    ? varA?.compareTo(varB)
+                    : varB?.compareTo(varA);
               });
             }
             adminDataTableKey = GlobalKey<AdminDataTableState>();
@@ -251,7 +275,8 @@ class AdminScreenState extends State<AdminScreen> {
               builder: (ctx) {
                 return MultiSelectDialog<String>(
                   items: widget.module.columns.map((ColumnModule columnModule) {
-                    return MultiSelectItem(columnModule.field, columnModule.label);
+                    return MultiSelectItem(
+                        columnModule.field, columnModule.label);
                   }).toList(),
                   initialValue: columnasSeleccionadas.entries.map((e) {
                     if (e.value) return e.key;
@@ -270,7 +295,8 @@ class AdminScreenState extends State<AdminScreen> {
 
                       onUpdateColumnasSeleccionadas();
 
-                      SharedPreferences.getInstance().then((SharedPreferences prefs) {
+                      SharedPreferences.getInstance()
+                          .then((SharedPreferences prefs) {
                         String key = 'admin_columns_' + widget.module.name;
                         prefs.setStringList(key, values);
                       });
@@ -283,8 +309,12 @@ class AdminScreenState extends State<AdminScreen> {
     }
 
     Widget getGlobalSearch() {
-      Color highlightColor =
-          context.findAncestorStateOfType<DashboardMainScreenState>()?.widget.theme?.appBar1TextColor ?? Theme.of(context).primaryColor;
+      Color highlightColor = context
+              .findAncestorStateOfType<DashboardMainScreenState>()
+              ?.widget
+              .theme
+              ?.appBar1TextColor ??
+          Theme.of(context).primaryColor;
 
       return Container(
         width: 280,
@@ -295,10 +325,13 @@ class AdminScreenState extends State<AdminScreen> {
             fillColor: Theme.of(context).cardColor,
             suffixIcon: Icon(Icons.search, color: highlightColor),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+              borderSide:
+                  BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
               borderRadius: BorderRadius.circular(6.0),
             ),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: highlightColor, width: 2.0)),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: BorderSide(color: highlightColor, width: 2.0)),
             hintText: "Buscar...",
             hintStyle: TextStyle(color: highlightColor),
             contentPadding: EdgeInsets.all(10),
@@ -317,7 +350,8 @@ class AdminScreenState extends State<AdminScreen> {
       await loading(context, "Por favor espere...");
       try {
         List<DocumentSnapshot> allDocs = [];
-        if (widget.dataTableImplementation == DataTableImplementation.SyncfusionDataTable) {
+        if (widget.dataTableImplementation ==
+            DataTableImplementation.SyncfusionDataTable) {
           allDocs = await keyDataTable.currentState!.loadAll();
         } else {
           allDocs = docs ?? [];
@@ -328,13 +362,16 @@ class AdminScreenState extends State<AdminScreen> {
 
         List<xlsio.ExcelDataRow> rows = [];
 
-        List<ColumnModule> columnasExportables = widget.module.columns.where((e) => e.listable && e.excellable).toList();
+        List<ColumnModule> columnasExportables = widget.module.columns
+            .where((e) => e.listable && e.excellable)
+            .toList();
 
         for (var doc in allDocs) {
           List<xlsio.ExcelDataCell> cells = [];
           for (var column in columnasExportables) {
             var value = column.type.getSyncStringContent(doc, column);
-            cells.add(xlsio.ExcelDataCell(value: value, columnHeader: column.label));
+            cells.add(
+                xlsio.ExcelDataCell(value: value, columnHeader: column.label));
           }
 
           rows.add(xlsio.ExcelDataRow(cells: cells));
@@ -370,7 +407,9 @@ class AdminScreenState extends State<AdminScreen> {
         result.addAll(widget.module.getScaffoldActions!(context, this));
       }
 
-      if (widget.module.globalSearch && widget.dataTableImplementation == DataTableImplementation.AdminDataTable) {
+      if (widget.module.globalSearch &&
+          widget.dataTableImplementation ==
+              DataTableImplementation.AdminDataTable) {
         result.add(getGlobalSearch());
       }
 
@@ -401,12 +440,17 @@ class AdminScreenState extends State<AdminScreen> {
           },
         ));
       }
-      if (widget.module.globalSearch && widget.dataTableImplementation == DataTableImplementation.SyncfusionDataTable) {
+      if (widget.module.globalSearch &&
+          widget.dataTableImplementation ==
+              DataTableImplementation.SyncfusionDataTable) {
         result.add(IconButton(
           icon: Icon(Icons.search),
           onPressed: () async {
-            List<DocumentSnapshot> allDocs = await keyDataTable.currentState!.loadAll();
-            showSearch(context: context, delegate: _Search(parentState: this, allDocs: allDocs));
+            List<DocumentSnapshot> allDocs =
+                await keyDataTable.currentState!.loadAll();
+            showSearch(
+                context: context,
+                delegate: _Search(parentState: this, allDocs: allDocs));
           },
         ));
       }
@@ -418,26 +462,32 @@ class AdminScreenState extends State<AdminScreen> {
     return Theme(
       data: Theme.of(context). /* ThemeData.light()*/ copyWith(
         highlightColor: DashboardMainScreen.dashboardTheme?.iconButtonColor,
-        primaryColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+        primaryColor:
+            DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ??
+                Theme.of(context).secondaryHeaderColor,
       ),
       child: FutureBuilder(
           future: initAdmin(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) return SizedBox.shrink();
             return Scaffold(
-<<<<<<< HEAD
               appBar: AppBar(
-                backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+                backgroundColor: DashboardMainScreen
+                        .dashboardTheme?.appBar2BackgroundColor ??
+                    Theme.of(context).secondaryHeaderColor,
                 title: Text(widget.module.title),
                 leading: getLeading(),
                 actions: <Widget>[] +
-                    widget.module.columns.map<Widget>((ColumnModule columnModule) {
+                    widget.module.columns
+                        .map<Widget>((ColumnModule columnModule) {
                       if (columnModule.filter) {
                         if (filtro.containsKey(columnModule.field) == false) {
                           filtro[columnModule.field] = "";
                         }
                         return Row(children: [
-                          columnModule.type.getFilterContent(context, filtro[columnModule.field], columnModule, (val) {
+                          columnModule.type.getFilterContent(
+                              context, filtro[columnModule.field], columnModule,
+                              (val) {
                             setState(() {
                               filtro[columnModule.field] = val;
                             });
@@ -450,37 +500,6 @@ class AdminScreenState extends State<AdminScreen> {
               ),
               body: getDataTable(context),
             );
-=======
-                appBar: AppBar(
-                  backgroundColor: DashboardMainScreen.dashboardTheme!.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
-                  title: Row(
-                    children: [
-                      getLeading(),
-                      SizedBox(width: 10),
-                      Text(widget.module.title),
-                    ],
-                  ),
-                  //leading: getLeading(),
-                  actions: <Widget>[] +
-                      widget.module.columns.map<Widget>((ColumnModule columnModule) {
-                        if (columnModule.filter) {
-                          if (filtro.containsKey(columnModule.field) == false) {
-                            filtro[columnModule.field] = "";
-                          }
-                          return Row(children: [
-                            columnModule.type.getFilterContent(context, filtro[columnModule.field], columnModule, (val) {
-                              setState(() {
-                                filtro[columnModule.field] = val;
-                              });
-                            })
-                          ]);
-                        } else
-                          return Container();
-                      }).toList() +
-                      getActions(),
-                ),
-                body: SyncfusionDataTable(key: keyDataTable));
->>>>>>> 47b176d1ce282afa631e68c1da65f770838ada6b
           }),
     );
   }
@@ -556,10 +575,14 @@ class _Search extends SearchDelegate {
         itemBuilder: (context, index) {
           final suggestion = suggesstions[index];
           List<String> suggestionText = [];
-          parentState.widget.module.fieldsForShowInSearchResult.forEach((fieldName) {
-            ColumnModule column = parentState.widget.module.columns.where((col) => col.field == fieldName).first;
+          parentState.widget.module.fieldsForShowInSearchResult
+              .forEach((fieldName) {
+            ColumnModule column = parentState.widget.module.columns
+                .where((col) => col.field == fieldName)
+                .first;
 
-            suggestionText.add(column.type.getSyncStringContent(suggestion, column));
+            suggestionText
+                .add(column.type.getSyncStringContent(suggestion, column));
             // suggestion.getFieldAdm(fieldName, "").toString());
           });
           return ListTile(
