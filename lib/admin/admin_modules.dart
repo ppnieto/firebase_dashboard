@@ -44,6 +44,7 @@ class Module {
   final Function? onSave;
   final Function? onUpdated;
   final Function? onRemove;
+  final Function? onNew;
   final bool globalSearch;
   final Future<String?> Function(bool isNew, Map<String, dynamic> updateData)? validation;
   final int rowsPerPage;
@@ -87,6 +88,7 @@ class Module {
       this.actionColumnWidth,
       this.onSave,
       this.onUpdated,
+      this.onNew,
       this.onRemove,
       this.validation,
       this.getActions,

@@ -38,6 +38,10 @@ class DetalleScreenState extends State<DetalleScreen> {
         this.updateData = value.data() as Map<String, dynamic>?;
       });
     });
+
+    if (widget.module.onNew != null) {
+      widget.module.onNew!(this.updateData);
+    }
   }
 
   @override
