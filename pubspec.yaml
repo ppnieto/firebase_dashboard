@@ -14,11 +14,11 @@ dependencies:
 
   font_awesome_flutter:
   sweetsheet: any
-  flutter_spinbox: ^0.6.0
+  flutter_spinbox:
   firebase_core: any
   firebase_storage: any
   firebase_auth: any
-  cloud_firestore: any
+  cloud_firestore:
   uuid: any
   google_maps_flutter: any
   package_info_plus: any
@@ -31,11 +31,11 @@ dependencies:
   flutter_typeahead: any
   #excel: ^1.1.5
   syncfusion_flutter_xlsio: any
-  syncfusion_flutter_datagrid_export: ^19.4.53-beta
-  syncfusion_flutter_datagrid: ^19.3.48
+  syncfusion_flutter_datagrid_export:
+  syncfusion_flutter_datagrid: 
   data_table_2: any
-  textfield_tags: any
   dropdown_search: any
+  textfield_tags: any
   
 
 

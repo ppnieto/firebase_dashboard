@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 
 class FieldTypeBoolean extends FieldType {
   final bool editOnList;
+  final bool defValue;
 
-  FieldTypeBoolean({this.editOnList = false});
+  FieldTypeBoolean({this.editOnList = false, this.defValue = false});
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
-    bool value = _object.getFieldAdm(column.field, false);
+    bool value = _object.getFieldAdm(column.field, defValue);
     return IconButton(
       icon: Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank),
       onPressed: column.editable && editOnList
@@ -25,7 +26,7 @@ class FieldTypeBoolean extends FieldType {
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     {
       return StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-        var value = values[column.field];
+        var value = values[column.field] ?? _object?.getFieldAdm(column.field, defValue) ?? defValue;
         return CheckboxListTile(
             value: value ?? false,
             onChanged: column.editable

@@ -3,7 +3,6 @@ import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:textfield_tags/textfield_tags.dart';
 
 class FieldTypeChips extends FieldType {
   final Map<String, dynamic> options;

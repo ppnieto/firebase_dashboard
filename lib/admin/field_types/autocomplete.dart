@@ -53,7 +53,7 @@ class FieldTypeAutocomplete extends FieldType {
     if (value == null) {
       value = initialValue ?? "";
       //values[column.field] = value;
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         updateData(context, column, value);
       });
     }

@@ -10,6 +10,7 @@ class FieldTypeTags extends FieldType {
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+    TextfieldTagsController _controller = TextfieldTagsController();
     var value;
     if (_object != null && hasField(_object, column.field)) {
       value = _object.get(column.field);
@@ -25,8 +26,114 @@ class FieldTypeTags extends FieldType {
         valueString.add(v.toString());
       }
     }
+    //return SizedBox.shrink();
+    double _distanceToField = MediaQuery.of(context).size.width;
+
+    _controller.addListener(
+      () {
+        updateData(context, column, _controller.getTags);
+      },
+    );
+
     return TextFieldTags(
-        initialTags: valueString,
+      textfieldTagsController: _controller,
+      initialTags: valueString,
+      textSeparators: const [' ', ','],
+      letterCase: LetterCase.normal,
+      validator: (String tag) {
+        /*
+        if (tag == 'php') {
+          return 'No, please just no';
+        } else */
+
+        if (_controller.getTags?.contains(tag) ?? false) {
+          return 'La etiqueta $tag ya existe';
+        }
+
+        return null;
+      },
+      inputfieldBuilder: (context, tec, fn, error, onChanged, onSubmitted) {
+        return ((context, sc, tags, onTagDelete) {
+          return Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: TextField(
+              controller: tec,
+              focusNode: fn,
+              decoration: InputDecoration(
+                isDense: true,
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    //color: Color.fromARGB(255, 74, 137, 92),
+                    width: 3.0,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 3.0,
+                  ),
+                ),
+                /*
+                helperText: 'Enter language...',
+                helperStyle: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                ),
+                */
+                hintText: /*_controller.hasTags ? '' :*/ hint,
+                errorText: error,
+                prefixIconConstraints: BoxConstraints(maxWidth: _distanceToField * 0.74),
+                prefixIcon: tags.isNotEmpty
+                    ? SingleChildScrollView(
+                        controller: sc,
+                        scrollDirection: Axis.horizontal,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Row(
+                              children: tags.map((String tag) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20.0),
+                                  ),
+                                  color: Theme.of(context).secondaryHeaderColor),
+                              margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('$tag', style: const TextStyle(color: Colors.white)),
+                                  const SizedBox(width: 4.0),
+                                  InkWell(
+                                    child: const Icon(
+                                      Icons.cancel,
+                                      size: 14.0,
+                                      color: Color.fromARGB(255, 233, 233, 233),
+                                    ),
+                                    onTap: () {
+                                      onTagDelete(tag);
+                                    },
+                                  )
+                                ],
+                              ),
+                            );
+                          }).toList()),
+                        ),
+                      )
+                    : null,
+              ),
+              onEditingComplete: () {
+                print("on editing complete");
+              },
+              onChanged: onChanged,
+              onSubmitted: onSubmitted,
+            ),
+          );
+        });
+      },
+    );
+
+    /*
         tagsStyler: TagsStyler(
             tagTextStyle: TextStyle(fontWeight: FontWeight.normal),
             tagDecoration: BoxDecoration(
@@ -35,6 +142,7 @@ class FieldTypeTags extends FieldType {
             ),
             tagCancelIcon: Icon(Icons.cancel, size: 18.0, color: Colors.blue[900]),
             tagPadding: const EdgeInsets.all(6.0)),
+            
         tagsDistanceFromBorderEnd: 10,
         textFieldStyler: TextFieldStyler(helperText: "Introduzca etiquetas separadas por espacio o coma", hintText: hint),
         onTag: (tag) {
@@ -45,15 +153,11 @@ class FieldTypeTags extends FieldType {
         onDelete: (tag) {
           valueString.remove(tag);
           updateData(context, column, valueString);
-        },
+        },        
         validator: (tag) {
-          /*
-            if (tag.length > 15) {
-              return "hey that's too long";
-            }
-            */
           return null;
-        });
+        }
+    );*/
   }
 
   @override
@@ -75,7 +179,7 @@ class FieldTypeTags extends FieldType {
             spacing: 5.0,
             children: value
                 .map<Widget>((e) => Container(
-                      decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.all(Radius.circular(5))),
+                      decoration: BoxDecoration(color: Theme.of(context).secondaryHeaderColor, borderRadius: BorderRadius.all(Radius.circular(5))),
                       padding: EdgeInsets.all(6),
                       child: Text(e),
                     ))
