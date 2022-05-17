@@ -13,7 +13,13 @@ class DetalleScreen extends StatefulWidget {
   final double labelWidth;
   final CollectionReference? collection;
 
-  DetalleScreen({Key? key, this.object, required this.module, this.labelWidth = 120, this.collection}) : super(key: key);
+  DetalleScreen(
+      {Key? key,
+      this.object,
+      required this.module,
+      this.labelWidth = 120,
+      this.collection})
+      : super(key: key);
 
   @override
   State<DetalleScreen> createState() => DetalleScreenState();
@@ -51,17 +57,25 @@ class DetalleScreenState extends State<DetalleScreen> {
   }
 
   getEditField(BuildContext context, ColumnModule column) {
-    Widget? child = column.type.getEditContent(context, widget.object, updateData!, column);
+    Widget? child =
+        column.type.getEditContent(context, widget.object, updateData!, column);
 
     if (child != null) {
       if (column.showLabelOnEdit) {
         child = Row(children: [
-          ConstrainedBox(constraints: BoxConstraints(minWidth: widget.labelWidth), child: Text(column.label)),
+          ConstrainedBox(
+              constraints: BoxConstraints(minWidth: widget.labelWidth),
+              child: Text(column.label)),
           SizedBox(width: 20),
           Expanded(child: child)
         ]);
       }
-      return Padding(padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 5 : 20), child: child);
+      return Padding(
+          padding: EdgeInsets.all(
+              MediaQuery.of(context).size.width < responsiveDashboardWidth
+                  ? 5
+                  : 20),
+          child: child);
     } else
       return SizedBox.shrink();
   }
@@ -69,9 +83,14 @@ class DetalleScreenState extends State<DetalleScreen> {
   getDetail(BuildContext context) => SingleChildScrollView(
         child: Card(
           elevation: 2,
-          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth ? EdgeInsets.fromLTRB(64, 32, 64, 64) : EdgeInsets.all(5),
+          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth
+              ? EdgeInsets.fromLTRB(64, 32, 64, 64)
+              : EdgeInsets.all(5),
           child: Padding(
-            padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 32.0 : 5),
+            padding: EdgeInsets.all(
+                MediaQuery.of(context).size.width < responsiveDashboardWidth
+                    ? 32.0
+                    : 5),
             child: Container(
                 child: StreamBuilder(
                     stream: widget.object?.reference.snapshots(),
@@ -80,9 +99,14 @@ class DetalleScreenState extends State<DetalleScreen> {
                           builder: (context) => Form(
                               key: _formKey,
                               child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: widget.module.columns.map<Widget>((column) {
-                                    if ((widget.object == null && column.showOnNew) || (widget.object != null && column.showOnEdit)) {
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: widget.module.columns
+                                      .map<Widget>((column) {
+                                    if ((widget.object == null &&
+                                            column.showOnNew) ||
+                                        (widget.object != null &&
+                                            column.showOnEdit)) {
                                       return getEditField(context, column);
                                     } else {
                                       return Container();
@@ -142,7 +166,10 @@ class DetalleScreenState extends State<DetalleScreen> {
     if (widget.module.getQueryCollection != null) {
       return widget.module.getQueryCollection!();
     } else {
-      String collectionPath = widget.collection?.path ?? widget.module.collection ?? widget.collection?.path ?? "";
+      String collectionPath = widget.collection?.path ??
+          widget.module.collection ??
+          widget.collection?.path ??
+          "";
       return FirebaseFirestore.instance.collection(collectionPath);
     }
   }
@@ -166,7 +193,8 @@ class DetalleScreenState extends State<DetalleScreen> {
       String? msgValidation;
 
       if (widget.module.validation != null) {
-        msgValidation = await widget.module.validation!(isNew, this.updateData!);
+        msgValidation =
+            await widget.module.validation!(isNew, this.updateData!);
       }
 
       bool doUpdate = true;
@@ -177,7 +205,8 @@ class DetalleScreenState extends State<DetalleScreen> {
         if (doUpdate) {
           if (!isNew) {
             widget.object!.reference.update(this.updateData!).then((value) {
-              if (widget.module.onUpdated != null) widget.module.onUpdated!(isNew, widget.object!.reference);
+              if (widget.module.onUpdated != null)
+                widget.module.onUpdated!(isNew, widget.object!.reference);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Elemento guardado con éxito'),
                 duration: Duration(seconds: 2),
@@ -188,7 +217,8 @@ class DetalleScreenState extends State<DetalleScreen> {
             });
           } else if (isNew) {
             _getCollection().add(this.updateData!).then((value) {
-              if (widget.module.onUpdated != null) widget.module.onUpdated!(isNew, value);
+              if (widget.module.onUpdated != null)
+                widget.module.onUpdated!(isNew, value);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Elemento guardado con éxito'),
                 duration: Duration(seconds: 2),
@@ -218,8 +248,11 @@ class DetalleScreenState extends State<DetalleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.module.title + (widget.object == null ? " / nuevo" : " / detalle")),
-          backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+          title: Text(widget.module.title +
+              (widget.object == null ? " / nuevo" : " / detalle")),
+          backgroundColor:
+              DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ??
+                  Theme.of(context).secondaryHeaderColor,
           centerTitle: false,
           actions: [
             IconButton(

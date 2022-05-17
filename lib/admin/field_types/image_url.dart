@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import "package:universal_html/html.dart" as html;
+import 'dart:html' as html;
 
 class FieldTypeImageURL extends FieldType {
   final double width;
@@ -15,10 +15,16 @@ class FieldTypeImageURL extends FieldType {
   TextEditingController textController = TextEditingController();
   TextEditingController pathController = TextEditingController();
 
-  FieldTypeImageURL({required this.width, required this.height, this.allowURL = true, this.allowUpload = false, required this.storePath});
+  FieldTypeImageURL(
+      {required this.width,
+      required this.height,
+      this.allowURL = true,
+      this.allowUpload = false,
+      required this.storePath});
 
   @override
-  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(
+      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
       var value = _object.get(column.field);
       if (value is Map) {
@@ -49,7 +55,8 @@ class FieldTypeImageURL extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object,
+      Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
     if (value is Map) {
       textController.text = value['url'] ?? "";
@@ -64,7 +71,8 @@ class FieldTypeImageURL extends FieldType {
                 ),
                 enabled: this.allowURL,
                 onSaved: (val) {
-                  updateData(context, column, {'url': val, 'path': pathController.text});
+                  updateData(context, column,
+                      {'url': val, 'path': pathController.text});
                 })),
         //if (allowUpload) Expanded(child: TextFormField(controller: pathController)),
         if (allowUpload)
@@ -91,7 +99,8 @@ class _UploadDialog extends StatefulWidget {
   final FieldTypeImageURL parent;
   final String url;
 
-  _UploadDialog({Key? key, required this.parent, required this.url}) : super(key: key);
+  _UploadDialog({Key? key, required this.parent, required this.url})
+      : super(key: key);
 
   @override
   __UploadDialogState createState() => __UploadDialogState();
@@ -108,6 +117,7 @@ class __UploadDialogState extends State<_UploadDialog> {
 
   void uploadFile() {
     Uint8List? uploadedImage;
+
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
     uploadInput.click();
 
@@ -122,7 +132,8 @@ class __UploadDialogState extends State<_UploadDialog> {
           uploadedImage = reader.result as Uint8List?;
           String fileName = widget.parent.storePath + "/" + file.name;
           print("subimos " + fileName);
-          firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref(fileName);
+          firebase_storage.Reference ref =
+              firebase_storage.FirebaseStorage.instance.ref(fileName);
           firebase_storage.UploadTask uploadTask = ref.putData(uploadedImage!);
           firebase_storage.TaskSnapshot task = await uploadTask;
           print("subido");
@@ -161,9 +172,14 @@ class __UploadDialogState extends State<_UploadDialog> {
       width: 800,
       height: 700,
       padding: EdgeInsets.all(50),
-      decoration: BoxDecoration(shape: BoxShape.rectangle, color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [
-        BoxShadow(color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
-      ]),
+      decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
+          ]),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
