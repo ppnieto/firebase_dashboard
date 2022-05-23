@@ -68,7 +68,8 @@ class DetalleScreenState extends State<DetalleScreen> {
 
   getDetail(BuildContext context) => SingleChildScrollView(
         child: Card(
-          elevation: 2,
+          elevation: 5,
+          color: Theme.of(context).canvasColor,
           margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth ? EdgeInsets.fromLTRB(64, 32, 64, 64) : EdgeInsets.all(5),
           child: Padding(
             padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 32.0 : 5),

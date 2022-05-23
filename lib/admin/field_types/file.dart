@@ -6,16 +6,14 @@ import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:html' as html;
 
-class FieldTypeImageURL extends FieldType {
-  final double width;
-  final double height;
-  bool allowUpload;
-  bool allowURL;
-  String storePath;
+class FieldTypeFile extends FieldType {
+  final String storePath;
+  final bool allowURL;
+  final bool allowUpload;
   TextEditingController textController = TextEditingController();
   TextEditingController pathController = TextEditingController();
 
-  FieldTypeImageURL({required this.width, required this.height, this.allowURL = true, this.allowUpload = false, required this.storePath});
+  FieldTypeFile({required this.storePath, this.allowURL = false, this.allowUpload = true});
 
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
@@ -23,23 +21,12 @@ class FieldTypeImageURL extends FieldType {
       var value = _object.get(column.field);
       if (value is Map) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
-          child: Image.network(
-            _object[column.field]['url'],
-            width: this.width,
-            height: this.height,
-          ),
-        );
+            padding: const EdgeInsets.symmetric(vertical: 2.0),
+            child: IconButton(icon: Icon(Icons.file_copy, color: Theme.of(context).primaryColor), onPressed: () {}));
       } else if (value is String) {
-        print("image url = " + _object.get(column.field));
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
-          child: Image.network(
-            _object.get(column.field),
-            width: this.width,
-            height: this.height,
-          ),
-        );
+            padding: const EdgeInsets.symmetric(vertical: 2.0),
+            child: IconButton(icon: Icon(Icons.file_copy, color: Theme.of(context).primaryColor), onPressed: () {}));
       } else {
         return Text("Error");
       }
@@ -88,7 +75,7 @@ class FieldTypeImageURL extends FieldType {
 }
 
 class _UploadDialog extends StatefulWidget {
-  final FieldTypeImageURL parent;
+  final FieldTypeFile parent;
   final String url;
 
   _UploadDialog({Key? key, required this.parent, required this.url}) : super(key: key);
@@ -107,7 +94,7 @@ class __UploadDialogState extends State<_UploadDialog> {
   }
 
   void uploadFile() {
-    Uint8List? uploadedImage;
+    Uint8List? uploadedFile;
 
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
     uploadInput.click();
@@ -120,11 +107,11 @@ class __UploadDialogState extends State<_UploadDialog> {
         html.FileReader reader = html.FileReader();
 
         reader.onLoadEnd.listen((e) async {
-          uploadedImage = reader.result as Uint8List?;
+          uploadedFile = reader.result as Uint8List?;
           String fileName = widget.parent.storePath + "/" + file.name;
           print("subimos " + fileName);
           firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref(fileName);
-          firebase_storage.UploadTask uploadTask = ref.putData(uploadedImage!);
+          firebase_storage.UploadTask uploadTask = ref.putData(uploadedFile!);
           firebase_storage.TaskSnapshot task = await uploadTask;
           print("subido");
           String downloadURL = await task.ref.getDownloadURL();
@@ -174,14 +161,6 @@ class __UploadDialogState extends State<_UploadDialog> {
           ),
           SizedBox(
             height: 20,
-          ),
-          Expanded(
-            child: Image.network(
-              this.url,
-            ),
-          ),
-          SizedBox(
-            height: 22,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

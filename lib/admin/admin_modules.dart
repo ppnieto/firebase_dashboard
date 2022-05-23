@@ -26,6 +26,7 @@ export "field_types/qr.dart";
 export "field_types/rating.dart";
 export "field_types/select.dart";
 export 'field_types/multi_select.dart';
+export 'field_types/file.dart';
 
 export "package:firebase_dashboard/theme.dart";
 export "field_types/tags.dart";

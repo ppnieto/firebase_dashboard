@@ -1,13 +1,14 @@
 import 'dart:async';
+import 'dart:html' as html;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_dashboard/admin/screens/admin.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
-import 'package:universal_html/html.dart' as html;
 import 'package:syncfusion_flutter_datagrid_export/export.dart';
 import 'package:intl/intl.dart';
 
@@ -36,6 +37,7 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
     final xlsio.Workbook workbook = _key.currentState!.exportToExcelWorkbook();
 
     List<int> bytes = workbook.saveAsStream();
+
     final blob = html.Blob([bytes]);
     final url = html.Url.createObjectUrlFromBlob(blob);
     DateTime now = DateTime.now();
@@ -100,13 +102,18 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
 
   @override
   Widget build(BuildContext context) {
+    DashboardMainScreenState? dashboardState = context.findAncestorStateOfType<DashboardMainScreenState>();
+    if (dashboardState == null) throw new Exception("No encuentro admin screen state!!!");
+
     updateColumns();
     return SfDataGridTheme(
       data: SfDataGridThemeData(
-        selectionColor: Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
-        rowHoverColor: Theme.of(context).secondaryHeaderColor.withOpacity(0.2),
-        headerColor: Theme.of(context).primaryColor.withOpacity(0.3),
-      ),
+          selectionColor:
+              dashboardState.widget.theme?.appBar2BackgroundColor?.withOpacity(0.6) ?? Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
+          rowHoverColor:
+              dashboardState.widget.theme?.appBar2BackgroundColor?.withOpacity(0.2) ?? Theme.of(context).secondaryHeaderColor.withOpacity(0.2),
+          headerColor: Theme.of(context).primaryColor.withOpacity(0.3),
+          sortIconColor: Theme.of(context).primaryColor),
       child: SfDataGrid(
           key: _key,
           controller: _controller,
@@ -180,7 +187,7 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
                         col.label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Theme.of(context).primaryColor),
                       ))))
               .toList()),
     );
@@ -247,17 +254,20 @@ class _DataSource extends DataGridSource {
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
-    return DataGridRowAdapter(
-        color: Theme.of(context).backgroundColor,
-        cells: row.getCells().map<Widget>((dataGridCell) {
-          ColumnModule column = getColumnModuleByField(dataGridCell.columnName);
+    DashboardMainScreenState? dashboardState = context.findAncestorStateOfType<DashboardMainScreenState>();
+    if (dashboardState == null) throw new Exception("No encuentro admin screen state!!!");
 
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-            alignment: Alignment.centerRight,
-            child: column.type.getListContent(context, dataGridCell.value.doc, column),
-          );
-        }).toList());
+    return DataGridRowAdapter(
+        cells: row.getCells().map<Widget>((dataGridCell) {
+      ColumnModule column = getColumnModuleByField(dataGridCell.columnName);
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+        alignment: Alignment.centerRight,
+        child: DefaultTextStyle(
+            style: TextStyle(color: Theme.of(context).primaryColor), child: column.type.getListContent(context, dataGridCell.value.doc, column)),
+      );
+    }).toList());
   }
 }
 

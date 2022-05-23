@@ -22,7 +22,6 @@ dependencies:
   uuid: any
   google_maps_flutter: any
   package_info_plus: any
-  universal_html: any
   shared_preferences: any
   date_time_picker: any
   badges:
@@ -36,6 +35,7 @@ dependencies:
   data_table_2: any
   dropdown_search: any
   textfield_tags: any
+  html:
   
 
 
