@@ -41,7 +41,7 @@ class Module {
   final String? orderBy;
   final Query Function(Query)? addFilter;
   final String? reverseOrderBy;
-  final Function? onSave;
+  final Future<bool> Function(bool, Map<String, dynamic>?)? onSave;
   final Function? onUpdated;
   final Function? onRemove;
   final Function? onNew;
