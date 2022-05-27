@@ -172,8 +172,9 @@ class DetalleScreenState extends State<DetalleScreen> {
 
       bool doUpdate = true;
       if (widget.module.onSave != null) {
-        doUpdate = widget.module.onSave!(isNew, this.updateData);
+        doUpdate = await widget.module.onSave!(isNew, this.updateData);
       }
+      print("doUpdate $doUpdate");
       if (msgValidation == null) {
         if (doUpdate) {
           if (!isNew) {
@@ -188,7 +189,12 @@ class DetalleScreenState extends State<DetalleScreen> {
               showError(context, e);
             });
           } else if (isNew) {
-            _getCollection().add(this.updateData!).then((value) {
+            print("guardamos datos nuevos");
+            print(this.updateData);
+            // si en updateData hay un id, lo usamos
+            String? id = updateData!['id'] ?? null;
+
+            _getCollection().doc(id).set(this.updateData!).then((value) {
               if (widget.module.onUpdated != null) widget.module.onUpdated!(isNew, value);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Elemento guardado con éxito'),
@@ -200,11 +206,11 @@ class DetalleScreenState extends State<DetalleScreen> {
             });
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          /*ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('Elemento guardado con éxito'),
             duration: Duration(seconds: 2),
           ));
-          Navigator.of(context).pop();
+          Navigator.of(context).pop();*/
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
