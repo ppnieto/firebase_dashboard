@@ -20,7 +20,7 @@ dependencies:
   firebase_auth: any
   cloud_firestore:
   uuid: any
-  google_maps_flutter: any
+  #google_maps_flutter: any
   package_info_plus: any
   shared_preferences: any
   date_time_picker: any
@@ -35,10 +35,8 @@ dependencies:
   data_table_2: any
   dropdown_search: any
   textfield_tags: any
-  html:
-  
-
-
+  file_picker: ^4.5.1
+  filesize: ^2.0.1
 
 dev_dependencies:
   flutter_test:

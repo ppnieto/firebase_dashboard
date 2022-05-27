@@ -24,9 +24,10 @@ class FieldTypeNumber extends FieldType {
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = _object?.hasFieldAdm(column.field) ?? false ? _object?.get(column.field) : defaultValue;
-    if (value == null && defaultValue != null) {
-      value = defaultValue;
+    var value = _object?.getFieldAdm(column.field, defaultValue);
+    if (_object == null) value = defaultValue;
+
+    if (_object?.hasFieldAdm(column.field) == false) {
       updateData(context, column, value);
     }
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -37,7 +38,7 @@ class FieldTypeNumber extends FieldType {
           max: this.maxValue,
           step: this.step,
           enabled: column.editable,
-          value: value ?? minValue,
+          value: value,
           onChanged: (value) {
             updateData(context, column, value);
           },

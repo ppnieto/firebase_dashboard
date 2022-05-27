@@ -230,7 +230,7 @@ class DetalleScreenState extends State<DetalleScreen> {
                 doGuardar(context);
               },
             ),
-            if (widget.module.canRemove)
+            if (widget.module.canRemove && widget.module.removeInEdit)
               IconButton(
                 padding: EdgeInsets.all(0),
                 icon: Icon(Icons.delete),

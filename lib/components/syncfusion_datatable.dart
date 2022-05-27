@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:html' as html;
-
+//import 'dart:html' as html;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_dashboard/admin/screens/admin.dart';
 import 'package:firebase_dashboard/dashboard.dart';
+import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
@@ -37,21 +37,10 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
     final xlsio.Workbook workbook = _key.currentState!.exportToExcelWorkbook();
 
     List<int> bytes = workbook.saveAsStream();
-
-    final blob = html.Blob([bytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
     DateTime now = DateTime.now();
     String suffix = DateFormat('yyyyMMdd').format(now);
-    final anchor = html.document.createElement('a') as html.AnchorElement
-      ..href = url
-      ..style.display = 'none'
-      ..download = adminScreenState!.widget.module.name + '_$suffix.xls';
-    html.document.body!.children.add(anchor);
-    anchor.click();
-
-// cleanup
-    html.document.body!.children.remove(anchor);
-    html.Url.revokeObjectUrl(url);
+    String fileName = adminScreenState!.widget.module.name + '_$suffix.xls';
+    DashboardUtils.download(fileName, bytes);
   }
 
   updateColumns() {

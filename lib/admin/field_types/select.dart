@@ -119,6 +119,7 @@ class FieldTypeSelect extends FieldType {
             updateData(context, column, val);
           },
           validator: (val) {
+            print("valudate select");
             if (column.mandatory && val == null) return "Campo obligatorio";
             if (validate != null) return validate!(initialValue, val);
             return null;

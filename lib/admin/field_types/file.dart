@@ -1,19 +1,28 @@
-import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:filesize/filesize.dart';
+import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'dart:html' as html;
 
 class FieldTypeFile extends FieldType {
   final String storePath;
   final bool allowURL;
   final bool allowUpload;
-  TextEditingController textController = TextEditingController();
-  TextEditingController pathController = TextEditingController();
+  final Function? onUploadComplete;
+  TextEditingController nameController = TextEditingController();
+  TextEditingController sizeController = TextEditingController();
 
-  FieldTypeFile({required this.storePath, this.allowURL = false, this.allowUpload = true});
+  Map<String, dynamic> data = {};
+  /*
+  String? path;
+  int? size;
+  String? contentType;
+  String? name;
+  String? url;
+  */
+
+  FieldTypeFile({required this.storePath, this.allowURL = false, this.allowUpload = true, this.onUploadComplete});
 
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
@@ -38,167 +47,56 @@ class FieldTypeFile extends FieldType {
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
-    if (value is Map) {
-      textController.text = value['url'] ?? "";
+    if (value is Map<String, dynamic>) {
+      nameController.text = value['name'] ?? "";
+      sizeController.text = filesize(value['size']);
+      data = value;
     }
     return Row(
       children: [
-        Expanded(
+        Flexible(
+            flex: 2,
             child: TextFormField(
-                controller: textController,
+                controller: nameController,
                 decoration: InputDecoration(
                   labelText: column.label,
                 ),
                 enabled: this.allowURL,
                 onSaved: (val) {
-                  updateData(context, column, {'url': val, 'path': pathController.text});
+                  updateData(context, column, data);
                 })),
-        //if (allowUpload) Expanded(child: TextFormField(controller: pathController)),
-        if (allowUpload)
-          SizedBox(
-            width: 20,
+        SizedBox(width: 20),
+        Flexible(
+          flex: 1,
+          child: TextFormField(
+            controller: sizeController,
+            enabled: false,
+            decoration: InputDecoration(labelText: "Tamaño"),
           ),
+        ),
+        if (allowUpload) SizedBox(width: 20),
         if (allowUpload)
           IconButton(
             icon: Icon(Icons.upload_file, color: Theme.of(context).primaryColor),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return _UploadDialog(parent: this, url: value.toString());
-                  });
+            onPressed: () async {
+              UploadResult? uploadResult = await DashboardUtils.pickAndUploadFile(context, storePath);
+              if (uploadResult != null) {
+                firebase_storage.FullMetadata metadata = await uploadResult.reference.getMetadata();
+                String url = await uploadResult.reference.getDownloadURL();
+                data = {
+                  'path': uploadResult.reference.fullPath,
+                  'size': metadata.size,
+                  'name': uploadResult.reference.name,
+                  'content-type': metadata.contentType,
+                  'url': url
+                };
+                sizeController.text = filesize(metadata.size);
+                nameController.text = uploadResult.reference.name;
+                if (onUploadComplete != null) onUploadComplete!(uploadResult, data);
+              }
             },
           )
       ],
-    );
-  }
-}
-
-class _UploadDialog extends StatefulWidget {
-  final FieldTypeFile parent;
-  final String url;
-
-  _UploadDialog({Key? key, required this.parent, required this.url}) : super(key: key);
-
-  @override
-  __UploadDialogState createState() => __UploadDialogState();
-}
-
-class __UploadDialogState extends State<_UploadDialog> {
-  late String url;
-
-  @override
-  initState() {
-    super.initState();
-    this.url = widget.url;
-  }
-
-  void uploadFile() {
-    Uint8List? uploadedFile;
-
-    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.click();
-
-    uploadInput.onChange.listen((e) {
-      // read file content as dataURL
-      final files = uploadInput.files;
-      if (files != null && files.length == 1) {
-        final file = files[0];
-        html.FileReader reader = html.FileReader();
-
-        reader.onLoadEnd.listen((e) async {
-          uploadedFile = reader.result as Uint8List?;
-          String fileName = widget.parent.storePath + "/" + file.name;
-          print("subimos " + fileName);
-          firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref(fileName);
-          firebase_storage.UploadTask uploadTask = ref.putData(uploadedFile!);
-          firebase_storage.TaskSnapshot task = await uploadTask;
-          print("subido");
-          String downloadURL = await task.ref.getDownloadURL();
-          print("url = " + downloadURL);
-          widget.parent.textController.text = downloadURL;
-          widget.parent.pathController.text = fileName;
-          setState(() {
-            this.url = downloadURL;
-          });
-        });
-
-        reader.onError.listen((fileEvent) {
-          print("Some Error occured while reading the file");
-        });
-
-        reader.readAsArrayBuffer(file);
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      child: contentBox(context),
-    );
-  }
-
-  contentBox(context) {
-    return Container(
-      width: 800,
-      height: 700,
-      padding: EdgeInsets.all(50),
-      decoration: BoxDecoration(shape: BoxShape.rectangle, color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [
-        BoxShadow(color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
-      ]),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(
-            "Subir imagen",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                  onPressed: () {
-                    uploadFile();
-                  },
-                  child: Text(
-                    "Subir archivo...",
-                    style: TextStyle(fontSize: 18),
-                  )),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        "Aceptar",
-                        style: TextStyle(fontSize: 18),
-                      )),
-                  SizedBox(width: 20),
-                  TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        "Cancelar",
-                        style: TextStyle(fontSize: 18),
-                      )),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

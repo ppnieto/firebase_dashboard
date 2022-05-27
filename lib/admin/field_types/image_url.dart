@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'dart:html' as html;
 
 class FieldTypeImageURL extends FieldType {
   final double width;
@@ -107,42 +107,7 @@ class __UploadDialogState extends State<_UploadDialog> {
   }
 
   void uploadFile() {
-    Uint8List? uploadedImage;
-
-    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.click();
-
-    uploadInput.onChange.listen((e) {
-      // read file content as dataURL
-      final files = uploadInput.files;
-      if (files != null && files.length == 1) {
-        final file = files[0];
-        html.FileReader reader = html.FileReader();
-
-        reader.onLoadEnd.listen((e) async {
-          uploadedImage = reader.result as Uint8List?;
-          String fileName = widget.parent.storePath + "/" + file.name;
-          print("subimos " + fileName);
-          firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref(fileName);
-          firebase_storage.UploadTask uploadTask = ref.putData(uploadedImage!);
-          firebase_storage.TaskSnapshot task = await uploadTask;
-          print("subido");
-          String downloadURL = await task.ref.getDownloadURL();
-          print("url = " + downloadURL);
-          widget.parent.textController.text = downloadURL;
-          widget.parent.pathController.text = fileName;
-          setState(() {
-            this.url = downloadURL;
-          });
-        });
-
-        reader.onError.listen((fileEvent) {
-          print("Some Error occured while reading the file");
-        });
-
-        reader.readAsArrayBuffer(file);
-      }
-    });
+    DashboardUtils.pickAndUploadFile(context, widget.parent.storePath);
   }
 
   @override
