@@ -181,7 +181,7 @@ class FieldTypeTags extends FieldType {
                 .map<Widget>((e) => Container(
                       decoration: BoxDecoration(color: Theme.of(context).secondaryHeaderColor, borderRadius: BorderRadius.all(Radius.circular(5))),
                       padding: EdgeInsets.all(6),
-                      child: Text(e),
+                      child: Text(e, style: TextStyle(color: Colors.white)),
                     ))
                 .toList());
       }
