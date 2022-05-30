@@ -31,8 +31,8 @@ dependencies:
   flutter_typeahead: any
   #excel: ^1.1.5
   syncfusion_flutter_xlsio: any
-  syncfusion_flutter_datagrid_export: ^19.4.53-beta
-  syncfusion_flutter_datagrid: ^19.3.48
+  syncfusion_flutter_datagrid_export: 
+  syncfusion_flutter_datagrid: 
   data_table_2: any
   textfield_tags: any
   dropdown_search: any

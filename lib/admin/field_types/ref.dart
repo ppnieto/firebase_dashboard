@@ -126,7 +126,7 @@ class FieldTypeRef extends FieldType {
     if (value == null) {
       value = initialValue ?? nullValue;
       values[column.field] = value;
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         updateData(context, column, value);
       });
     }
