@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:download/download.dart' as d;
 
 class UploadResult {
   final Reference reference;
@@ -47,22 +48,8 @@ class DashboardUtils {
   }
 
   static void download(String fileName, List<int> bytes) {
-    /*
-    final blob = html.Blob([bytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    DateTime now = DateTime.now();
-    final anchor = html.document.createElement('a') as html.AnchorElement
-      ..href = url
-      ..style.display = 'none'
-      ..download = fileName;
-    html.document.body!.children.add(anchor);
-// download
-    anchor.click();
-
-// cleanup
-    html.document.body!.children.remove(anchor);
-    html.Url.revokeObjectUrl(url);
-    */
+    final stream = Stream.fromIterable(bytes);
+    d.download(stream, fileName);
   }
 
   static void loading(BuildContext context, String message) async {

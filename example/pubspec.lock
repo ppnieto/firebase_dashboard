@@ -113,6 +113,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  download:
+    dependency: transitive
+    description:
+      name: download
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1+1"
   dropdown_search:
     dependency: transitive
     description:

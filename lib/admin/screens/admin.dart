@@ -362,7 +362,6 @@ class AdminScreenState extends State<AdminScreen> {
       }
 
       if (widget.module.exportExcel) {
-        /*
         result.add(Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton.icon(
@@ -372,7 +371,6 @@ class AdminScreenState extends State<AdminScreen> {
                 exportExcel();
               },
             )));
-            */
       }
       if (widget.module.canAdd) {
         result.add(IconButton(
