@@ -12,7 +12,10 @@ class FieldTypeBoolean extends FieldType {
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     bool value = _object.getFieldAdm(column.field, defValue);
     return IconButton(
-      icon: Icon(value ? Icons.check_box_outlined : Icons.check_box_outline_blank),
+      icon: Icon(
+        value ? Icons.check_box_outlined : Icons.check_box_outline_blank,
+        color: Theme.of(context).highlightColor,
+      ),
       onPressed: column.editable && editOnList
           ? () {
               _object.reference.update({column.field: !value}).then((value) => print("updated!!!"));
