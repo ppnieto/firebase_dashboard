@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_dashboard/admin/screens/detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:flutter_spinbox/material.dart';
@@ -24,13 +25,13 @@ class FieldTypeNumber extends FieldType {
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = _object?.getFieldAdm(column.field, defaultValue);
+    var value = values[column.field]; // ?? _object?.getFieldAdm(column.field, defaultValue);
     if (_object == null) value = defaultValue;
 
-    if (_object?.hasFieldAdm(column.field) == false) {
+    if (_object?.hasFieldAdm(column.field) == false && value != null) {
       updateData(context, column, value);
     }
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
       Container(
         width: 200,
         child: SpinBox(
@@ -38,13 +39,23 @@ class FieldTypeNumber extends FieldType {
           max: this.maxValue,
           step: this.step,
           enabled: column.editable,
-          value: value,
+          value: value ?? 0,
           onChanged: (value) {
+            print("on changed $value");
             updateData(context, column, value);
           },
         ),
       ),
-      SizedBox.shrink()
+      if (!column.mandatory)
+        IconButton(
+          icon: Icon(Icons.clear, color: Theme.of(context).primaryColor),
+          onPressed: () {
+            updateData(context, column, null);
+            DetalleScreenState? state = context.findAncestorStateOfType<DetalleScreenState>();
+            state?.setState(() {});
+          },
+        ),
+      Spacer()
     ]);
   }
 }
