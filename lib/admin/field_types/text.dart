@@ -69,7 +69,10 @@ class FieldTypeText extends FieldType {
             obscureText: this.obscureText,
             enableSuggestions: this.obscureText,
             autocorrect: this.obscureText,
-            decoration: InputDecoration(labelText: column.label, filled: !column.editable, fillColor: Theme.of(context).canvasColor.withAlpha(1)),
+            decoration: InputDecoration(
+                labelText: column.label,
+                filled: !column.editable,
+                fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor),
             validator: (value) {
               if (regexp != null) {
                 if (!regexp!.hasMatch(value ?? "")) {

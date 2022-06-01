@@ -44,6 +44,8 @@ class FieldTypeDate extends FieldType {
           child: TextFormField(
         decoration: InputDecoration(
           labelText: column.label,
+          filled: !column.editable,
+          fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor,
         ),
         controller: txt,
         enabled: column.editable,
@@ -67,7 +69,7 @@ class FieldTypeDate extends FieldType {
       )),
       if (column.editable)
         IconButton(
-          icon: Icon(FontAwesomeIcons.calendar),
+          icon: Icon(FontAwesomeIcons.calendar, color: Theme.of(context).primaryColor),
           onPressed: () async {
             final DateTime? picked = await showDatePicker(
                 context: context,

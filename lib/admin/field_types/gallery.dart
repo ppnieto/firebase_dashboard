@@ -1,11 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import "package:universal_html/html.dart" as html;
-import 'package:firebase_dashboard/admin/field_types/field_type_base.dart';
 
 class FieldTypeGallery extends FieldType {
   final bool addUrls;
@@ -200,6 +199,8 @@ class __UploadDialogState extends State<_UploadDialog> {
   }
 
   void uploadFile() {
+    DashboardUtils.pickAndUploadFile(context, widget.parent.storePath);
+    /*
     Uint8List? uploadedImage;
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
     uploadInput.click();
@@ -234,6 +235,7 @@ class __UploadDialogState extends State<_UploadDialog> {
         reader.readAsArrayBuffer(file);
       }
     });
+    */
   }
 
   @override

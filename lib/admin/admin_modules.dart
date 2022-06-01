@@ -26,6 +26,7 @@ export "field_types/qr.dart";
 export "field_types/rating.dart";
 export "field_types/select.dart";
 export 'field_types/multi_select.dart';
+export 'field_types/file.dart';
 
 export "package:firebase_dashboard/theme.dart";
 export "field_types/tags.dart";
@@ -41,9 +42,10 @@ class Module {
   final String? orderBy;
   final Query Function(Query)? addFilter;
   final String? reverseOrderBy;
-  final Function? onSave;
+  final Future<bool> Function(bool, Map<String, dynamic>?)? onSave;
   final Function? onUpdated;
   final Function? onRemove;
+  final Function? onNew;
   final bool globalSearch;
   final Future<String?> Function(bool isNew, Map<String, dynamic> updateData)? validation;
   final int rowsPerPage;
@@ -51,6 +53,7 @@ class Module {
   final bool canAdd;
   final bool canEdit;
   final bool canRemove;
+  final bool removeInEdit;
   final bool canSort;
   final bool exportExcel;
   final double? actionColumnWidth;
@@ -82,11 +85,13 @@ class Module {
       this.canAdd = true,
       this.canEdit = true,
       this.canRemove = true,
+      this.removeInEdit = false,
       this.canSort = true,
       this.canSelect = false,
       this.actionColumnWidth,
       this.onSave,
       this.onUpdated,
+      this.onNew,
       this.onRemove,
       this.validation,
       this.getActions,

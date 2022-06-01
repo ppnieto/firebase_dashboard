@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import "package:universal_html/html.dart" as html;
 
 class FieldTypeImageURL extends FieldType {
   final double width;
@@ -53,6 +53,7 @@ class FieldTypeImageURL extends FieldType {
     var value = values[column.field];
     if (value is Map) {
       textController.text = value['url'] ?? "";
+      pathController.text = value['path'] ?? "";
     }
     return Row(
       children: [
@@ -66,19 +67,19 @@ class FieldTypeImageURL extends FieldType {
                 onSaved: (val) {
                   updateData(context, column, {'url': val, 'path': pathController.text});
                 })),
-        //if (allowUpload) Expanded(child: TextFormField(controller: pathController)),
-        if (allowUpload)
-          SizedBox(
-            width: 20,
-          ),
+        if (allowUpload) SizedBox(width: 20),
         if (allowUpload)
           IconButton(
-            icon: Icon(Icons.upload_file),
+            icon: Icon(Icons.upload_file, color: Theme.of(context).primaryColor),
             onPressed: () {
               showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return _UploadDialog(parent: this, url: value.toString());
+                    return _UploadDialog(
+                      parent: this,
+                      url: value.toString(),
+                      column: column,
+                    );
                   });
             },
           )
@@ -90,8 +91,9 @@ class FieldTypeImageURL extends FieldType {
 class _UploadDialog extends StatefulWidget {
   final FieldTypeImageURL parent;
   final String url;
+  final ColumnModule column;
 
-  _UploadDialog({Key? key, required this.parent, required this.url}) : super(key: key);
+  _UploadDialog({Key? key, required this.parent, required this.url, required this.column}) : super(key: key);
 
   @override
   __UploadDialogState createState() => __UploadDialogState();
@@ -106,42 +108,16 @@ class __UploadDialogState extends State<_UploadDialog> {
     this.url = widget.url;
   }
 
-  void uploadFile() {
-    Uint8List? uploadedImage;
-    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.click();
-
-    uploadInput.onChange.listen((e) {
-      // read file content as dataURL
-      final files = uploadInput.files;
-      if (files != null && files.length == 1) {
-        final file = files[0];
-        html.FileReader reader = html.FileReader();
-
-        reader.onLoadEnd.listen((e) async {
-          uploadedImage = reader.result as Uint8List?;
-          String fileName = widget.parent.storePath + "/" + file.name;
-          print("subimos " + fileName);
-          firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref(fileName);
-          firebase_storage.UploadTask uploadTask = ref.putData(uploadedImage!);
-          firebase_storage.TaskSnapshot task = await uploadTask;
-          print("subido");
-          String downloadURL = await task.ref.getDownloadURL();
-          print("url = " + downloadURL);
-          widget.parent.textController.text = downloadURL;
-          widget.parent.pathController.text = fileName;
-          setState(() {
-            this.url = downloadURL;
-          });
-        });
-
-        reader.onError.listen((fileEvent) {
-          print("Some Error occured while reading the file");
-        });
-
-        reader.readAsArrayBuffer(file);
-      }
-    });
+  void uploadFile() async {
+    var res = await DashboardUtils.pickAndUploadFile(context, widget.parent.storePath);
+    if (res != null) {
+      String downloadUrl = await res.reference.getDownloadURL();
+      setState(() {
+        this.url = downloadUrl;
+      });
+      widget.parent.textController.text = downloadUrl;
+      widget.parent.pathController.text = res.reference.fullPath;
+    }
   }
 
   @override
@@ -167,21 +143,12 @@ class __UploadDialogState extends State<_UploadDialog> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text(
-            "Subir imagen",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-          ),
-          SizedBox(
-            height: 20,
-          ),
+          Text("Subir imagen", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
+          SizedBox(height: 20),
           Expanded(
-            child: Image.network(
-              this.url,
-            ),
+            child: Image.network(this.url),
           ),
-          SizedBox(
-            height: 22,
-          ),
+          SizedBox(height: 22),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -189,10 +156,7 @@ class __UploadDialogState extends State<_UploadDialog> {
                   onPressed: () {
                     uploadFile();
                   },
-                  child: Text(
-                    "Subir archivo...",
-                    style: TextStyle(fontSize: 18),
-                  )),
+                  child: Text("Subir archivo...", style: TextStyle(fontSize: 18))),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -200,19 +164,13 @@ class __UploadDialogState extends State<_UploadDialog> {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text(
-                        "Aceptar",
-                        style: TextStyle(fontSize: 18),
-                      )),
+                      child: Text("Aceptar", style: TextStyle(fontSize: 18))),
                   SizedBox(width: 20),
                   TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text(
-                        "Cancelar",
-                        style: TextStyle(fontSize: 18),
-                      )),
+                      child: Text("Cancelar", style: TextStyle(fontSize: 18))),
                 ],
               ),
             ],

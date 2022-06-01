@@ -1,6 +1,5 @@
-import 'package:universal_html/html.dart' as html;
-
 import 'dart:typed_data';
+import 'package:firebase_dashboard/util.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 import 'package:flutter/material.dart';
@@ -21,35 +20,7 @@ class GalleryScreenState extends State<GalleryScreen> {
 
   @override
   void addFile() {
-    Uint8List uploadedImage;
-    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.click();
-
-    uploadInput.onChange.listen((e) {
-      // read file content as dataURL
-      final files = uploadInput.files;
-      if (files != null && files.length == 1) {
-        final file = files[0];
-        html.FileReader reader = html.FileReader();
-
-        reader.onLoadEnd.listen((e) async {
-          uploadedImage = reader.result! as Uint8List;
-          String fileName = widget.path + "/" + file.name;
-          print("subimos " + fileName);
-          firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref(fileName);
-          firebase_storage.UploadTask uploadTask = ref.putData(uploadedImage);
-          firebase_storage.TaskSnapshot task = await uploadTask;
-          print("subido");
-          setState(() {});
-        });
-
-        reader.onError.listen((fileEvent) {
-          print("Some Error occured while reading the file");
-        });
-
-        reader.readAsArrayBuffer(file);
-      }
-    });
+    DashboardUtils.pickAndUploadFile(context, widget.path);
   }
 
   void deleteFile(firebase_storage.Reference file) async {

@@ -76,68 +76,75 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
   @override
   Widget build(BuildContext context) {
     Widget drawerItems = listDrawerItems(context);
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: widget.theme?.appBar1BackgroundColor,
-        leading: MediaQuery.of(context).size.width >= responsiveDashboardWidth
-            ? IconButton(
-                icon: Icon(Icons.menu),
-                onPressed: () {
-                  setState(() {
-                    isMenu = !isMenu;
-                  });
-                },
-              )
-            : null,
-        automaticallyImplyLeading: MediaQuery.of(context).size.width < responsiveDashboardWidth ? true : false,
-        title: Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-          Container(
-            child: Text(
-              widget.title, // + " - " + subtitle,
-              style: TextStyle(
-                fontSize: 24,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+    return Theme(
+      data: Theme.of(context).copyWith(
+        scaffoldBackgroundColor: widget.theme?.canvasColor ?? Theme.of(context).canvasColor,
+        highlightColor: DashboardMainScreen.dashboardTheme?.iconButtonColor,
+        primaryColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+      ),
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          backgroundColor: widget.theme?.appBar1BackgroundColor,
+          leading: MediaQuery.of(context).size.width >= responsiveDashboardWidth
+              ? IconButton(
+                  icon: Icon(Icons.menu),
+                  onPressed: () {
+                    setState(() {
+                      isMenu = !isMenu;
+                    });
+                  },
+                )
+              : null,
+          automaticallyImplyLeading: MediaQuery.of(context).size.width < responsiveDashboardWidth ? true : false,
+          title: Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
+            Container(
+              child: Text(
+                widget.title, // + " - " + subtitle,
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-        ]),
-        actions: widget.actions ??
-            <Widget>[] +
-                (widget.sideBar != null
-                    ? [
-                        IconButton(
-                            icon: Icon(widget.sideBarIcon),
-                            onPressed: () {
-                              setState(() {
-                                isSidebar = !isSidebar;
-                              });
-                            })
-                      ]
-                    : []),
-      ),
-      body: Row(
-        children: <Widget>[
-          MediaQuery.of(context).size.width < responsiveDashboardWidth || !isMenu
-              ? Container()
-              : Card(
-                  elevation: 2.0,
-                  child: Container(
-                    color: widget.theme?.canvasColor,
-                    margin: EdgeInsets.all(0),
-                    height: MediaQuery.of(context).size.height,
-                    width: 300,
-                    child: drawerItems,
+          ]),
+          actions: widget.actions ??
+              <Widget>[] +
+                  (widget.sideBar != null
+                      ? [
+                          IconButton(
+                              icon: Icon(widget.sideBarIcon),
+                              onPressed: () {
+                                setState(() {
+                                  isSidebar = !isSidebar;
+                                });
+                              })
+                        ]
+                      : []),
+        ),
+        body: Row(
+          children: <Widget>[
+            MediaQuery.of(context).size.width < responsiveDashboardWidth || !isMenu
+                ? Container()
+                : Card(
+                    elevation: 2.0,
+                    child: Container(
+                      color: widget.theme?.canvasColor,
+                      margin: EdgeInsets.all(0),
+                      height: MediaQuery.of(context).size.height,
+                      width: 300,
+                      child: drawerItems,
+                    ),
                   ),
-                ),
-          Expanded(
-            child: Navigator(key: _navigatorKey, onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(builder: (_) => currentWidget)),
-          ),
-          isSidebar ? Container(width: widget.sideBarWidth, child: widget.sideBar) : SizedBox.shrink(),
-        ],
+            Expanded(
+              child: Navigator(key: _navigatorKey, onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(builder: (_) => currentWidget)),
+            ),
+            isSidebar ? Container(width: widget.sideBarWidth, child: widget.sideBar) : SizedBox.shrink(),
+          ],
+        ),
+        drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: drawerItems)),
       ),
-      drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: drawerItems)),
     );
   }
 
