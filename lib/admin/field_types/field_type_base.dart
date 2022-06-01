@@ -14,7 +14,7 @@ abstract class FieldType {
         return data[fields[0]][fields[1]];
       } else {
         if (!data.containsKey(fieldName)) return defValue;
-        return data[fieldName];
+        return data[fieldName] ?? defValue;
       }
     } catch (e) {
       return defValue;

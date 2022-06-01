@@ -51,7 +51,9 @@ class DetalleScreenState extends State<DetalleScreen> {
   }
 
   getEditField(BuildContext context, ColumnModule column) {
+    //print("getEditContent " + column.field);
     Widget? child = column.type.getEditContent(context, widget.object, updateData!, column);
+    //print("getEditContent ok");
 
     if (child != null) {
       if (column.showLabelOnEdit) {
