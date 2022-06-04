@@ -41,10 +41,8 @@ class FieldTypeDateTime extends FieldType {
       value = null;
     }
     //Timestamp? value = _object?.getFieldAdm(column.field, Timestamp.fromDate(DateTime.now()));
-    print(value);
     var dtp = DateTimePicker(
         enabled: column.editable,
-        //locale: Locale('es'),
         type: showTime ? DateTimePickerType.dateTimeSeparate : DateTimePickerType.date,
         dateMask: 'dd/MM/yyyy',
         initialValue: value?.toDate().toString() ?? null,

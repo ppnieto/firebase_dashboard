@@ -13,7 +13,6 @@ class FieldTypeRefNumChilds extends FieldType {
 
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
-    print("get list content: " + this.collection.toString());
     Query col = collection != null ? FirebaseFirestore.instance.collection(collection!) : getCollection!(_object);
     return FutureBuilder(
       future: col.where(this.overrideFieldName ?? column.field, isEqualTo: _object.reference).get(),
