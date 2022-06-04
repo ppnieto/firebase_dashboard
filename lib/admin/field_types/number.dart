@@ -41,12 +41,11 @@ class FieldTypeNumber extends FieldType {
           enabled: column.editable,
           value: value ?? 0,
           onChanged: (value) {
-            print("on changed $value");
             updateData(context, column, value);
           },
         ),
       ),
-      if (!column.mandatory)
+      if (!column.mandatory && column.editable)
         IconButton(
           icon: Icon(Icons.clear, color: Theme.of(context).primaryColor),
           onPressed: () {

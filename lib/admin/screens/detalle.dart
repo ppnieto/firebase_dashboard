@@ -72,7 +72,7 @@ class DetalleScreenState extends State<DetalleScreen> {
         child: Card(
           elevation: 5,
           color: Theme.of(context).canvasColor,
-          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth ? EdgeInsets.fromLTRB(64, 32, 64, 64) : EdgeInsets.all(5),
+          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth ? EdgeInsets.all(20) : EdgeInsets.all(5),
           child: Padding(
             padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 32.0 : 5),
             child: Container(
@@ -228,7 +228,7 @@ class DetalleScreenState extends State<DetalleScreen> {
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.module.title + (widget.object == null ? " / nuevo" : " / detalle")),
-          backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+          //backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
           centerTitle: false,
           actions: [
             IconButton(

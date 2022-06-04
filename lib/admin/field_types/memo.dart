@@ -17,19 +17,12 @@ class FieldTypeMemo extends FieldType {
     var value = values[column.field];
     return TextFormField(
         enabled: column.editable,
-        style: TextStyle(
-            //fontFamily: 'HelveticaNeue',
-            ),
         initialValue: value,
         maxLines: this.maxLines,
         decoration: InputDecoration(
-          labelText: column.label,
-        ),
-        /*
-        validator: (value) {
-          return onValidate != null ? onValidate(value) : null;
-        },
-        */
+            labelText: column.label,
+            filled: !column.editable,
+            fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor),
         onSaved: (val) {
           updateData(context, column, val);
         });

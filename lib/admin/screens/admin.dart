@@ -28,6 +28,8 @@ class AdminScreen extends StatefulWidget {
   final double labelWidth;
   final DataTableImplementation dataTableImplementation;
 
+  Map<String, dynamic> filtroInicial = {};
+
   AdminScreen(
       {Key? key,
       required this.module,
@@ -54,6 +56,12 @@ class AdminScreenState extends State<AdminScreen> {
   int? sortColumnIndex;
   Map<String, bool> columnasSeleccionadas = {};
   List<DocumentSnapshot> rowsSelected = [];
+
+  @override
+  initState() {
+    super.initState();
+    if (widget.filtroInicial.isNotEmpty) this.filtro = widget.filtroInicial;
+  }
 
   Future<bool> initAdmin() async {
     print("init admin");

@@ -45,7 +45,7 @@ class FieldTypeRef extends FieldType {
 
   @override
   String getSyncStringContent(DocumentSnapshot _object, ColumnModule column) {
-    var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : null;
+    var _data = _object.getFieldAdm(column.field, null);
     if (preloadedData.isNotEmpty && _data != null) {
       if (preloadedData.containsKey(_data.path)) {
         return preloadedData[_data.path]!;
@@ -68,7 +68,7 @@ class FieldTypeRef extends FieldType {
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     this.column = column;
-    var _data = (_object.data() as Map).containsKey(column.field) ? _object.get(column.field) : "-";
+    var _data = _object.getFieldAdm(column.field, "-");
     if (_data != null && _data is DocumentReference) {
       if (this.preloadedData.isNotEmpty) {
         return getListWidget(context, _object, this.preloadedData[_data.path] ?? this.otherRef ?? "Otro",
@@ -124,11 +124,14 @@ class FieldTypeRef extends FieldType {
         ];
 
     if (value == null) {
-      value = initialValue ?? nullValue;
-      values[column.field] = value;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        updateData(context, column, value);
-      });
+      value = _object?.getFieldAdm(column.field, null);
+      if (value == null) {
+        value = initialValue ?? nullValue;
+        values[column.field] = value;
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          updateData(context, column, value);
+        });
+      }
     }
     if (this.preloadedData.isNotEmpty) {
       if (preloadedData.containsKey(value.path) == false && value != nullValue) {
