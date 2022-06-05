@@ -33,7 +33,7 @@ dependencies:
   syncfusion_flutter_datagrid_export: 
   syncfusion_flutter_datagrid: 
   data_table_2: any
-  dropdown_search: any
+  dropdown_search: ^5.0.1
   textfield_tags: any
   file_picker: ^4.5.1
   filesize: ^2.0.1

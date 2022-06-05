@@ -138,18 +138,19 @@ class FieldTypeRef extends FieldType {
         return Text(column.label + ": Este campo no se puede editar", style: TextStyle(color: Colors.red));
       }
 
-      if (search)
+      if (search) {
         return Container(
           width: 300,
           child: DropdownSearch<DocumentReference>(
-              //maxHeight: 500,
-
               selectedItem: value,
               onChanged: column.editable
                   ? (val) {
                       updateData(context, column, val);
                     }
                   : null,
+              dropdownDecoratorProps: DropDownDecoratorProps(),
+
+/*                  
               showSearchBox: search,
               popupTitle: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
@@ -163,11 +164,11 @@ class FieldTypeRef extends FieldType {
                       style: TextStyle(color: Colors.black),
                     ));
               },
+              */
               itemAsString: (item) => preloadedData[item!.path]?.toString() ?? "-",
-              items: //getIfNullable() +
-                  preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList()),
+              items: preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList()),
         );
-      else
+      } else
         return Row(
           children: [
             Container(
