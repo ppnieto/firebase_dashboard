@@ -96,7 +96,7 @@ class FieldTypeTags extends FieldType {
                                   borderRadius: BorderRadius.all(
                                     Radius.circular(20.0),
                                   ),
-                                  color: Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).primaryColor),
                               margin: const EdgeInsets.symmetric(horizontal: 5.0),
                               padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                               child: Row(
@@ -179,7 +179,7 @@ class FieldTypeTags extends FieldType {
             spacing: 5.0,
             children: value
                 .map<Widget>((e) => Container(
-                      decoration: BoxDecoration(color: Theme.of(context).secondaryHeaderColor, borderRadius: BorderRadius.all(Radius.circular(5))),
+                      decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.all(Radius.circular(5))),
                       padding: EdgeInsets.all(6),
                       child: Text(e, style: TextStyle(color: Colors.white)),
                     ))
