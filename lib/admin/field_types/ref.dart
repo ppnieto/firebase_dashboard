@@ -165,7 +165,7 @@ class FieldTypeRef extends FieldType {
                     ));
               },
               */
-              itemAsString: (item) => preloadedData[item!.path]?.toString() ?? "-",
+              itemAsString: (item) => preloadedData[item.path]?.toString() ?? "-",
               items: preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList()),
         );
       } else
