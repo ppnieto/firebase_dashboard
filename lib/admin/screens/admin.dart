@@ -345,7 +345,7 @@ class AdminScreenState extends State<AdminScreen> {
 
         List<xlsio.ExcelDataRow> rows = [];
 
-        List<ColumnModule> columnasExportables = widget.module.columns.where((e) => e.listable && e.excellable).toList();
+        List<ColumnModule> columnasExportables = widget.module.columns.where((e) => e.excellable).toList();
 
         for (var doc in allDocs) {
           List<xlsio.ExcelDataCell> cells = [];
