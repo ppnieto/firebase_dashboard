@@ -18,8 +18,6 @@ class AdminDataTableState extends State<AdminDataTable> {
     if (adminScreenState == null) throw new Exception("No encuentro AdminScreenState!!!");
 
     setState(() {
-      //adminScreenState.indexSelected.clear();
-      //adminScreenState.indexSelected.add(index);
       adminScreenState.rowsSelected.clear();
       adminScreenState.rowsSelected.add(object);
     });
@@ -99,7 +97,6 @@ class AdminDataTableState extends State<AdminDataTable> {
             context: context,
             parent: this,
             onTap: (index) {
-              print("on tap datatable " + index.toString());
               adminScreenState.showDetalle(index);
             },
             showFields: adminScreenState.columnasSeleccionadas));

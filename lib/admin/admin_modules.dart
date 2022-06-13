@@ -205,6 +205,11 @@ class Menu extends MenuBase {
   }
 }
 
+class MenuClick extends MenuBase {
+  Function(BuildContext context) onClick;
+  MenuClick({required String label, required IconData iconData, required this.onClick}) : super(label: label, iconData: iconData);
+}
+
 class MenuGroup extends MenuBase {
   final List<MenuBase>? children;
   final bool open;

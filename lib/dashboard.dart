@@ -213,6 +213,18 @@ class _MenuTile extends StatelessWidget {
             Menu m = submenu as Menu;
             return _MenuTile(menu: m);
           }).toList());
+    } else if (menu is MenuClick) {
+      MenuClick menuClick = menu as MenuClick;
+
+      return Container(
+          color: theme?.menuBackgroundColor,
+          child: ListTile(
+            onTap: () {
+              menuClick.onClick(context);
+            },
+            leading: Icon(menu.iconData, color: theme?.menuTextColor),
+            title: Text(menu.label, style: TextStyle(fontSize: 18, color: theme?.menuTextColor)),
+          ));
     } else {
       return Text("ERROR");
     }

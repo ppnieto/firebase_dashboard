@@ -221,33 +221,40 @@ class DetalleScreenState extends State<DetalleScreen> {
     }
   }
 
+  Future<bool> _onWillPop() async {
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.module.title + (widget.object == null ? " / nuevo" : " / detalle")),
-          backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
-          centerTitle: false,
-          actions: [
-            IconButton(
-              padding: EdgeInsets.all(0),
-              icon: Icon(FontAwesomeIcons.save),
-              onPressed: () {
-                doGuardar(context);
-              },
-            ),
-            if (widget.module.canRemove)
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text(widget.module.title + (widget.object == null ? " / nuevo" : " / detalle")),
+            backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+            centerTitle: false,
+            actions: [
               IconButton(
                 padding: EdgeInsets.all(0),
-                icon: Icon(Icons.delete),
-                onPressed: () async {
-                  doBorrar(context, widget.object!.reference, () {
-                    Navigator.of(context).pop();
-                  });
+                icon: Icon(FontAwesomeIcons.save),
+                onPressed: () {
+                  doGuardar(context);
                 },
-              )
-          ],
-        ),
-        body: getDetail(context));
+              ),
+              if (widget.module.canRemove)
+                IconButton(
+                  padding: EdgeInsets.all(0),
+                  icon: Icon(Icons.delete),
+                  onPressed: () async {
+                    doBorrar(context, widget.object!.reference, () {
+                      Navigator.of(context).pop();
+                    });
+                  },
+                )
+            ],
+          ),
+          body: getDetail(context)),
+    );
   }
 }

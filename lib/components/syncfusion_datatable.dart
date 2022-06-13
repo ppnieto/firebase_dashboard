@@ -119,6 +119,7 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
           controller: _controller,
           showCheckboxColumn: adminScreenState?.canSelect ?? false,
           //footerFrozenColumnsCount: 1,
+          columnWidthMode: ColumnWidthMode.fill,
           source: _DataSource(columns: columns!, context: context, parentState: this),
           allowSorting: true,
           allowTriStateSorting: true,
@@ -164,6 +165,7 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
             if (adminScreenState!.widget.selectPreEdit == false) {
               if (selected != null) {
                 adminScreenState?.showDetalleObject(selected);
+                _controller.selectedIndex = -1;
               }
             }
           },
@@ -171,6 +173,7 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
             if (adminScreenState!.widget.selectPreEdit && _controller.selectedIndex == details.rowColumnIndex.rowIndex - 1) {
               if (selected != null) {
                 adminScreenState?.showDetalleObject(selected);
+                _controller.selectedIndex = -1;
               }
             }
           },
