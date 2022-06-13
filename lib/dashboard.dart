@@ -127,14 +127,17 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
           children: <Widget>[
             MediaQuery.of(context).size.width < responsiveDashboardWidth || !isMenu
                 ? Container()
-                : Card(
-                    elevation: 2.0,
-                    child: Container(
-                      color: widget.theme?.canvasColor,
-                      margin: EdgeInsets.all(0),
-                      height: MediaQuery.of(context).size.height,
-                      width: 300,
-                      child: drawerItems,
+                : Container(
+                    color: widget.theme?.menuBackgroundColor,
+                    child: Card(
+                      elevation: 2.0,
+                      child: Container(
+                        color: widget.theme?.menuBackgroundColor,
+                        margin: EdgeInsets.all(0),
+                        height: MediaQuery.of(context).size.height,
+                        width: 300,
+                        child: drawerItems,
+                      ),
                     ),
                   ),
             Expanded(

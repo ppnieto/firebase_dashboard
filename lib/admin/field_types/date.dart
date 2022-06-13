@@ -44,6 +44,8 @@ class FieldTypeDate extends FieldType {
           child: TextFormField(
         decoration: InputDecoration(
           labelText: column.label,
+          filled: !column.editable,
+          fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor,
         ),
         controller: txt,
         enabled: column.editable,

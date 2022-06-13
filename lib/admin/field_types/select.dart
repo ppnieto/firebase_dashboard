@@ -103,10 +103,14 @@ class FieldTypeSelect extends FieldType {
         child: DropdownButtonFormField(
           value: value == null ? initialValue : value,
           isExpanded: true,
+          decoration: InputDecoration(
+            filled: !column.editable,
+            fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor,
+          ),
           items: options.entries.map((e) {
             return DropdownMenuItem(
               value: e.key,
-              child: Text(e.value),
+              child: Text(e.value, style: TextStyle(color: column.editable ? null : Theme.of(context).primaryColor)),
               enabled: !(frozenValue != null && frozenValue == e.key),
             );
           }).toList(),
@@ -119,6 +123,7 @@ class FieldTypeSelect extends FieldType {
             updateData(context, column, val);
           },
           validator: (val) {
+            print("valudate select");
             if (column.mandatory && val == null) return "Campo obligatorio";
             if (validate != null) return validate!(initialValue, val);
             return null;

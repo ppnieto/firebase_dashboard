@@ -53,6 +53,7 @@ class Module {
   final bool canAdd;
   final bool canEdit;
   final bool canRemove;
+  final bool removeInEdit;
   final bool canSort;
   final bool exportExcel;
   final double? actionColumnWidth;
@@ -84,6 +85,7 @@ class Module {
       this.canAdd = true,
       this.canEdit = true,
       this.canRemove = true,
+      this.removeInEdit = false,
       this.canSort = true,
       this.canSelect = false,
       this.actionColumnWidth,

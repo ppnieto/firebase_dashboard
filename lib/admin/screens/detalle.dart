@@ -51,7 +51,9 @@ class DetalleScreenState extends State<DetalleScreen> {
   }
 
   getEditField(BuildContext context, ColumnModule column) {
+    //print("getEditContent " + column.field);
     Widget? child = column.type.getEditContent(context, widget.object, updateData!, column);
+    //print("getEditContent ok");
 
     if (child != null) {
       if (column.showLabelOnEdit) {
@@ -70,7 +72,7 @@ class DetalleScreenState extends State<DetalleScreen> {
         child: Card(
           elevation: 5,
           color: Theme.of(context).canvasColor,
-          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth ? EdgeInsets.fromLTRB(64, 32, 64, 64) : EdgeInsets.all(5),
+          margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth ? EdgeInsets.all(20) : EdgeInsets.all(5),
           child: Padding(
             padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 32.0 : 5),
             child: Container(

@@ -6,6 +6,7 @@ import 'package:firebase_dashboard/components/admin_datatable.dart';
 import 'package:firebase_dashboard/components/async_datatable.dart';
 import 'package:firebase_dashboard/components/syncfusion_datatable.dart';
 import 'package:firebase_dashboard/dashboard.dart';
+import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,7 +16,6 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweetsheet/sweetsheet.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
-import 'dart:html' as html;
 
 enum DataTableImplementation { AdminDataTable, AsyncDataTable, SyncfusionDataTable }
 
@@ -27,6 +27,8 @@ class AdminScreen extends StatefulWidget {
   final double minWidth;
   final double labelWidth;
   final DataTableImplementation dataTableImplementation;
+
+  Map<String, dynamic> filtroInicial = {};
 
   AdminScreen(
       {Key? key,
@@ -54,6 +56,12 @@ class AdminScreenState extends State<AdminScreen> {
   int? sortColumnIndex;
   Map<String, bool> columnasSeleccionadas = {};
   List<DocumentSnapshot> rowsSelected = [];
+
+  @override
+  initState() {
+    super.initState();
+    if (widget.filtroInicial.isNotEmpty) this.filtro = widget.filtroInicial;
+  }
 
   Future<bool> initAdmin() async {
     print("init admin");
@@ -241,44 +249,54 @@ class AdminScreenState extends State<AdminScreen> {
 
   @override
   Widget build(BuildContext context) {
-    getLeading() {
-      return IconButton(
-          icon: Icon(FontAwesomeIcons.listUl),
-          onPressed: () async {
-            await showDialog(
-              context: context,
-              builder: (ctx) {
-                return MultiSelectDialog<String>(
-                  items: widget.module.columns.map((ColumnModule columnModule) {
-                    return MultiSelectItem(columnModule.field, columnModule.label);
-                  }).toList(),
-                  initialValue: columnasSeleccionadas.entries.map((e) {
-                    if (e.value) return e.key;
-                    return "";
-                  }).toList(),
-                  searchable: false,
-                  confirmText: Text('Aceptar'),
-                  cancelText: Text('Cancelar'),
-                  title: Text("Seleccione las columnas para mostrar"),
-                  onConfirm: (values) {
-                    setState(() {
-                      columnasSeleccionadas.clear();
-                      for (var value in values) {
-                        columnasSeleccionadas[value] = true;
-                      }
+    List<Widget> getLeading() {
+      return [
+        SizedBox(width: 10),
+        if (Navigator.of(context).canPop())
+          IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        IconButton(
+            icon: Icon(FontAwesomeIcons.listUl),
+            onPressed: () async {
+              await showDialog(
+                context: context,
+                builder: (ctx) {
+                  return MultiSelectDialog<String>(
+                    items: widget.module.columns.map((ColumnModule columnModule) {
+                      return MultiSelectItem(columnModule.field, columnModule.label);
+                    }).toList(),
+                    initialValue: columnasSeleccionadas.entries.map((e) {
+                      if (e.value) return e.key;
+                      return "";
+                    }).toList(),
+                    searchable: false,
+                    confirmText: Text('Aceptar'),
+                    cancelText: Text('Cancelar'),
+                    title: Text("Seleccione las columnas para mostrar"),
+                    onConfirm: (values) {
+                      setState(() {
+                        columnasSeleccionadas.clear();
+                        for (var value in values) {
+                          columnasSeleccionadas[value] = true;
+                        }
 
-                      onUpdateColumnasSeleccionadas();
+                        onUpdateColumnasSeleccionadas();
 
-                      SharedPreferences.getInstance().then((SharedPreferences prefs) {
-                        String key = 'admin_columns_' + widget.module.name;
-                        prefs.setStringList(key, values);
+                        SharedPreferences.getInstance().then((SharedPreferences prefs) {
+                          String key = 'admin_columns_' + widget.module.name;
+                          prefs.setStringList(key, values);
+                        });
                       });
-                    });
-                  },
-                );
-              },
-            );
-          });
+                    },
+                  );
+                },
+              );
+            }),
+      ];
     }
 
     Widget getGlobalSearch() {
@@ -340,23 +358,10 @@ class AdminScreenState extends State<AdminScreen> {
         }
 
         sheet.importData(rows, 1, 1);
-
         List<int> bytes = workbook.saveAsStream();
-        final blob = html.Blob([bytes]);
-        final url = html.Url.createObjectUrlFromBlob(blob);
-        DateTime now = DateTime.now();
-        String suffix = DateFormat('yyyyMMdd').format(now);
-        final anchor = html.document.createElement('a') as html.AnchorElement
-          ..href = url
-          ..style.display = 'none'
-          ..download = widget.module.name + '_$suffix.xls';
-        html.document.body!.children.add(anchor);
-// download
-        anchor.click();
-
-// cleanup
-        html.document.body!.children.remove(anchor);
-        html.Url.revokeObjectUrl(url);
+        String suffix = DateFormat('yyyyMMdd').format(DateTime.now());
+        String fileName = widget.module.name + '_$suffix.xls';
+        DashboardUtils.download(fileName, bytes);
       } finally {
         Navigator.of(context).pop();
       }
@@ -414,6 +419,7 @@ class AdminScreenState extends State<AdminScreen> {
     }
 
     print("build admin");
+    List<Widget> leading = getLeading();
     return FutureBuilder(
         future: initAdmin(),
         builder: (context, snapshot) {
@@ -422,9 +428,9 @@ class AdminScreenState extends State<AdminScreen> {
             appBar: AppBar(
               backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
               title: Text(widget.module.title),
-              leading: getLeading(),
-              actions: <Widget>[] +
-                  widget.module.columns.map<Widget>((ColumnModule columnModule) {
+              leadingWidth: leading.length * 40,
+              leading: Row(children: leading),
+              actions: widget.module.columns.map<Widget>((ColumnModule columnModule) {
                     if (columnModule.filter) {
                       if (filtro.containsKey(columnModule.field) == false) {
                         filtro[columnModule.field] = "";
