@@ -28,6 +28,7 @@ class DetalleScreenState extends State<DetalleScreen> {
   @override
   initState() {
     super.initState();
+    print("show detalle " + (widget.object?.reference.path ?? "----"));
     this.updateData = widget.object?.data() as Map<String, dynamic>?;
     if (this.updateData == null) {
       this.updateData = {};
