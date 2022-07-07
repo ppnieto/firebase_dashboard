@@ -51,7 +51,8 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
     } else {
       columns = [];
     }
-    if (adminScreenState!.widget.module.canRemove || adminScreenState!.widget.module.getActions != null) {
+    if (adminScreenState!.widget.module.canRemove ||
+        adminScreenState!.widget.module.getActions != null) {
       columns!.add(ColumnModule(
           field: "_acciones",
           label: "",
@@ -60,12 +61,17 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
             builder: (context, object, inList) {
               return Row(
                 children: [
-                  ...adminScreenState!.widget.module.getActions != null ? adminScreenState!.widget.module.getActions!(object!, context) : [],
+                  ...adminScreenState!.widget.module.getActions != null
+                      ? adminScreenState!.widget.module.getActions!(
+                          object!, context)
+                      : [],
                   if (adminScreenState!.widget.module.canRemove)
                     IconButton(
-                      icon: Icon(Icons.delete, color: Theme.of(context).highlightColor),
+                      icon: Icon(Icons.delete,
+                          color: Theme.of(context).highlightColor),
                       onPressed: () {
-                        adminScreenState?.doBorrar(context, object!.reference, () {});
+                        adminScreenState?.doBorrar(
+                            context, object!.reference, () {});
                       },
                     ),
                   SizedBox(width: 15)
@@ -91,16 +97,20 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
 
   @override
   Widget build(BuildContext context) {
-    DashboardMainScreenState? dashboardState = context.findAncestorStateOfType<DashboardMainScreenState>();
-    if (dashboardState == null) throw new Exception("No encuentro admin screen state!!!");
+    DashboardMainScreenState? dashboardState =
+        context.findAncestorStateOfType<DashboardMainScreenState>();
+    if (dashboardState == null)
+      throw new Exception("No encuentro admin screen state!!!");
 
     updateColumns();
     return SfDataGridTheme(
       data: SfDataGridThemeData(
-          selectionColor:
-              dashboardState.widget.theme?.appBar2BackgroundColor?.withOpacity(0.6) ?? Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
-          rowHoverColor:
-              dashboardState.widget.theme?.appBar2BackgroundColor?.withOpacity(0.2) ?? Theme.of(context).secondaryHeaderColor.withOpacity(0.2),
+          selectionColor: dashboardState.widget.theme?.appBar2BackgroundColor
+                  ?.withOpacity(0.6) ??
+              Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
+          rowHoverColor: dashboardState.widget.theme?.appBar2BackgroundColor
+                  ?.withOpacity(0.2) ??
+              Theme.of(context).secondaryHeaderColor.withOpacity(0.2),
           headerColor: Theme.of(context).primaryColor.withOpacity(0.3),
           sortIconColor: Theme.of(context).primaryColor),
       child: SfDataGrid(
@@ -109,12 +119,16 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
           showCheckboxColumn: adminScreenState?.canSelect ?? false,
           //footerFrozenColumnsCount: 1,
           columnWidthMode: ColumnWidthMode.fill,
-          source: _DataSource(columns: columns!, context: context, parentState: this),
+          source: _DataSource(
+              columns: columns!, context: context, parentState: this),
           allowSorting: true,
           allowTriStateSorting: true,
-          selectionMode: adminScreenState!.canSelect ? SelectionMode.multiple : SelectionMode.single,
+          selectionMode: adminScreenState!.canSelect
+              ? SelectionMode.multiple
+              : SelectionMode.single,
           navigationMode: GridNavigationMode.row,
-          loadMoreViewBuilder: (BuildContext context, LoadMoreRows loadMoreRows) {
+          loadMoreViewBuilder:
+              (BuildContext context, LoadMoreRows loadMoreRows) {
             if (noMoreElements) {
               return SizedBox.shrink();
             }
@@ -133,9 +147,15 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
                         height: 60.0,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                            color: Colors.white, border: BorderDirectional(top: BorderSide(width: 1.0, color: Color.fromRGBO(0, 0, 0, 0.26)))),
+                            color: Colors.white,
+                            border: BorderDirectional(
+                                top: BorderSide(
+                                    width: 1.0,
+                                    color: Color.fromRGBO(0, 0, 0, 0.26)))),
                         alignment: Alignment.center,
-                        child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor)));
+                        child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(
+                                Theme.of(context).primaryColor)));
                   } else {
                     return SizedBox.shrink();
                   }
@@ -147,7 +167,8 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
               adminScreenState!.rowsSelected.add(selected!);
             }
             if (removedRows.isNotEmpty) {
-              DocumentSnapshot removed = removedRows.single.getCells().first.value.doc;
+              DocumentSnapshot removed =
+                  removedRows.single.getCells().first.value.doc;
               adminScreenState!.rowsSelected.remove(removed);
             }
 
@@ -159,7 +180,9 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
             }
           },
           onCellTap: (details) {
-            if (adminScreenState!.widget.selectPreEdit && _controller.selectedIndex == details.rowColumnIndex.rowIndex - 1) {
+            if (adminScreenState!.widget.selectPreEdit &&
+                _controller.selectedIndex ==
+                    details.rowColumnIndex.rowIndex - 1) {
               if (selected != null) {
                 adminScreenState?.showDetalleObject(selected);
                 _controller.selectedIndex = -1;
@@ -179,7 +202,10 @@ class SyncfusionDataTableState extends State<SyncfusionDataTable> {
                         col.label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Theme.of(context).primaryColor),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Theme.of(context).primaryColor),
                       ))))
               .toList()),
     );
@@ -191,7 +217,10 @@ class _DataSource extends DataGridSource {
   final List<ColumnModule> columns;
   final SyncfusionDataTableState parentState;
 
-  _DataSource({required this.columns, required this.context, required this.parentState}) {
+  _DataSource(
+      {required this.columns,
+      required this.context,
+      required this.parentState}) {
     handleLoadMoreRows();
     buildDataGridRows();
   }
@@ -201,14 +230,17 @@ class _DataSource extends DataGridSource {
 
   @override
   Future<void> handleLoadMoreRows() async {
-    AdminScreenState? adminScreenState = context.findAncestorStateOfType<AdminScreenState>();
-    if (adminScreenState == null) throw new Exception("No encuentro admin screen state!!!");
+    AdminScreenState? adminScreenState =
+        context.findAncestorStateOfType<AdminScreenState>();
+    if (adminScreenState == null)
+      throw new Exception("No encuentro admin screen state!!!");
 
-    int limit = 100 + docs.length;
+    int limit = adminScreenState.getPageSize() + docs.length;
 
-    StreamSubscription<QuerySnapshot>? tempSubscription = adminScreenState.getQuery().limit(limit).snapshots().listen((value) {
+    StreamSubscription<QuerySnapshot>? tempSubscription =
+        adminScreenState.getQuery().limit(limit).snapshots().listen((value) {
       //print("traemos " + value.docs.length.toString() + " / " + limit.toString());
-      if (value.docs.length < limit && limit > 100) {
+      if (value.docs.length < limit && limit > adminScreenState.getPageSize()) {
         parentState.noMoreElements = true;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("Final del listado alcanzado"),
@@ -234,7 +266,9 @@ class _DataSource extends DataGridSource {
     dataGridRows = docs.map((doc) {
       return DataGridRow(
           cells: columns.map((column) {
-        return DataGridCell(value: _DocumentSnapshotWrapper(doc: doc, field: column.field), columnName: column.field);
+        return DataGridCell(
+            value: _DocumentSnapshotWrapper(doc: doc, field: column.field),
+            columnName: column.field);
       }).toList());
     }).toList();
   }
@@ -242,12 +276,15 @@ class _DataSource extends DataGridSource {
   @override
   List<DataGridRow> get rows => dataGridRows;
 
-  ColumnModule? getColumnModuleByField(String field) => columns.firstWhere((element) => element.field == field);
+  ColumnModule? getColumnModuleByField(String field) =>
+      columns.firstWhere((element) => element.field == field);
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
-    DashboardMainScreenState? dashboardState = context.findAncestorStateOfType<DashboardMainScreenState>();
-    if (dashboardState == null) throw new Exception("No encuentro admin screen state!!!");
+    DashboardMainScreenState? dashboardState =
+        context.findAncestorStateOfType<DashboardMainScreenState>();
+    if (dashboardState == null)
+      throw new Exception("No encuentro admin screen state!!!");
 
     return DataGridRowAdapter(
         cells: row.getCells().map<Widget>((dataGridCell) {
@@ -258,7 +295,9 @@ class _DataSource extends DataGridSource {
         alignment: Alignment.centerRight,
         child: DefaultTextStyle(
             style: TextStyle(color: Theme.of(context).primaryColor),
-            child: column?.type.getListContent(context, dataGridCell.value.doc, column) ?? SizedBox.shrink()),
+            child: column?.type
+                    .getListContent(context, dataGridCell.value.doc, column) ??
+                SizedBox.shrink()),
       );
     }).toList());
   }
