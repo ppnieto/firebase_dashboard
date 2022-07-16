@@ -109,19 +109,18 @@ class DashboardMainScreenState extends State<DashboardMainScreen> with SingleTic
               ),
             ),
           ]),
-          actions: widget.actions ??
-              <Widget>[] +
-                  (widget.sideBar != null
-                      ? [
-                          IconButton(
-                              icon: Icon(widget.sideBarIcon),
-                              onPressed: () {
-                                setState(() {
-                                  isSidebar = !isSidebar;
-                                });
-                              })
-                        ]
-                      : []),
+          actions: (widget.actions ?? []) +
+              (widget.sideBar != null
+                  ? [
+                      IconButton(
+                          icon: Icon(widget.sideBarIcon),
+                          onPressed: () {
+                            setState(() {
+                              isSidebar = !isSidebar;
+                            });
+                          })
+                    ]
+                  : []),
         ),
         body: Row(
           children: <Widget>[
