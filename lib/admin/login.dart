@@ -79,7 +79,7 @@ class _LoginMobile extends StatefulWidget {
 
 class __LoginMobileState extends State<_LoginMobile> {
   bool recordarCredenciales = false;
-
+  bool loading = false;
   @override
   void initState() {
     super.initState();
@@ -222,13 +222,35 @@ class __LoginMobileState extends State<_LoginMobile> {
                             primary: Colors.white,
                             backgroundColor: Theme.of(context).primaryColor,
                           )),
-                          child: TextButton(
-                              child: Text("Entrar", style: TextStyle(fontSize: 18)),
-                              onPressed: () async {
-                                this.setPreferences();
-                                widget.parent
-                                    .onEntrar(LoginMethod.loginPassword, widget.parent.emailController.text, widget.parent.passwordController.text);
-                              })),
+                          child: loading
+                              ? Row(
+                                  children: [Spacer(), Container(width: 50, height: 50, child: CircularProgressIndicator()), Spacer()],
+                                )
+                              : TextButton(
+                                  child: Text("Entrar", style: TextStyle(fontSize: 18)),
+                                  onPressed: () async {
+                                    setState(() {
+                                      loading = true;
+                                    });
+                                    this.setPreferences();
+                                    try {
+                                      await widget.parent.onEntrar(
+                                          LoginMethod.loginPassword, widget.parent.emailController.text, widget.parent.passwordController.text);
+                                    } catch (e) {
+                                      print("error");
+                                      print(e);
+                                    } finally {
+                                      setState(() {
+                                        loading = false;
+                                      });
+                                    }
+
+                                    /*
+                                    setState(() {
+                                      loading = false;
+                                    });
+                                    */
+                                  })),
                       SizedBox(height: 40),
                       widget.parent.useGoogle
                           ? TextButton.icon(

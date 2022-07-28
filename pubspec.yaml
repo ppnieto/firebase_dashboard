@@ -23,7 +23,10 @@ dependencies:
   shared_preferences: any
   date_time_picker: any
   badges:
-  multi_select_flutter: any
+  
+  multi_select_flutter: ^4.1.2
+  multiselect: any
+  
   flutter_tags: any
   flutter_typeahead: any
   #excel: ^1.1.5

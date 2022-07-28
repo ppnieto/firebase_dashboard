@@ -91,7 +91,7 @@ class FieldTypeRef extends FieldType {
     }
   }
 
-  CollectionReference getCollection() {
+  Query getCollection() {
     if (getQueryCollection != null) {
       return getQueryCollection!();
     } else {
@@ -268,7 +268,7 @@ class FieldTypeRef extends FieldType {
               value: value,
               items: <DropdownMenuItem<dynamic>>[DropdownMenuItem(value: "", child: Text("Seleccione " + column.label))] +
                   snapshot.data!.docs.map<DropdownMenuItem<dynamic>>((object) {
-                    return DropdownMenuItem(value: object.reference, child: Text(object.get(this.refLabel)));
+                    return DropdownMenuItem(value: object.reference, child: Text(object.getFieldAdm(this.refLabel, "-")));
                   }).toList(),
               onChanged: (dynamic val) {
                 if (onFilter != null) onFilter(val);
