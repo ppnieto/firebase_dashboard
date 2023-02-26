@@ -1,0 +1,108 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/field_types/field_type_base.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:uuid/uuid.dart';
+import 'package:uuid/uuid_util.dart';
+
+class FieldTypeColor extends FieldType {
+  FieldTypeColor();
+
+  @override
+  getListContent(
+      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+    String color = _object.getFieldAdm(column.field, Colors.grey.toHex());
+    return Container(width: 30, height: 30, color: color.fromHexAdmin);
+  }
+
+  @override
+  getEditContent(BuildContext context, DocumentSnapshot? _object,
+      Map<String, dynamic> values, ColumnModule column) {
+    String strColor =
+        _object?.get(column.field) ?? values[column.field] ?? "aaaaaa";
+    return Row(
+      children: [
+        StatefulBuilder(builder: (context, setStateBuilder) {
+          return InkWell(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context2) {
+                    return AlertDialog(
+                      title: const Text('Pick a color!'),
+                      content: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: strColor.fromHexAdmin,
+                          onColorChanged: (newColor) {
+                            strColor = newColor.toHex(leadingHashSign: false);
+                            updateData(context, column,
+                                newColor.toHex(leadingHashSign: false));
+                          },
+                        ),
+                        // Use Material color picker:
+                        //
+                        // child: MaterialPicker(
+                        //   pickerColor: pickerColor,
+                        //   onColorChanged: changeColor,
+                        //   showLabel: true, // only on portrait mode
+                        // ),
+                        //
+                        // Use Block color picker:
+                        //
+                        // child: BlockPicker(
+                        //   pickerColor: currentColor,
+                        //   onColorChanged: changeColor,
+                        // ),
+                        //
+                        // child: MultipleChoiceBlockPicker(
+                        //   pickerColors: currentColors,
+                        //   onColorsChanged: changeColors,
+                        // ),
+                      ),
+                      actions: <Widget>[
+                        ElevatedButton(
+                          child: const Text('Aceptar'),
+                          onPressed: () {
+                            setStateBuilder(() {});
+                            Navigator.of(context2).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Container(
+                  width: 30, height: 30, color: strColor.fromHexAdmin));
+        }),
+        Spacer(),
+      ],
+    );
+  }
+}
+
+extension HexColorExt on String {
+  Color get fromHexAdmin {
+    final buffer = StringBuffer();
+    if (this.length == 6 || this.length == 7) {
+      buffer.write('ff');
+    }
+
+    if (this.startsWith('#')) {
+      buffer.write(this.replaceFirst('#', ''));
+    } else {
+      buffer.write(this);
+    }
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
+}
+
+extension HexColorExt2 on Color {
+  String toHex({bool leadingHashSign = true}) => '${leadingHashSign ? '#' : ''}'
+      '${alpha.toRadixString(16).padLeft(2, '0')}'
+      '${red.toRadixString(16).padLeft(2, '0')}'
+      '${green.toRadixString(16).padLeft(2, '0')}'
+      '${blue.toRadixString(16).padLeft(2, '0')}';
+}
