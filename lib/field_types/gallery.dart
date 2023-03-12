@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_dashboard/components/image_storage.dart';
 import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
@@ -90,6 +91,22 @@ class FieldTypeGallery extends FieldType {
         updateData(context, column, urls.toSet().toList());
       },
     );
+/*
+    return FutureBuilder(
+        future: DashboardUtils.fixUrls(urls),
+        builder: (context, AsyncSnapshot<List<String>> snapshot) {
+          if (!snapshot.hasData) return const SizedBox.shrink();
+          urls = snapshot.data!;
+          return _Gallery(
+            parent: this,
+            name: column.label,
+            addImageURL: addImageURL,
+            onChange: () {
+              // removing duplicates
+              updateData(context, column, urls.toSet().toList());
+            },
+          );
+        });*/
   }
 }
 
@@ -172,13 +189,17 @@ class __GalleryState extends State<_Gallery> {
                       alignment: Alignment.topRight,
                       children: [
                         SizedBox(
-                          width: 160,
-                          height: 160,
-                          child: Image.network(url, width: double.infinity, height: 160, fit: BoxFit.cover),
-                        ),
+                            width: 160,
+                            height: 160,
+                            child: ImageFromStorage(
+                              url: url,
+                              width: double.infinity,
+                              height: 160,
+                              fit: BoxFit.cover,
+                            )),
                         if (widget.parent.canRemove)
                           Container(
-                              color: Theme.of(context).primaryColor.withOpacity(0.8),
+                              color: Theme.of(context).primaryColor.withOpacity(0.6),
                               child: IconButton(
                                 icon: Icon(Icons.delete, size: 20, color: Theme.of(context).colorScheme.secondary),
                                 onPressed: () {
@@ -203,7 +224,7 @@ class __GalleryState extends State<_Gallery> {
                             bottom: 0,
                             right: 0,
                             child: Container(
-                                color: Theme.of(context).primaryColor.withOpacity(0.8),
+                                color: Theme.of(context).primaryColor.withOpacity(0.6),
                                 child: IconButton(
                                   icon: Icon(
                                     Icons.download,

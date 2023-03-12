@@ -110,11 +110,16 @@ class AdminController extends GetxController {
       print(e);
     }
 
+    reinit();
+
+    return true;
+  }
+
+  void reinit() {
     columns = getColumns();
     _datagridSource = SyncfusionDataSource(columns: columns, module: module);
-
+    finalAlcanzado = false;
     nextPage();
-    return true;
   }
 
   List<ColumnModule> getColumns() {
@@ -140,7 +145,7 @@ class AdminController extends GetxController {
                         ? IconButton(
                             icon: Icon(Icons.delete, color: Theme.of(context).primaryColorDark),
                             onPressed: () {
-                              doBorrar(context, object.reference, () {});
+                              doBorrar(context, object, () {});
                             },
                           )
                         : const SizedBox.shrink()),
@@ -148,7 +153,7 @@ class AdminController extends GetxController {
                     IconButton(
                       icon: Icon(Icons.delete, color: Theme.of(context).primaryColorDark),
                       onPressed: () {
-                        doBorrar(context, object!.reference, () {});
+                        doBorrar(context, object!, () {});
                       },
                     ),
                   //SizedBox(width: 15)
@@ -278,29 +283,9 @@ class AdminController extends GetxController {
     box.write('admin_columns', values);
     box.save();
 
-    /*SharedPreferences.getInstance().then((SharedPreferences prefs) {
-      String key = 'admin_columns_' + module.name;
-      prefs.setStringList(key, values);
-    });
-    */
-
-    /*
-    if (value) {
-      int index = min(module.columns.indexOf(cm), showingColumns.length);
-      showingColumns.insert(index, cm);
-    } else {
-      showingColumns.remove(cm);
-    }
-    */
-  }
-
-/*
-  void onUpdateColumnasSeleccionadas() {
-    showingColumns =
-        module.columns.where((col) => col.listable && columnasSeleccionadas.containsKey(col.field) && columnasSeleccionadas[col.field]!).toList().obs;
+    reinit();
     update();
   }
-  */
 
   Future<void> _preloadReferences() async {
     for (var column in module.columns) {
@@ -415,8 +400,8 @@ class AdminController extends GetxController {
     return query;
   }
 
-  doBorrar(BuildContext context, DocumentReference ref, Function postDelete) {
-    if (module.deleteDisabled && !deleteEnabled.contains(ref.path)) {
+  doBorrar(BuildContext context, DocumentSnapshot object, Function postDelete) {
+    if (module.deleteDisabled && !deleteEnabled.contains(object.reference.path)) {
       // esto no debe darse
       Get.snackbar("Atención", "No se puede borrar el elemento",
           snackPosition: SnackPosition.BOTTOM, backgroundColor: Theme.of(context).primaryColor, colorText: Colors.white, margin: EdgeInsets.all(20));
@@ -427,11 +412,13 @@ class AdminController extends GetxController {
         context: context,
         textPos: "Borrar",
         onPos: () {
-          ref.delete();
+          object.reference.delete();
           Navigator.of(context).pop();
           Get.snackbar("Atención", "El elemento ha sido borrado",
               duration: Duration(seconds: 2), backgroundColor: Theme.of(context).primaryColor, colorText: Colors.white, margin: EdgeInsets.all(20));
-
+          if (module.onRemove != null) {
+            module.onRemove!(object);
+          }
           postDelete();
         },
         title: "¿Está seguro de borrar el elemento?",

@@ -8,17 +8,17 @@ class FieldTypeMemo extends FieldType {
   FieldTypeMemo({this.maxLines = 4, this.listWidth});
 
   @override
-  getListContent(BuildContext context, DocumentSnapshot _object,
-          ColumnModule column) =>
-      listWidth != null
-          ? Container(
-              width: this.listWidth,
-              child: super.getListContent(context, _object, column))
-          : super.getListContent(context, _object, column);
+  Widget _getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+    return Text(_object.getFieldAdm(column.field, '-').toString());
+  }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) => listWidth != null
+      ? Container(width: this.listWidth, child: _getListContent(context, _object, column))
+      : _getListContent(context, _object, column);
+
+  @override
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
     return TextFormField(
         enabled: column.editable,
@@ -27,9 +27,7 @@ class FieldTypeMemo extends FieldType {
         decoration: InputDecoration(
             labelText: column.label,
             filled: !column.editable,
-            fillColor: column.editable
-                ? Theme.of(context).canvasColor.withAlpha(1)
-                : Theme.of(context).disabledColor),
+            fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor),
         onSaved: (val) {
           updateData(context, column, val);
         });

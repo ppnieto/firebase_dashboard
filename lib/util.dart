@@ -117,6 +117,15 @@ class DashboardUtils {
       ),
     );
   }
+
+  static Future<List<String>> fixUrls(List<String> urls) async {
+    List<String> result = [];
+    for (var url in urls) {
+      String newUrl = await FirebaseStorage.instance.refFromURL(url).getDownloadURL();
+      result.add(newUrl);
+    }
+    return result;
+  }
 }
 
 extension ActionSpacing on List<Widget> {

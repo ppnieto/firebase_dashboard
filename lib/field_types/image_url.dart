@@ -56,7 +56,11 @@ class FieldTypeImageURL extends FieldType {
     if (value is Map) {
       textController.text = value['url'] ?? "";
       pathController.text = value['path'] ?? "";
+    } else {
+      textController.text = "";
+      pathController.text = "";
     }
+
     return Row(
       children: [
         Expanded(

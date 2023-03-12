@@ -18,6 +18,7 @@ class FieldTypeRef extends FieldType {
   final TextOverflow? overflow;
   final int? maxLines;
   final Iterable<DocumentSnapshot> Function(Iterable<DocumentSnapshot>)? doFilter;
+  final String? labelField;
 
   static final DocumentReference nullValue = FirebaseFirestore.instance.doc("/values/null");
 
@@ -33,6 +34,7 @@ class FieldTypeRef extends FieldType {
       this.filterFunction,
       this.overflow,
       this.maxLines,
+      this.labelField,
       this.doFilter,
       this.search = false,
       this.empty /* = const Text("<sin asignar>", style: TextStyle(color: Colors.red))*/});
@@ -177,26 +179,10 @@ class FieldTypeRef extends FieldType {
                     }
                   : null,
               dropdownDecoratorProps: DropDownDecoratorProps(),
-
-/*                  
-              showSearchBox: search,
-              popupTitle: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                child: Text("Seleccione " + column.label, style: TextStyle(fontSize: 22, color: Colors.black)),
-              ),
-              popupItemBuilder: (context, item, isSelected) {
-                return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                    child: Text(
-                      preloadedData[item.path]?.toString() ?? "-",
-                      style: TextStyle(color: Colors.black),
-                    ));
-              },
-              */
               itemAsString: (item) => preloadedData[item.path]?.toString() ?? "-",
               items: preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList()),
         );
-      } else
+      } else {
         return Row(
           children: [
             Container(
@@ -211,10 +197,16 @@ class FieldTypeRef extends FieldType {
                 onChanged: column.editable
                     ? (val) {
                         updateData(context, column, val);
+                        if (this.labelField != null && val != null) {
+                          updateDataColumnName(context, labelField!, preloadedData[val.path]);
+                        }
                       }
                     : null,
                 onSaved: (val) {
                   updateData(context, column, val);
+                  if (this.labelField != null && val != null) {
+                    updateDataColumnName(context, labelField!, preloadedData[val.path]);
+                  }
                 },
                 validator: (value) {
                   print("validamos campo...");
@@ -226,6 +218,7 @@ class FieldTypeRef extends FieldType {
             SizedBox.shrink(),
           ],
         );
+      }
     } else {
       return StreamBuilder(
           stream: getStream == null ? getQuery().snapshots() : getStream!(),

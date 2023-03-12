@@ -62,7 +62,7 @@ class DetalleScreen extends StatelessWidget {
                                   // no usamos el AdminController por si es un detalle sin listado
                                   //AdminController adminController = Get.find<AdminController>(tag: module.name);
                                   AdminController adminController = AdminController(module: module);
-                                  adminController.doBorrar(context, object!.reference, () {
+                                  adminController.doBorrar(context, object!, () {
                                     Navigator.of(context).pop();
                                   });
                                 },

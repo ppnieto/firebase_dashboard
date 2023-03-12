@@ -41,6 +41,7 @@ dependencies:
   flutter_colorpicker:
   anim_search_bar:
   syncfusion_localizations:
+  cached_network_image:
 
 
 

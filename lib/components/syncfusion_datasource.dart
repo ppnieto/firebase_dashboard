@@ -9,10 +9,9 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 class SyncfusionDataSource extends DataGridSource {
   final List<ColumnModule> columns;
   final Module module;
-  //final SyncfusionDataTableState parentState;
   List<DataGridRow> dataGridRows = [];
 
-  SyncfusionDataSource({required this.columns, required this.module}) {}
+  SyncfusionDataSource({required this.columns, required this.module});
 
   @override
   Future<void> handleLoadMoreRows() async {

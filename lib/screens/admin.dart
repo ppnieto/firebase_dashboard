@@ -106,11 +106,7 @@ class AdminScreen extends StatelessWidget {
                     onConfirm: (Iterable<String> values) {
                       //setState(() {
                       for (var columna in controller.visibleColumns.entries) {
-                        if (values.contains(columna.key.field)) {
-                          controller.setColumnaSeleccionada(columna.key, true);
-                        } else {
-                          controller.setColumnaSeleccionada(columna.key, false);
-                        }
+                        controller.setColumnaSeleccionada(columna.key, values.contains(columna.key.field));
                       }
                     },
                   );
