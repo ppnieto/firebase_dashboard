@@ -1,27 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:uuid/uuid.dart';
-import 'package:uuid/uuid_util.dart';
 
 class FieldTypeColor extends FieldType {
   FieldTypeColor();
 
   @override
-  getListContent(
-      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     String color = _object.getFieldAdm(column.field, Colors.grey.toHex());
     return Container(width: 30, height: 30, color: color.fromHexAdmin);
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    String strColor =
-        _object?.get(column.field) ?? values[column.field] ?? "aaaaaa";
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+    String strColor = _object?.getFieldAdm(column.field, values[column.field] ?? "aaaaaa") ?? "aaaaaa";
     return Row(
       children: [
         StatefulBuilder(builder: (context, setStateBuilder) {
@@ -37,8 +30,7 @@ class FieldTypeColor extends FieldType {
                           pickerColor: strColor.fromHexAdmin,
                           onColorChanged: (newColor) {
                             strColor = newColor.toHex(leadingHashSign: false);
-                            updateData(context, column,
-                                newColor.toHex(leadingHashSign: false));
+                            updateData(context, column, newColor.toHex(leadingHashSign: false));
                           },
                         ),
                         // Use Material color picker:
@@ -74,8 +66,7 @@ class FieldTypeColor extends FieldType {
                   },
                 );
               },
-              child: Container(
-                  width: 30, height: 30, color: strColor.fromHexAdmin));
+              child: Container(width: 30, height: 30, color: strColor.fromHexAdmin));
         }),
         Spacer(),
       ],

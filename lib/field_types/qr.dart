@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:uuid/uuid.dart';
-import 'package:uuid/uuid_util.dart';
 
 class FieldTypeQR extends FieldType {
   final Function onListTap;
@@ -44,7 +42,11 @@ class FieldTypeQR extends FieldType {
       IconButton(
           icon: Icon(FontAwesomeIcons.sync),
           onPressed: () {
-            var uuid = new Uuid(options: {'grng': UuidUtil.cryptoRNG});
+            var uuid = new Uuid(
+                //goptions: GlobalOptions(
+
+                //options: {'grng': UuidUtil.cryptoRNG}
+                );
             qr.text = regenerate != null ? regenerate!() : uuid.v4();
             updateData(context, column, qr.text);
           })

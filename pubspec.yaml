@@ -3,26 +3,25 @@ description: A new Flutter package project.
 version: 0.0.1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.17.6 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  font_awesome_flutter: ^10.4.0
+  font_awesome_flutter: 
   sweetsheet: any
   flutter_spinbox:
   firebase_core: any
   firebase_storage: any
   firebase_auth: any
-  cloud_firestore: ^4.4.2
+  cloud_firestore:
   get: 
   get_storage: 
   
   uuid: any  
   package_info_plus: any
-  date_time_picker: any
   badges:
   multi_select_flutter:
   multiselect: any
@@ -31,15 +30,19 @@ dependencies:
   syncfusion_flutter_xlsio: any
   syncfusion_flutter_datagrid_export: 
   syncfusion_flutter_datagrid: 
-  dropdown_search:
+  #dropdown_search:
+  dropdown_button2: 
   textfield_tags:
-  file_picker:
+  #file_picker: 
+  file_selector:
+
   filesize:
   download:
   url_launcher:
   super_tag_editor:
   flutter_colorpicker:
   anim_search_bar:
+  app_bar_with_search_switch:
   syncfusion_localizations:
   cached_network_image:
 

@@ -23,6 +23,7 @@ class DetalleController extends GetxController {
 
   @override
   void onInit() {
+    Get.log('DetalleController onInit ${module.name}');
     super.onInit();
 
     _updateData = object?.data() as Map<String, dynamic>?;

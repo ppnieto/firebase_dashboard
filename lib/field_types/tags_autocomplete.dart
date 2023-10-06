@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:flutter/material.dart';
 import 'package:super_tag_editor/tag_editor.dart';
-import 'package:textfield_tags/textfield_tags.dart';
 
 class FieldTypeTagsAutocomplete extends FieldType {
   final String hint;
@@ -55,7 +54,7 @@ class FieldTypeTagsAutocomplete extends FieldType {
               updateData(context, column, valueString.join(","));
             });
           },
-          suggestionBuilder: (context2, state, data, b) => ListTile(
+          suggestionBuilder: (context, state, data, index, lenght, highlight, suggestionValid) => ListTile(
                 key: ObjectKey(data),
                 title: Text(data?.toString() ?? "-"),
                 onTap: () {

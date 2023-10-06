@@ -1,11 +1,13 @@
 import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:firebase_dashboard/controllers/dashboard.dart';
-import 'package:firebase_dashboard/controllers/menu.dart';
+import 'package:firebase_dashboard/controllers/menu.dart' as menuC;
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MenuDrawer extends StatelessWidget {
-  const MenuDrawer({Key? key}) : super(key: key);
+  final DashboardMainScreen? parent;
+  const MenuDrawer({Key? key, this.parent}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +20,13 @@ class MenuDrawer extends StatelessWidget {
         child: CircularProgressIndicator(),
       ));
     }
-    return GetBuilder<MenuController>(builder: (controller) {
+    return GetBuilder<menuC.MenuController>(builder: (controller) {
       return ListView(
           children: (dashboardController.menus ?? []).map<Widget>((menu) {
         bool hasRole = true;
 
         if (menu.role != null) {
-          List<String>? roles = []; // getRolesFunction != null ? getRolesFunction!() : [];
+          List<String> roles = parent?.getRolesFunction != null ? parent?.getRolesFunction!() : [];
           hasRole = roles.contains(menu.role);
         }
         bool visible = menu.visible ?? true;
@@ -41,16 +43,17 @@ class _MenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DashboardController controller = Get.find<DashboardController>();
-    MenuController menuController = Get.find<MenuController>();
+    menuC.MenuController menuController = Get.find<menuC.MenuController>();
     DashboardTheme? theme = controller.theme;
     if (menu is Menu) {
       MenuInfo? menuInfo = menu is MenuInfo ? menu as MenuInfo : null;
       //bool selected = controller.isMenuSelected(menu as Menu);
-      bool selected = menuController.currentMenu!.hashCode == menu.hashCode;
+      //bool selected = menuController.currentMenu!.hashCode == menu.hashCode;
+      bool selected = menuController.currentMenu!.id == menu.id;
       return Container(
         color: selected ? theme?.menuSelectedBackgroundColor : theme?.menuBackgroundColor,
         child: ListTile(
-          trailing: menuInfo?.info(),
+          trailing: menuInfo?.info(context),
           onTap: () {
             if (!selected) controller.showScreen(menu as Menu);
             ScaffoldState? scaffolsState = context.findAncestorStateOfType<ScaffoldState>();
@@ -78,9 +81,10 @@ class _MenuTile extends StatelessWidget {
           collapsedIconColor: theme?.menuTextColor,
           title: Text(menu.label, style: TextStyle(fontSize: 18, color: theme?.menuTextColor)),
           leading: Icon(menu.iconData, color: theme?.menuTextColor),
-          children: (menu as MenuGroup).children!.map<Widget>((submenu) {
-            return _MenuTile(menu: submenu);
-          }).toList());
+          children: (menu as MenuGroup).children?.map<Widget>((submenu) {
+                return _MenuTile(menu: submenu);
+              }).toList() ??
+              []);
     } else if (menu is MenuClick) {
       MenuClick menuClick = menu as MenuClick;
 

@@ -47,10 +47,8 @@ class FieldTypeAutocomplete extends FieldType {
   Query _getQuery() {
     Query query = getCollection();
     Map<String, dynamic> filters = getFilter != null ? getFilter!() : {};
-    if (filters != null) {
-      for (MapEntry entry in filters.entries) {
-        query = query.where(entry.key, isEqualTo: entry.value);
-      }
+    for (MapEntry entry in filters.entries) {
+      query = query.where(entry.key, isEqualTo: entry.value);
     }
     return query;
   }

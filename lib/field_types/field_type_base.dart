@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/controllers/dashboard.dart';
 import 'package:firebase_dashboard/controllers/detalle.dart';
 import 'package:flutter/material.dart';
@@ -10,17 +9,24 @@ import 'package:get/get.dart';
 
 abstract class FieldType {
   final Map<String, String> preloadedData = {};
-  bool async = false;
+  bool async() => false;
 
   dynamic getFieldFromMap(Map<String, dynamic> data, String fieldName, dynamic defValue) {
     try {
       if (fieldName.contains('.')) {
         List<String> fields = fieldName.split('.');
-        if (fields.length != 2) return "Error con sintaxis de campo $fieldName";
-        if (data.containsKey(fields[0])) {
-          return data[fields[0]][fields[1]] ?? defValue;
-        } else {
-          return defValue;
+        var obj = data;
+        while (fields.isNotEmpty) {
+          if (obj.containsKey(fields.first)) {
+            if (obj[fields.first] is Map) {
+              obj = obj[fields.first];
+              fields.removeAt(0);
+            } else {
+              return obj[fields.first];
+            }
+          } else {
+            return defValue;
+          }
         }
       } else {
         if (!data.containsKey(fieldName)) return defValue;
@@ -77,11 +83,11 @@ abstract class FieldType {
   }
 
   updateData(BuildContext context, ColumnModule column, value) {
-    print("updateData ${column.field} => $value");
     updateDataColumnName(context, column.field, value);
   }
 
   updateDataColumnName(BuildContext context, String columnName, value) {
+    print("updateData ${columnName} => $value");
     DetalleController detalleController = Get.find<DetalleController>(tag: DashboardController.tag);
     detalleController.updateData(columnName, value);
   }

@@ -27,9 +27,7 @@ class FieldTypeActions extends FieldType {
               child: Text(action.title, style: TextStyle(color: Colors.white)),
             ),
             onPressed: () {
-              if (action.onTap != null) {
-                action.onTap(_object, context);
-              }
+              action.onTap(_object, context);
             }),
       );
     }).toList());

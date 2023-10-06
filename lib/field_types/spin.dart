@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/screens/detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:flutter_spinbox/material.dart';
@@ -31,6 +30,11 @@ class FieldTypeSpin extends FieldType {
     if (_object?.hasFieldAdm(column.field) == false && value != null) {
       updateData(context, column, value);
     }
+
+    if (value is String) {
+      value = int.parse(value);
+    }
+
     return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
       Container(
         width: 200,

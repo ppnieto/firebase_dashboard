@@ -2,7 +2,6 @@ import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/controllers/dashboard.dart';
 import 'package:firebase_dashboard/controllers/detalle.dart';
-import 'package:firebase_dashboard/screens/detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -65,6 +64,7 @@ class FieldTypeText extends FieldType {
     value = showTextFunction == null ? value : showTextFunction!(value);
 
     controller.text = value ?? "";
+    print('${column.field} => ${controller.text}');
     return Focus(
         onFocusChange: (hasFocus) {
           if (!hasFocus) {
@@ -73,7 +73,8 @@ class FieldTypeText extends FieldType {
         },
         child: TextFormField(
             controller: controller,
-            enabled: column.editable,
+            //enabled: column.editable,
+            readOnly: !column.editable,
             obscureText: this.obscureText,
             enableSuggestions: this.obscureText,
             autofocus: this.autoFocus,
@@ -92,6 +93,7 @@ class FieldTypeText extends FieldType {
               if (column.mandatory && (value == null || value.isEmpty)) return "Campo obligatorio";
               return null;
             },
+            /*
             onFieldSubmitted: introSendForm
                 ? (value) async {
                     Get.log('on field submitted');
@@ -99,6 +101,7 @@ class FieldTypeText extends FieldType {
                     detalleController.doGuardar();
                   }
                 : null,
+                */
             onSaved: (val) {
               print("text onsaved $val");
               if (emptyNull) {

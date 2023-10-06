@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dropdown_search/dropdown_search.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:flutter/scheduler.dart';
@@ -75,7 +75,7 @@ class FieldTypeRef extends FieldType {
   @override
   String getValue(DocumentSnapshot _object, ColumnModule column) {
     var _data = _object.getFieldAdm(column.field, null);
-    if (preloadedData.isNotEmpty && _data != null) {
+    if (preloadedData.isNotEmpty && _data != null && _data is DocumentReference) {
       if (preloadedData.containsKey(_data.path)) {
         return preloadedData[_data.path]!;
       } else {
@@ -169,19 +169,72 @@ class FieldTypeRef extends FieldType {
       }
 
       if (search) {
-        return Container(
-          width: 300,
-          child: DropdownSearch<DocumentReference>(
-              selectedItem: value,
-              onChanged: column.editable
-                  ? (val) {
-                      updateData(context, column, val);
-                    }
-                  : null,
-              dropdownDecoratorProps: DropDownDecoratorProps(),
-              itemAsString: (item) => preloadedData[item.path]?.toString() ?? "-",
-              items: preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList()),
-        );
+        print("search ${this.column.label}");
+        List<DocumentReference> docRefs = preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList();
+        TextEditingController textEditingController = TextEditingController();
+        print("value = $value");
+        return StatefulBuilder(builder: (context, innerSetState) {
+          return DropdownButtonHideUnderline(
+            child: DropdownButton2<DocumentReference>(
+                value: value,
+                onChanged: column.editable
+                    ? (val) {
+                        updateData(context, column, val);
+                        if (this.labelField != null && val != null) {
+                          updateDataColumnName(context, labelField!, preloadedData[val.path]);
+                        }
+                        innerSetState(() {
+                          value = val;
+                        });
+                      }
+                    : null,
+                items: getIfNullable() + docRefs.map((e) => DropdownMenuItem(value: e, child: Text(preloadedData[e.path].toString()))).toList(),
+                dropdownSearchData: DropdownSearchData(
+                  searchController: textEditingController,
+                  searchInnerWidgetHeight: 50,
+                  searchInnerWidget: Container(
+                    height: 50,
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      bottom: 4,
+                      right: 8,
+                      left: 8,
+                    ),
+                    child: TextFormField(
+                      expands: true,
+                      maxLines: null,
+                      controller: textEditingController,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        hintText: 'Buscar...',
+                        hintStyle: const TextStyle(fontSize: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  searchMatchFn: (item, searchValue) {
+                    return ((preloadedData[item.value?.path] ?? "").toLowerCase().contains(searchValue.toLowerCase()));
+                  },
+                )),
+          );
+        });
+        /*
+        return DropdownSearch<DocumentReference>(
+            selectedItem: value,
+            onChanged: column.editable
+                ? (val) {
+                    updateData(context, column, val);
+                  }
+                : null,
+            dropdownDecoratorProps: DropDownDecoratorProps(dropdownSearchDecoration: InputDecoration(labelText: "Name")),
+            itemAsString: (item) => preloadedData[item.path]?.toString() ?? "-",
+            items: preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList());*/
       } else {
         return Row(
           children: [

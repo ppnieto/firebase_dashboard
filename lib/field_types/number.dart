@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/screens/detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_spinbox/material.dart';
 
 class FieldTypeNumber extends FieldType {
   final double maxValue;
@@ -18,13 +15,15 @@ class FieldTypeNumber extends FieldType {
 
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
-    var num = getField(_object, column.field, 0);
-    if (num is String) {
-      num = double.parse(num as String);
-    }
-    if (num is int) {
+    var num = getField(_object, column.field, null);
+    if (num == null) {
+      return const Text("-");
+    } else if (num is String) {
+      num = double.parse(num);
+    } else if (num is int) {
       num = num.toDouble();
     }
+
     if (decimals > 0) {
       return Text(num.toStringAsFixed(decimals));
     } else if (formatter != null) {
@@ -36,7 +35,8 @@ class FieldTypeNumber extends FieldType {
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = getFieldFromMap(values, column.field, 0.0);
+    var value = getFieldFromMap(values, column.field, null);
+
     if (_object == null) value = defaultValue;
 
     if (_object?.hasFieldAdm(column.field) == false && value != null) {
@@ -44,11 +44,14 @@ class FieldTypeNumber extends FieldType {
     }
     if (value != null) {
       _controller.text = value.toString();
+    } else {
+      _controller.text = "";
     }
 
     return TextFormField(
         controller: _controller,
-        enabled: column.editable,
+        //enabled: column.editable,
+        readOnly: !column.editable,
         keyboardType: TextInputType.numberWithOptions(decimal: decimals > 0),
         decoration: InputDecoration(
             labelText: column.label,
@@ -57,16 +60,23 @@ class FieldTypeNumber extends FieldType {
         validator: (value) {
           //print("validator ${column.field} = $value");
           if (column.editable == false) return null;
-          if ((value == null || value.isEmpty) && column.mandatory) return "El campo es obligatorio";
+          if (value == null || value.isEmpty) {
+            if (column.mandatory) {
+              return "El campo es obligatorio";
+            } else {
+              return null;
+            }
+          }
+
+          if (value != null && value!.contains(',')) {
+            value = value!.replaceAll(',', '.');
+          }
 
           if (double.tryParse(value.toString()) == null) {
             print("no es un número válido");
             return "No es un número válido";
           }
-          if (column.mandatory && (value == null || value.isEmpty)) {
-            print("campo obligatorio");
-            return "Campo obligatorio";
-          }
+
           double v = double.parse(value.toString());
           if (v > maxValue) {
             return "El valor $v es mayor que el máximo permitido ($maxValue)";
@@ -77,12 +87,10 @@ class FieldTypeNumber extends FieldType {
           return null;
         },
         onSaved: (val) {
-          //print("onSaved $val");
           if (!column.editable) return;
           val = (val ?? "").isEmpty ? null : val;
-          double d = double.parse(val.toString());
-          //print("guardamos número $d");
-          updateData(context, column, d);
+          var valueToSave = val == null ? null : double.parse(val.toString().replaceAll(',', '.'));
+          updateData(context, column, valueToSave);
         });
   }
 }

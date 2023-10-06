@@ -30,7 +30,7 @@ class DashboardTheme {
     appBar2BackgroundColor ??= Theme.of(context).primaryColor;
     appBar1TextColor ??= Theme.of(context).primaryColor;
     appBar2TextColor ??= Theme.of(context).primaryColor;
-    menuBackgroundColor ??= Theme.of(context).backgroundColor;
+    menuBackgroundColor ??= Theme.of(context).colorScheme.background;
     menuTextColor ??= Theme.of(context).primaryColor;
     menuSelectedBackgroundColor ??= Theme.of(context).primaryColor;
     menuSelectedTextColor ??= Theme.of(context).canvasColor;

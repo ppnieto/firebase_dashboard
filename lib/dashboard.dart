@@ -2,7 +2,6 @@ library dashboard;
 
 import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:firebase_dashboard/components/menu.dart';
-import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/controllers/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,6 +18,7 @@ class DashboardMainScreen extends StatelessWidget {
   final IconData? sideBarIcon;
   final DashboardTheme? theme;
   static DashboardTheme? dashboardTheme;
+  final Function? getRolesFunction;
 
   static int dashboardKeyId = 100;
 
@@ -27,6 +27,7 @@ class DashboardMainScreen extends StatelessWidget {
       required this.menus,
       this.actions,
       this.title,
+      this.getRolesFunction,
       this.titleWidget,
       this.sideBar,
       this.sideBarWidth = 100,
@@ -100,7 +101,7 @@ class DashboardMainScreen extends StatelessWidget {
                           margin: EdgeInsets.all(0),
                           height: MediaQuery.of(context).size.height,
                           width: 300,
-                          child: MenuDrawer(),
+                          child: MenuDrawer(parent: this),
                         ),
                       ),
                     ),
@@ -121,7 +122,7 @@ class DashboardMainScreen extends StatelessWidget {
               controller.isSidebar ? Container(width: sideBarWidth, child: sideBar) : SizedBox.shrink(),
             ],
           ),
-          drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: MenuDrawer())),
+          drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: MenuDrawer(parent: this))),
         ),
       );
     });

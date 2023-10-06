@@ -1,6 +1,5 @@
 import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/controllers/admin.dart';
-import 'package:firebase_dashboard/controllers/menu.dart';
+import 'package:firebase_dashboard/controllers/menu.dart' as menuC;
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,7 +17,7 @@ class DashboardController extends GetxController {
   DashboardController({this.menus, this.theme});
 
   bool get isMenu => _isMenu;
-  void set isMenu(i) {
+  set isMenu(i) {
     _isMenu = i;
     update();
   }
@@ -28,8 +27,8 @@ class DashboardController extends GetxController {
     super.onInit();
 
     //DashboardMainScreen.dashboardTheme = widget.theme;
-    Get.put(MenuController());
-    MenuController menuController = Get.find<MenuController>();
+    Get.put(menuC.MenuController());
+    menuC.MenuController menuController = Get.find<menuC.MenuController>();
 
     if (menus != null && menus!.isNotEmpty) {
       if (menus!.first is Menu) {
@@ -54,7 +53,7 @@ class DashboardController extends GetxController {
 
   Future<void> showScreen(Menu menu) async {
     Get.log('showScreen ${menu.label} - ${menu.id}');
-    MenuController menuController = Get.find<MenuController>();
+    menuC.MenuController menuController = Get.find<menuC.MenuController>();
 
     menuController.currentMenu = menu;
     Widget widget = await menu.builder(Get.context);

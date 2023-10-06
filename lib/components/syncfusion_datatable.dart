@@ -42,6 +42,20 @@ class SyncfusionDataTable extends StatelessWidget {
                       columnResizeMode: ColumnResizeMode.onResizeEnd,
                       columnWidthMode: ColumnWidthMode.none,
                       source: controller.datagridSource!,
+                      tableSummaryRows: module.showSummary
+                          ? [
+                              GridTableSummaryRow(
+                                  showSummaryInRow: false,
+                                  position: GridTableSummaryRowPosition.bottom,
+                                  columns: controller.columns
+                                      .map((col) => GridSummaryColumn(
+                                            name: col.field,
+                                            columnName: col.label,
+                                            summaryType: GridSummaryType.sum,
+                                          ))
+                                      .toList())
+                            ]
+                          : [],
                       allowSorting: true,
                       frozenColumnsCount: module.firstFreezedColumns,
                       footerFrozenColumnsCount: controller.freezeLastColumn ? 1 : 0,
@@ -75,11 +89,12 @@ class SyncfusionDataTable extends StatelessWidget {
                       onSelectionChanged: (addedRows, removedRows) {
                         if (addedRows.isNotEmpty) {
                           SyncfusionDataGridRow row = addedRows.single as SyncfusionDataGridRow;
+
                           DocumentSnapshot selected = row.doc;
                           controller.rowsSelected.add(selected);
                         }
                         if (removedRows.isNotEmpty) {
-                          DocumentSnapshot removed = removedRows.single.getCells().first.value.doc;
+                          DocumentSnapshot removed = (removedRows.single as SyncfusionDataGridRow).doc;
                           controller.rowsSelected.remove(removed);
                         }
 /*
@@ -97,8 +112,17 @@ class SyncfusionDataTable extends StatelessWidget {
                               controller.datagridSource!.effectiveRows[details.rowColumnIndex.rowIndex - 1] as SyncfusionDataGridRow;
                           DocumentSnapshot doc = row.doc;
 
-                          controller.showDetalleObject(context, doc);
-                          _controller.selectedIndex = -1;
+                          if (module.selectPreEdit ?? false) {
+                            print("selected = ${_controller.selectedIndex} / ${details.rowColumnIndex.rowIndex}");
+                            if (_controller.selectedIndex + 1 == details.rowColumnIndex.rowIndex) {
+                              // click on selected, nos vamos al detalle
+                              controller.showDetalleObject(context, doc);
+                              _controller.selectedIndex = -1;
+                            }
+                          } else {
+                            controller.showDetalleObject(context, doc);
+                            _controller.selectedIndex = -1;
+                          }
                         }
                       },
                       showSortNumbers: true,

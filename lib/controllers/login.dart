@@ -11,7 +11,7 @@ class LoginController extends GetxController {
   bool _loading = false;
 
   bool get loading => _loading;
-  void set loading(l) {
+  set loading(l) {
     _loading = l;
     update();
   }

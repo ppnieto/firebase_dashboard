@@ -51,9 +51,11 @@ class FieldTypeSelect extends FieldType {
                       return PopupMenuItem<String>(value: e.key, child: Text(e.value));
                     }).toList();
               },
-              onSelected: (String ref) {
-                _object.reference.set({column.field: ref}, SetOptions(merge: true)).then((value) => print("updated!!!"));
-              })
+              onSelected: column.editable == false
+                  ? null
+                  : (String ref) {
+                      _object.reference.set({column.field: ref}, SetOptions(merge: true)).then((value) => print("updated!!!"));
+                    })
 
           /*
           child: DropdownButtonFormField(

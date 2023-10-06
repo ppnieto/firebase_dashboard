@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/components/syncfusion_datatable.dart';
 import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -31,7 +30,7 @@ class SyncfusionDataSource extends DataGridSource {
         ColumnModule? columnModule = getColumnModuleByField(column.field);
         var value;
         if (columnModule != null) {
-          if (columnModule.type.async) {
+          if (columnModule.type.async()) {
             value = await columnModule.type.getAsyncValue(doc, column);
           } else {
             value = columnModule.type.getValue(doc, column);
@@ -73,6 +72,23 @@ class SyncfusionDataSource extends DataGridSource {
             child: column?.type.getListContent(Get.context!, doc, column) ?? SizedBox.shrink()),
       );
     }).toList());
+  }
+
+  @override
+  Widget? buildTableSummaryCellWidget(
+      GridTableSummaryRow summaryRow, GridSummaryColumn? summaryColumn, RowColumnIndex rowColumnIndex, String summaryValue) {
+    return summaryValue.isEmpty
+        ? const SizedBox.shrink()
+        : Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+            alignment: Alignment.centerRight,
+            child: Text("SUM: $summaryValue",
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(Get.context!).primaryColorDark,
+                )),
+          );
   }
 }
 

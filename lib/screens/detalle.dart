@@ -9,8 +9,6 @@ import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
-import 'package:get/instance_manager.dart';
-import 'package:sweetsheet/sweetsheet.dart';
 
 class DetalleScreen extends StatelessWidget {
   final DocumentSnapshot? object;

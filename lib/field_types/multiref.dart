@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:multi_select_flutter/util/multi_select_item.dart';
 
 class FieldTypeMultiref extends FieldType {
   String? collection;
@@ -11,7 +9,7 @@ class FieldTypeMultiref extends FieldType {
   final Function? getFilter;
   final String? rawField;
   final Iterable<DocumentSnapshot> Function(Iterable<DocumentSnapshot>, DocumentSnapshot? object)? doFilter;
-  final dynamic? initialValue;
+  final dynamic initialValue;
   final MultiSelectListType listType;
   final CollectionReference Function(DocumentSnapshot?)? getQueryCollection;
 
@@ -35,7 +33,9 @@ class FieldTypeMultiref extends FieldType {
       if (value is List) {
         List<DocumentReference> refs = [];
         for (var obj in value) {
-          refs.add(obj);
+          if (obj != null) {
+            refs.add(obj);
+          }
         }
 
         return StreamBuilder(
@@ -67,10 +67,8 @@ class FieldTypeMultiref extends FieldType {
   Query _getQuery(DocumentSnapshot? _object) {
     Query query = getCollection(_object);
     Map<String, dynamic> filters = getFilter != null ? getFilter!() : {};
-    if (filters != null) {
-      for (MapEntry entry in filters.entries) {
-        query = query.where(entry.key, isEqualTo: entry.value);
-      }
+    for (MapEntry entry in filters.entries) {
+      query = query.where(entry.key, isEqualTo: entry.value);
     }
     return query;
   }
@@ -147,11 +145,14 @@ class FieldTypeMultiref extends FieldType {
     var _datas = _object.getFieldAdm(column.field, null);
 
     if (preloadedData.isNotEmpty && _datas != null) {
+      if (_datas is Iterable == false) {
+        _datas = [_datas];
+      }
       for (var _data in _datas) {
-        if (preloadedData.containsKey(_data.path)) {
+        if (preloadedData.containsKey(_data?.path)) {
           result.add(preloadedData[_data.path]!);
         } else {
-          return "Error no data preloaded for key ${_data.path}";
+          return "Error no data preloaded for key ${_data?.path}";
         }
       }
     }

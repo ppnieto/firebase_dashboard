@@ -5,7 +5,7 @@ class MenuController extends GetxController {
   MenuBase? _currentMenu;
 
   MenuBase? get currentMenu => _currentMenu;
-  void set currentMenu(MenuBase? mb) {
+  set currentMenu(MenuBase? mb) {
     _currentMenu = mb;
     update();
   }

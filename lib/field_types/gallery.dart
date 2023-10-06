@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_dashboard/components/image_storage.dart';
 import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:file_selector/file_selector.dart';
 
 class FieldTypeGallery extends FieldType {
   final bool addUrls;
@@ -152,6 +152,30 @@ class __GalleryState extends State<_Gallery> {
                     IconButton(
                         icon: const Icon(Icons.file_upload),
                         onPressed: () async {
+                          const XTypeGroup jpgsTypeGroup = XTypeGroup(
+                            label: 'JPEGs',
+                            extensions: <String>['jpg', 'jpeg'],
+                          );
+                          const XTypeGroup pngTypeGroup = XTypeGroup(
+                            label: 'PNGs',
+                            extensions: <String>['png'],
+                          );
+
+                          final List<XFile> xfiles = await openFiles(acceptedTypeGroups: <XTypeGroup>[
+                            jpgsTypeGroup,
+                            pngTypeGroup,
+                          ]);
+
+                          for (var xfile in xfiles) {
+                            Uint8List fileBytes = await xfile.readAsBytes();
+                            String fileName = DashboardUtils.generateUUID() + "_" + xfile.name;
+                            UploadResult result = await DashboardUtils.uploadFile(context, '${widget.parent.storePath}/$fileName', fileBytes);
+
+                            String url = await result.reference.getDownloadURL();
+                            widget.parent.urls.add(url);
+                            widget.onChange();
+                          }
+/*
                           FilePickerResult? result = await FilePicker.platform.pickFiles(
                             allowMultiple: true,
                           );
@@ -159,7 +183,7 @@ class __GalleryState extends State<_Gallery> {
                             print(result.count);
                             for (var file in result.files) {
                               Uint8List? fileBytes = file.bytes;
-                              String fileName = file.name;
+                              String fileName = DashboardUtils.generateUUID() + "_" + file.name;
                               // Upload file
                               if (fileBytes != null) {
                                 UploadResult result = await DashboardUtils.uploadFile(context, '${widget.parent.storePath}/$fileName', fileBytes);
@@ -170,6 +194,7 @@ class __GalleryState extends State<_Gallery> {
                               }
                             }
                           }
+                          */
                           setState(() {});
                         }),
                 ],

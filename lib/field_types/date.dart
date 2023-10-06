@@ -18,6 +18,12 @@ class FieldTypeDate extends FieldType {
   }
   */
 
+  @override
+  updateData(BuildContext context, ColumnModule column, value) {
+    print("updateDataOverride ${column.field} => $value");
+    updateDataColumnName(context, column.field, value);
+  }
+
   DateTime? getDateTime(DocumentSnapshot object, ColumnModule column) {
     if (object.hasFieldAdm(column.field)) {
       var data = object.get(column.field);
@@ -33,8 +39,7 @@ class FieldTypeDate extends FieldType {
   }
 
   @override
-  getListContent(
-      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     DateTime? dt = getDateTime(_object, column);
     final f = new DateFormat(this.format);
     if (dt != null) {
@@ -44,14 +49,11 @@ class FieldTypeDate extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     //  var value = values[column.field];
     final f = new DateFormat(this.format);
     TextEditingController txt = TextEditingController();
-    DateTime dateTime = _object == null
-        ? DateTime.now()
-        : getDateTime(_object, column) ?? DateTime.now();
+    DateTime dateTime = _object == null ? DateTime.now() : getDateTime(_object, column) ?? DateTime.now();
     txt.text = f.format(dateTime);
 
     return Row(children: [
@@ -60,9 +62,7 @@ class FieldTypeDate extends FieldType {
         decoration: InputDecoration(
           labelText: column.label,
           filled: !column.editable,
-          fillColor: column.editable
-              ? Theme.of(context).canvasColor.withAlpha(1)
-              : Theme.of(context).disabledColor,
+          fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor,
         ),
         controller: txt,
         enabled: column.editable,
@@ -79,10 +79,10 @@ class FieldTypeDate extends FieldType {
           }
         },
         onSaved: (val) {
-          print("onSaved $val");
+          print("onSaved date $val");
           if (val!.isNotEmpty) {
             print("1");
-            var tmp = new DateFormat('dd/MM/yyyy').parse(val);
+            var tmp = new DateFormat('dd/MM/yyyy').parse(val, true);
             print(tmp);
             updateData(context, column, Timestamp.fromDate(tmp));
             print("ok");
@@ -91,8 +91,7 @@ class FieldTypeDate extends FieldType {
       )),
       if (column.editable)
         IconButton(
-          icon: Icon(FontAwesomeIcons.calendar,
-              color: Theme.of(context).primaryColor),
+          icon: Icon(FontAwesomeIcons.calendar, color: Theme.of(context).primaryColor),
           onPressed: () async {
             final DateTime? picked = await showDatePicker(
                 context: context,

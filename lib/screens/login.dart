@@ -3,7 +3,6 @@ import 'package:firebase_dashboard/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 enum LoginMethod { loginPassword, google, facebook, apple, twitter }
 
@@ -17,6 +16,7 @@ class LoginScreen extends StatelessWidget {
   final bool allowReminder;
   final bool useGoogle;
   final bool remindCredentials;
+  final double desktopLeftWidth;
 
   // para depuracion, meter los datos directamente desde fuera
   final String userName;
@@ -36,6 +36,7 @@ class LoginScreen extends StatelessWidget {
       this.logoWidget,
       this.imageURL,
       this.imageAsset,
+      this.desktopLeftWidth = 400,
       this.remindCredentials = false,
       this.useGoogle = true,
       this.userName = "",
@@ -109,7 +110,8 @@ class _LoginMobile extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(5.0),
                   ),
-                  child: ListView(shrinkWrap: true,
+                  child: ListView(
+                      shrinkWrap: true,
                       //crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (!Responsive.isDesktop(context)) parent.getLogo(),
@@ -175,8 +177,8 @@ class _LoginMobile extends StatelessWidget {
                                         TextButtonTheme(
                                             data: TextButtonThemeData(
                                                 style: TextButton.styleFrom(
+                                              foregroundColor: Colors.white,
                                               padding: EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
-                                              primary: Colors.white,
                                               backgroundColor: Theme.of(context).primaryColor,
                                             )),
                                             child: TextButton(
@@ -208,24 +210,26 @@ class _LoginMobile extends StatelessWidget {
                               foregroundColor: Theme.of(context).canvasColor,
                               backgroundColor: Theme.of(context).primaryColor,
                             )),
-                            child: controller.loading
-                                ? const Center(child: SizedBox(width: 40, height: 40, child: CircularProgressIndicator()))
-                                : Container(
-                                    height: 60,
-                                    child: TextButton(
-                                        child: Text("Entrar", style: TextStyle(fontSize: 22)),
-                                        onPressed: () async {
+                            child: Container(
+                              height: 60,
+                              child: TextButton(
+                                  child: controller.loading
+                                      ? const Center(child: SizedBox(width: 40, height: 40, child: CircularProgressIndicator()))
+                                      : Text("Entrar", style: TextStyle(fontSize: 22)),
+                                  onPressed: controller.loading
+                                      ? null
+                                      : () async {
                                           await doEnter(controller);
                                         }),
-                                  )),
+                            )),
                         SizedBox(height: 40),
                         parent.useGoogle
                             ? TextButton.icon(
                                 onPressed: () {
                                   parent.onEntrar(LoginMethod.google, "", "");
                                 },
-                                icon: Icon(FontAwesomeIcons.google, color: Theme.of(context).accentColor),
-                                label: Text("Entrar usando Google", style: TextStyle(color: Theme.of(context).accentColor)))
+                                icon: Icon(FontAwesomeIcons.google, color: Theme.of(context).colorScheme.secondary),
+                                label: Text("Entrar usando Google", style: TextStyle(color: Theme.of(context).colorScheme.secondary)))
                             : SizedBox.shrink(),
                       ])));
         });
@@ -246,9 +250,24 @@ class _LoginDesktop extends StatelessWidget {
       children: [
         Expanded(
           flex: 1,
-          child: Container(
-              color: Theme.of(context).primaryColor,
-              child: Column(children: [Spacer(), parent.getLogo().paddingSymmetric(horizontal: 40, vertical: 10), Spacer()])),
+          child: (parent.imageAsset == null && parent.imageURL == null)
+              ? Container(
+                  color: Theme.of(context).primaryColor,
+                  child: Column(children: [Spacer(), parent.getLogo().paddingSymmetric(horizontal: 40, vertical: 10), Spacer()]))
+              : Container(
+                  width: parent.desktopLeftWidth,
+                  height: double.infinity,
+                  decoration: BoxDecoration(
+                    image: parent.imageURL != null
+                        ? DecorationImage(
+                            image: NetworkImage(parent.imageURL!),
+                            fit: BoxFit.cover,
+                          )
+                        : parent.imageAsset != null
+                            ? DecorationImage(image: AssetImage(parent.imageAsset!), fit: BoxFit.cover)
+                            : null,
+                  ),
+                ),
         ),
         Expanded(
             flex: 2,

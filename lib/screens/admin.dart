@@ -1,28 +1,22 @@
-import 'dart:developer';
-
 import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:firebase_dashboard/screens/detalle.dart';
 import 'package:firebase_dashboard/components/syncfusion_datatable.dart';
-import 'package:firebase_dashboard/dashboard.dart';
 import 'package:firebase_dashboard/util.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:sweetsheet/sweetsheet.dart';
-import 'package:get/get.dart';
-import 'package:anim_search_bar/anim_search_bar.dart';
+import 'package:app_bar_with_search_switch/app_bar_with_search_switch.dart';
 
 class AdminScreen extends StatelessWidget {
   final bool showScaffoldBack;
   final double minWidth;
   final double labelWidth;
   final Module module;
+  final String? title;
   final Map<String, dynamic>? filtroInicial;
 
   AdminScreen({
@@ -30,9 +24,10 @@ class AdminScreen extends StatelessWidget {
     this.showScaffoldBack = false,
     this.minWidth = 200,
     this.labelWidth = 120,
+    this.title,
     required this.module,
     this.filtroInicial,
-  }) : super(key: key) {}
+  }) : super(key: key);
 
   final scrollController = ScrollController();
 
@@ -170,10 +165,6 @@ class AdminScreen extends StatelessWidget {
 */
   getActions(BuildContext context) {
     AdminController controller = Get.find<AdminController>(tag: module.name);
-    TextEditingController searchController = TextEditingController();
-    searchController.addListener(() {
-      controller.globalSearch = searchController.text;
-    });
 
     List<Widget> result = [];
 
@@ -252,6 +243,10 @@ class AdminScreen extends StatelessWidget {
       result.add(IconButton(padding: EdgeInsets.all(0), icon: Icon(Icons.add), onPressed: () => addRecord()));
     }
     if (controller.module.globalSearch) {
+      result.add(AppBarSearchButton(
+        toolTipLastText: "Última búsqueda: ",
+        toolTipStartText: "Click para buscar",
+      ));
       /*
       result.add(IconButton(
         icon: Icon(Icons.search),
@@ -261,6 +256,7 @@ class AdminScreen extends StatelessWidget {
         },
       ));
       */
+      /*
       result.add(Theme(
           data: ThemeData(
               inputDecorationTheme: InputDecorationTheme(
@@ -270,22 +266,50 @@ class AdminScreen extends StatelessWidget {
               child: Container(
             height: 42,
             child: AnimSearchBar(
-              width: 300,
+              width: 240,
               color: Theme.of(context).primaryColor,
               textFieldColor: Theme.of(context).canvasColor,
               textFieldIconColor: Theme.of(context).colorScheme.secondary,
               searchIconColor: Theme.of(context).canvasColor,
               autoFocus: true,
               helpText: "Buscar",
-              textController: searchController,
+              textController: controller.searchController,
               onSuffixTap: () {
-                searchController.text = "";
+                controller.searchController.text = "";
               },
               onSubmitted: (text) {
                 print("search for $text");
               },
             ),
+            /*
+                      SearchBarAnimation(
+                    textEditingController: controller.searchController,
+                    isOriginalAnimation: false,
+                    onPressButton: (isSearchBarOpens) {
+                      debugPrint('do something before animation started. It\'s the ${isSearchBarOpens ? 'opening' : 'closing'} animation');
+                    },
+                    onChanged: (value) {
+                      controller.globalSearch = value;
+                      print("global search ${value}");
+                    },
+                    trailingWidget: const Icon(
+                      Icons.search,
+                      size: 20,
+                      color: Colors.black,
+                    ),
+                    secondaryButtonWidget: const Icon(
+                      Icons.close,
+                      size: 20,
+                      color: Colors.black,
+                    ),
+                    buttonWidget: const Icon(
+                      Icons.search,
+                      size: 20,
+                      color: Colors.black,
+                    ),                  
+                  )*/
           ))));
+          */
     }
 
     return result;
@@ -297,16 +321,31 @@ class AdminScreen extends StatelessWidget {
         init: AdminController(module: module, filtroInicial: filtroInicial),
         tag: module.name,
         builder: (controller) {
+          String _title = controller.module.title;
+          if (title != null) {
+            _title += " / $title";
+          }
+
           List<Widget> leading = getLeading(context);
           return Scaffold(
-            appBar: AppBar(
-              backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
-              title: Text(controller.module.title),
-              leadingWidth: leading.length * 40,
-              leading: Row(children: leading),
-              actions: getActions(context),
+            appBar: AppBarWithSearchSwitch(
+              tooltipForClearButton: "Limpiar",
+              tooltipForCloseButton: "Cerrar",
+              fieldHintText: "Buscar",
+              onChanged: (value) {
+                controller.globalSearch = value;
+              },
+              appBarBuilder: (context) {
+                return AppBar(
+                  backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
+                  title: Text(_title),
+                  leadingWidth: leading.length * 40,
+                  leading: Row(children: leading),
+                  actions: getActions(context),
+                );
+              },
             ),
-            floatingActionButton: module.floatingButtons
+            floatingActionButton: module.floatingButtons && module.canAdd
                 ? FloatingActionButton(
                     child: Icon(Icons.add),
                     onPressed: () => addRecord(),

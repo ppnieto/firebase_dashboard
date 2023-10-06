@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeRefNumChilds extends FieldType {

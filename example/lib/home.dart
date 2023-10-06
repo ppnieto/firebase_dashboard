@@ -13,11 +13,13 @@ class HomeScreen extends StatelessWidget {
       title: "Dashboard demo",
       menus: [
         Menu(
+          id: "listado1",
           label: "Listado1",
           iconData: Icons.access_alarm,
           builder: (context) async => Listado1Screen(),
         ),
         Menu(
+          id: "listado2",
           label: "Listado2",
           iconData: Icons.add_business_rounded,
           builder: (context) async => Listado2Screen(),

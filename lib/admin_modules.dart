@@ -1,7 +1,7 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/field_types/field_type_base.dart';
-import 'package:firebase_dashboard/screens/admin.dart';
-import 'package:firebase_dashboard/screens/admin.dart';
 import 'package:firebase_dashboard/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -51,27 +51,28 @@ class Module {
   final Function(DocumentSnapshot)? onRemove;
   final Function(Map<String, dynamic>?)? onNew;
   final bool globalSearch;
-  final Future<String?> Function(bool isNew, Map<String, dynamic> updateData)?
-      validation;
+  final Future<String?> Function(bool isNew, Map<String, dynamic> updateData)? validation;
   final int rowsPerPage;
   final bool canSelect;
   final bool canAdd;
   final bool floatingButtons;
   final bool canEdit;
   final bool canRemove;
+  final bool canRemoveInList;
   int firstFreezedColumns;
   final bool deleteDisabled;
   final bool removeInEdit;
+  final bool selectPreEdit;
   final bool canSort;
   final Color Function(DocumentSnapshot)? backgroundColor;
   final bool exportExcel;
   final bool showColumnSelection;
   final bool compactColumnSelection;
   final double? actionColumnWidth;
+  final bool showSummary;
   final bool fitColumns;
   final List<String> fieldsForShowInSearchResult;
-  final List<Widget> Function(DocumentSnapshot object, BuildContext context)?
-      getActions;
+  final List<Widget> Function(DocumentSnapshot object, BuildContext context)? getActions;
   final List<Widget> Function(BuildContext context)? getScaffoldActions;
 
   List<ColumnModule> columns;
@@ -98,8 +99,11 @@ class Module {
       this.canAdd = true,
       this.canEdit = true,
       this.canRemove = true,
+      this.showSummary = false,
+      this.canRemoveInList = true,
       this.firstFreezedColumns = 0,
       this.removeInEdit = false,
+      this.selectPreEdit = false,
       this.canSort = true,
       this.canSelect = false,
       this.deleteDisabled = false,
@@ -163,12 +167,7 @@ abstract class MenuBase {
   String? id;
   bool? visible;
 
-  MenuBase(
-      {required this.label,
-      required this.iconData,
-      this.role,
-      this.id,
-      this.visible});
+  MenuBase({required this.label, required this.iconData, this.role, this.id, this.visible});
 
   @override
   int get hashCode {
@@ -180,8 +179,7 @@ abstract class MenuBase {
     return super == other;
   }
 
-  Widget build(BuildContext context, bool isSelected, DashboardTheme theme,
-      Function press) {
+  Widget build(BuildContext context, bool isSelected, DashboardTheme theme, Function press) {
     return Text("No implemetado para MenuBase");
   }
 }
@@ -194,44 +192,29 @@ class Menu extends MenuBase {
     required this.builder,
     IconData iconData = Icons.question_mark,
     String? role,
-    String? id,
+    required String id,
     bool? visible,
-  }) : super(
-            label: label,
-            iconData: iconData,
-            role: role,
-            id: id,
-            visible: visible);
+  }) : super(label: label, iconData: iconData, role: role, id: id, visible: visible);
 
   @override
-  build(BuildContext context, bool isSelected, DashboardTheme? theme,
-      Function press) {
+  build(BuildContext context, bool isSelected, DashboardTheme? theme, Function press) {
     return InkWell(
       onTap: () => press(),
       child: Container(
         padding: EdgeInsets.only(left: 20),
-        color: isSelected
-            ? theme?.menuSelectedBackgroundColor
-            : theme?.menuBackgroundColor,
+        color: isSelected ? theme?.menuSelectedBackgroundColor : theme?.menuBackgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData,
-                  color: isSelected
-                      ? theme?.menuSelectedTextColor
-                      : theme?.menuTextColor),
+              Icon(iconData, color: isSelected ? theme?.menuSelectedTextColor : theme?.menuTextColor),
               SizedBox(
                 width: 8,
               ),
               Text(
                 label,
-                style: TextStyle(
-                    fontSize: 18,
-                    color: isSelected
-                        ? theme?.menuSelectedTextColor
-                        : theme?.menuTextColor),
+                style: TextStyle(fontSize: 18, color: isSelected ? theme?.menuSelectedTextColor : theme?.menuTextColor),
               ),
             ]),
           ),
@@ -243,22 +226,13 @@ class Menu extends MenuBase {
 
 class MenuClick extends MenuBase {
   Function(BuildContext context) onClick;
-  MenuClick(
-      {required String label,
-      required IconData iconData,
-      required this.onClick})
-      : super(label: label, iconData: iconData);
+  MenuClick({required String label, required IconData iconData, required this.onClick}) : super(label: label, iconData: iconData);
 }
 
 class MenuGroup extends MenuBase {
   final List<MenuBase>? children;
   final bool open;
-  MenuGroup(
-      {this.children,
-      required String label,
-      required IconData iconData,
-      String? role,
-      this.open = false})
+  MenuGroup({this.children, required String label, required IconData iconData, String? role, this.open = false})
       : super(label: label, iconData: iconData, role: role);
 }
 
@@ -267,7 +241,7 @@ class MenuSeparator extends MenuBase {
 }
 
 class MenuInfo extends Menu {
-  final Function info;
+  final Function(BuildContext context) info;
 
   MenuInfo(
       {required Future<Widget> Function(BuildContext) builder,
@@ -276,18 +250,11 @@ class MenuInfo extends Menu {
       String? role,
       bool? visible,
       required this.info,
-      String? id})
-      : super(
-            label: label,
-            iconData: iconData,
-            role: role,
-            builder: builder,
-            id: id,
-            visible: visible);
+      required String id})
+      : super(label: label, iconData: iconData, role: role, builder: builder, id: id, visible: visible);
 
   @override
-  build(BuildContext context, bool isSelected, DashboardTheme? theme,
-      Function press) {
+  build(BuildContext context, bool isSelected, DashboardTheme? theme, Function press) {
     bool ident = false;
 
     return InkWell(
@@ -297,36 +264,138 @@ class MenuInfo extends Menu {
       child: Container(
         padding: EdgeInsets.only(left: ident ? 50 : 20),
         //color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).backgroundColor,
-        color: isSelected
-            ? theme?.menuSelectedBackgroundColor
-            : theme?.menuBackgroundColor,
+        color: isSelected ? theme?.menuSelectedBackgroundColor : theme?.menuBackgroundColor,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
             padding: EdgeInsets.only(top: 22, bottom: 22, right: 22),
             child: Row(children: [
-              Icon(iconData,
-                  color: isSelected
-                      ? theme?.menuSelectedTextColor
-                      : theme?.menuTextColor),
+              Icon(iconData, color: isSelected ? theme?.menuSelectedTextColor : theme?.menuTextColor),
               SizedBox(
                 width: 8,
               ),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: isSelected
-                          ? theme?.menuSelectedTextColor
-                          : theme?.menuTextColor),
+                  style: TextStyle(fontSize: 18, color: isSelected ? theme?.menuSelectedTextColor : theme?.menuTextColor),
                 ),
               ),
-              this.info()
+              this.info(context)
             ]),
           ),
         ),
       ),
+    );
+  }
+}
+
+class MenuCounter extends MenuInfo {
+  final Query? countQuery;
+  final Query query;
+  final int? limit;
+  final bool fullQuery;
+  final Color Function(int value)? getCounterBackgroundColor;
+  final Color Function(int value)? getCounterForegroundColor;
+
+  MenuCounter({
+    required Future<Widget> Function(BuildContext context) builder,
+    required String label,
+    required this.query,
+    this.getCounterBackgroundColor,
+    this.getCounterForegroundColor,
+    this.limit,
+    this.fullQuery = false,
+    this.countQuery,
+    required IconData iconData,
+    required String id,
+  }) : super(
+            builder: builder,
+            label: label,
+            iconData: iconData,
+            info: (context) {
+              return MenuCounterWidget(
+                query: query,
+                countQuery: countQuery,
+                limit: limit,
+                fullQuery: fullQuery,
+                getCounterBackgroundColor: getCounterBackgroundColor,
+                getCounterForegroundColor: getCounterForegroundColor,
+              );
+            },
+            id: id);
+}
+
+class MenuCounterWidget extends StatefulWidget {
+  final Query query;
+  final int? limit;
+  final Widget? child;
+  final bool fullQuery;
+  final Query? countQuery;
+  final Color Function(int value)? getCounterBackgroundColor;
+  final Color Function(int value)? getCounterForegroundColor;
+
+  const MenuCounterWidget(
+      {Key? key,
+      required this.query,
+      this.limit,
+      this.fullQuery = false,
+      this.getCounterBackgroundColor,
+      this.getCounterForegroundColor,
+      this.child,
+      this.countQuery})
+      : super(key: key);
+
+  @override
+  State<MenuCounterWidget> createState() => __MenuCounterState();
+}
+
+class __MenuCounterState extends State<MenuCounterWidget> {
+  StreamSubscription<QuerySnapshot>? counterSubscription;
+  int counter = -1;
+  bool showPlus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    print("_MenuCounter initState - limit ${widget.limit}");
+    Query tmpQuery = widget.countQuery ?? widget.query;
+    if (widget.limit != null) {
+      tmpQuery = tmpQuery.limit(widget.limit!);
+    }
+    if (widget.fullQuery) {
+      counterSubscription = tmpQuery.snapshots().listen((value) {
+        setState(() {
+          counter = value.docs.length;
+          showPlus = widget.limit != null && counter == widget.limit;
+        });
+      });
+    } else {
+      tmpQuery.count().get().then((countQuery) {
+        setState(() {
+          counter = countQuery.count;
+          showPlus = widget.limit != null && counter == widget.limit;
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    counterSubscription?.cancel();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (counter < 0) {
+      // inicializando
+      return const SizedBox.shrink();
+    }
+    return Badge(
+      label: Text("$counter${showPlus ? '+' : ''}"),
+      backgroundColor: widget.getCounterBackgroundColor != null ? widget.getCounterBackgroundColor!(counter) : null,
+      textColor: widget.getCounterForegroundColor != null ? widget.getCounterForegroundColor!(counter) : null,
+      child: widget.child,
     );
   }
 }

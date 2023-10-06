@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/field_types/field_type_base.dart';
+import 'package:firebase_dashboard/responsive.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeBoolean extends FieldType {
@@ -40,16 +40,56 @@ class FieldTypeBoolean extends FieldType {
       var value = _object == null ? values[column.field] : getValue(_object, column);
       if (value == null) value = false;
       return StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-        return CheckboxListTile(
-            value: value ?? false,
-            onChanged: column.editable
-                ? (val) {
-                    updateData(context, column, val);
-                    setState(() {
-                      value = !value;
-                    });
-                  }
-                : null);
+        if (Responsive.isMobile(context)) {
+          return Row(
+            children: [
+              Container(constraints: BoxConstraints(minWidth: 120), child: Text(column.label)),
+              SizedBox(width: 20),
+              Checkbox(
+                  value: value ?? false,
+                  onChanged: column.editable
+                      ? (val) {
+                          updateData(context, column, val);
+                          setState(() {
+                            value = !value;
+                          });
+                        }
+                      : null),
+              Spacer()
+            ],
+          );
+        } else {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Checkbox(
+                value: value ?? false,
+                onChanged: column.editable
+                    ? (val) {
+                        updateData(context, column, val);
+                        setState(() {
+                          value = !value;
+                        });
+                      }
+                    : null),
+          );
+        }
+        /*
+        return Container(
+          constraints: BoxConstraints(maxWidth: 100),
+          color: Colors.red,
+          child: CheckboxListTile(
+              value: value ?? false,
+              title: Responsive.isMobile(context) ? Text(column.label) : null,
+              onChanged: column.editable
+                  ? (val) {
+                      updateData(context, column, val);
+                      setState(() {
+                        value = !value;
+                      });
+                    }
+                  : null),
+                  
+        );*/
       });
     }
   }

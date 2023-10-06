@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/admin_modules.dart';
@@ -11,9 +9,7 @@ import 'package:firebase_dashboard/screens/detalle.dart';
 import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:sweetsheet/sweetsheet.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import 'package:intl/intl.dart';
 
@@ -51,21 +47,33 @@ class AdminController extends GetxController {
   AdminController({required this.module, this.filtroInicial}) {
     this.pageSize = module.rowsPerPage;
   }
-  late final GetStorage box;
+
   Map<String, double> get columnWidths => _columnWidths;
+
+  //TextEditingController searchController = TextEditingController();
+
+  get box => GetStorage(module.name);
 
   @override
   void onInit() async {
     print("admin controller on init!!! " + module.name);
     super.onInit();
+
+    //searchController.addListener(globalSearchListener);
+
     await initAdmin();
   }
 
   @override
   void onClose() {
     super.onClose();
-    print("admin controller on close!!!!" + module.name);
+    //searchController.removeListener(globalSearchListener);
   }
+/*
+  void globalSearchListener() {
+    globalSearch = searchController.text;
+  }
+  */
 
   List<DocumentSnapshot> get docs {
     if (module.doFilter != null) {
@@ -79,6 +87,8 @@ class AdminController extends GetxController {
     _globalSearch = search;
     _doGlobalSearch();
   }
+
+  String get globalSearch => _globalSearch ?? "";
 
   void toggleSelect() {
     canSelect = !canSelect;
@@ -99,7 +109,6 @@ class AdminController extends GetxController {
     finalAlcanzado = false;
 
     await GetStorage.init(module.name);
-    box = GetStorage(module.name);
 
     try {
       _readColumnVisibility();
@@ -137,7 +146,8 @@ class AdminController extends GetxController {
           width: module.actionColumnWidth,
           type: FieldTypeWidget(
             builder: (context, object, inList) {
-              return Row(
+              return ListView(
+                scrollDirection: Axis.horizontal,
                 children: <Widget>[
                   ...module.getActions != null ? module.getActions!(object!, context) : [],
                   if (module.canRemove && module.deleteDisabled)
@@ -149,7 +159,7 @@ class AdminController extends GetxController {
                             },
                           )
                         : const SizedBox.shrink()),
-                  if (module.canRemove && !module.deleteDisabled)
+                  if (module.canRemove && !module.deleteDisabled && module.canRemoveInList)
                     IconButton(
                       icon: Icon(Icons.delete, color: Theme.of(context).primaryColorDark),
                       onPressed: () {
@@ -257,7 +267,7 @@ class AdminController extends GetxController {
       return;
     }
     final int limit = pageSize + docs.length;
-    Get.log('nextPage $limit');
+    Get.log('nextPage limit = $limit');
     dataSubscription?.cancel();
     dataSubscription = getQuery().limit(limit).snapshots().listen((value) {
       print(" data subscription nuevos datos - ${value.docs.length}");
@@ -270,6 +280,11 @@ class AdminController extends GetxController {
       if (value.docs.length < limit) {
         finalAlcanzado = true;
       }
+    });
+
+    dataSubscription?.onError((error) {
+      Get.printError(info: "error obteniendo datos");
+      print(error);
     });
   }
 
@@ -298,8 +313,18 @@ class AdminController extends GetxController {
     if (module.collection != null) {
       return FirebaseFirestore.instance.collection(module.collection!);
     } else {
-      return module.getCollection!();
+      if (module.getCollection != null) {
+        return module.getCollection!();
+      } else {
+        if (module.getQueryCollection != null) {
+          Query queryCollection = module.getQueryCollection!();
+          if (queryCollection is CollectionReference) {
+            return queryCollection;
+          }
+        }
+      }
     }
+    throw Exception("No puedo encontrar coleccion para modulo " + module.name);
   }
 
   Query getQueryCollection() {
@@ -384,6 +409,7 @@ class AdminController extends GetxController {
   }
 
   Query getQuery() {
+    print("getQuery");
     Query query = getQueryCollection();
     query = addFilters(filtro, query);
     if (module.addFilter != null) {
