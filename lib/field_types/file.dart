@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:filesize/filesize.dart';
 import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:url_launcher/url_launcher.dart';
 

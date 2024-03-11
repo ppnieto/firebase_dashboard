@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/components/image_storage.dart';
 import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -17,10 +17,15 @@ class FieldTypeGallery extends FieldType {
   String storePath;
   List<String> urls = [];
 
-  FieldTypeGallery({this.storePath = "uploads", this.addUrls = false, this.canAdd = true, this.canRemove = true});
+  FieldTypeGallery(
+      {this.storePath = "uploads",
+      this.addUrls = false,
+      this.canAdd = true,
+      this.canRemove = true});
 
   @override
-  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(
+      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     List tmp = _object.getFieldAdm(column.field, []);
     return Text("${tmp.length} imágenes");
   }
@@ -52,7 +57,8 @@ class FieldTypeGallery extends FieldType {
                   TextField(
                     onChanged: (value) {},
                     controller: textFieldController,
-                    decoration: const InputDecoration(hintText: "URL de la imagen"),
+                    decoration:
+                        const InputDecoration(hintText: "URL de la imagen"),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
@@ -72,7 +78,8 @@ class FieldTypeGallery extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object,
+      Map<String, dynamic> values, ColumnModule column) {
     List tmp = values[column.field] ?? [];
     urls = [];
     for (var value in tmp) {
@@ -115,7 +122,13 @@ class _Gallery extends StatefulWidget {
   final String name;
   final Function(BuildContext) addImageURL;
   final Function onChange;
-  const _Gallery({Key? key, required this.parent, required this.name, required this.addImageURL, required this.onChange}) : super(key: key);
+  const _Gallery(
+      {Key? key,
+      required this.parent,
+      required this.name,
+      required this.addImageURL,
+      required this.onChange})
+      : super(key: key);
 
   @override
   __GalleryState createState() => __GalleryState();
@@ -161,17 +174,25 @@ class __GalleryState extends State<_Gallery> {
                             extensions: <String>['png'],
                           );
 
-                          final List<XFile> xfiles = await openFiles(acceptedTypeGroups: <XTypeGroup>[
+                          final List<XFile> xfiles =
+                              await openFiles(acceptedTypeGroups: <XTypeGroup>[
                             jpgsTypeGroup,
                             pngTypeGroup,
                           ]);
 
                           for (var xfile in xfiles) {
                             Uint8List fileBytes = await xfile.readAsBytes();
-                            String fileName = DashboardUtils.generateUUID() + "_" + xfile.name;
-                            UploadResult result = await DashboardUtils.uploadFile(context, '${widget.parent.storePath}/$fileName', fileBytes);
+                            String fileName = DashboardUtils.generateUUID() +
+                                "_" +
+                                xfile.name;
+                            UploadResult result =
+                                await DashboardUtils.uploadFile(
+                                    context,
+                                    '${widget.parent.storePath}/$fileName',
+                                    fileBytes);
 
-                            String url = await result.reference.getDownloadURL();
+                            String url =
+                                await result.reference.getDownloadURL();
                             widget.parent.urls.add(url);
                             widget.onChange();
                           }
@@ -224,9 +245,15 @@ class __GalleryState extends State<_Gallery> {
                             )),
                         if (widget.parent.canRemove)
                           Container(
-                              color: Theme.of(context).primaryColor.withOpacity(0.6),
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.6),
                               child: IconButton(
-                                icon: Icon(Icons.delete, size: 20, color: Theme.of(context).colorScheme.secondary),
+                                icon: Icon(Icons.delete,
+                                    size: 20,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary),
                                 onPressed: () {
                                   DashboardUtils.confirm(
                                       context: context,
@@ -249,15 +276,21 @@ class __GalleryState extends State<_Gallery> {
                             bottom: 0,
                             right: 0,
                             child: Container(
-                                color: Theme.of(context).primaryColor.withOpacity(0.6),
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.6),
                                 child: IconButton(
                                   icon: Icon(
                                     Icons.download,
-                                    color: Theme.of(context).colorScheme.secondary,
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
                                   ),
                                   onPressed: () async {
                                     //launchUrlString(url);
-                                    String newUrl = await firebase_storage.FirebaseStorage.instance.refFromURL(url).getDownloadURL();
+                                    String newUrl = await firebase_storage
+                                        .FirebaseStorage.instance
+                                        .refFromURL(url)
+                                        .getDownloadURL();
                                     launchUrlString(newUrl);
                                   },
                                 )))

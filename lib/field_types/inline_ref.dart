@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 
 class FieldTypeInlineRef extends FieldTypeRef {
   FieldTypeInlineRef({
@@ -36,8 +36,10 @@ class FieldTypeInlineRef extends FieldTypeRef {
                     }).toList();
               },
               onSelected: (DocumentReference ref) {
-                _object.reference
-                    .set({this.column.field: ref.path == "values/null" ? null : ref}, SetOptions(merge: true)).then((value) => print("updated!!!"));
+                if (this.column != null) {
+                  _object.reference.set(
+                      {this.column!.field: ref.path == "values/null" ? null : ref}, SetOptions(merge: true)).then((value) => print("updated!!!"));
+                }
               });
         },
       );
@@ -60,8 +62,10 @@ class FieldTypeInlineRef extends FieldTypeRef {
                 }).toList();
           },
           onSelected: (DocumentReference ref) {
-            _object.reference
-                .set({this.column.field: ref.path == "values/null" ? null : ref}, SetOptions(merge: true)).then((value) => print("updated!!!"));
+            if (this.column != null) {
+              _object.reference
+                  .set({this.column!.field: ref.path == "values/null" ? null : ref}, SetOptions(merge: true)).then((value) => print("updated!!!"));
+            }
           });
     }
   }

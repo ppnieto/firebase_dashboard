@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
@@ -14,21 +14,12 @@ class FieldTypeAutocomplete extends FieldType {
 
   final TextEditingController _typeAheadController = TextEditingController();
 
-  FieldTypeAutocomplete(
-      {this.collection,
-      required this.refLabel,
-      this.getFilter,
-      this.initialValue,
-      this.getQueryCollection,
-      this.getStream});
+  FieldTypeAutocomplete({this.collection, required this.refLabel, this.getFilter, this.initialValue, this.getQueryCollection, this.getStream});
 
-  Widget _getListWidget(DocumentSnapshot _object, String content,
-          {TextStyle? style}) =>
-      Text(content, style: style);
+  Widget _getListWidget(DocumentSnapshot _object, String content, {TextStyle? style}) => Text(content, style: style);
 
   @override
-  getListContent(
-      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if ((_object.data() as Map).containsKey(column.field)) {
       return Text(_object[column.field].toString());
     }
@@ -54,8 +45,7 @@ class FieldTypeAutocomplete extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
 
     if (value == null) {
@@ -91,32 +81,34 @@ class FieldTypeAutocomplete extends FieldType {
                   updateData(context, column, this._typeAheadController.text);
                 }
               },
-              child: TypeAheadFormField(
-                noItemsFoundBuilder: (BuildContext context) {
+              child: TypeAheadField(
+                builder: (context, controller, focusNode) {
+                  return TextFormField(
+                      controller: this._typeAheadController,
+                      focusNode: focusNode,
+                      onSaved: (value) {
+                        updateData(context, column, value);
+                      },
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        labelText: column.label,
+                      ));
+                },
+                emptyBuilder: (BuildContext context) {
                   return ListTile(
                     //leading: Icon(Icons.shopping_cart),
                     title: Text("No encuentro ninguna marca"),
                   );
                 },
-                onSaved: (value) {
-                  updateData(context, column, value);
-                },
-                textFieldConfiguration: TextFieldConfiguration(
-                    controller: this._typeAheadController,
-                    decoration: InputDecoration(
-                      labelText: column.label,
-                    )),
                 suggestionsCallback: (pattern) async {
-                  return items.where((element) =>
-                      element.toLowerCase().contains(pattern.toLowerCase()));
+                  return List.from(items.where((element) => element.toLowerCase().contains(pattern.toLowerCase())));
                 },
                 itemBuilder: (context, suggestion) {
                   return ListTile(
-                    title:
-                        Text(suggestion != null ? suggestion.toString() : ""),
+                    title: Text(suggestion != null ? suggestion.toString() : ""),
                   );
                 },
-                onSuggestionSelected: (suggestion) {
+                onSelected: (suggestion) {
                   this._typeAheadController.text = suggestion.toString();
                 },
               ));

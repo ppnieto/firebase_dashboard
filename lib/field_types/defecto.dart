@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeDefecto extends FieldType {
@@ -27,6 +27,4 @@ class FieldTypeDefecto extends FieldType {
       Map<String, dynamic> values, ColumnModule column) {
     return Container();
   }
-
-
 }

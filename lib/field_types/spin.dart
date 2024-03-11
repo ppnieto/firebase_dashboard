@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter_spinbox/material.dart';
 
 class FieldTypeSpin extends FieldType {
@@ -24,7 +24,9 @@ class FieldTypeSpin extends FieldType {
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field]; // ?? _object?.getFieldAdm(column.field, defaultValue);
+//    var value = _object?.getFieldAdm(column.field, defaultValue) ?? values[column.field];
+    var value = getFieldFromMap(values, column.field, null);
+
     if (_object == null) value = defaultValue;
 
     if (_object?.hasFieldAdm(column.field) == false && value != null) {
@@ -36,7 +38,7 @@ class FieldTypeSpin extends FieldType {
     }
 
     return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-      Container(
+      SizedBox(
         width: 200,
         child: SpinBox(
           min: this.minValue,

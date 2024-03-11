@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/dashboard.dart';
-import 'package:firebase_dashboard/responsive.dart';
+import 'package:firebase_dashboard/controllers/admin.dart';
+import 'package:firebase_dashboard/services/dashboard.dart';
+import 'package:firebase_dashboard/field_types/field_type_base.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,8 +13,9 @@ class DetalleController extends GetxController {
   final double labelWidth;
   final bool showLabel;
   final bool canDelete;
-  final Module module;
+  final DashboardModule module;
   final _formKey = GlobalKey<FormState>();
+  final int responsiveDashboardWidth = 1000;
 
   Map<String, dynamic>? _updateData;
   StreamSubscription<DocumentSnapshot>? changesSubscription;
@@ -23,7 +24,6 @@ class DetalleController extends GetxController {
 
   @override
   void onInit() {
-    Get.log('DetalleController onInit ${module.name}');
     super.onInit();
 
     _updateData = object?.data() as Map<String, dynamic>?;
@@ -48,17 +48,7 @@ class DetalleController extends GetxController {
   }
 
   void updateData(String fieldName, var value) {
-    if (fieldName.contains('.')) {
-      List<String> fields = fieldName.split('.');
-      if (fields.length != 2) throw Exception("Error con sintaxis de campo $fieldName");
-      if (_updateData!.containsKey(fields[0])) {
-        _updateData![fields[0]][fields[1]] = value;
-      } else {
-        _updateData![fields[0]] = {fields[1]: value};
-      }
-    } else {
-      _updateData![fieldName] = value;
-    }
+    _updateData?.updateValueFor(keyPath: fieldName, value: value);
   }
 
   getEditField(BuildContext context, ColumnModule column) {
@@ -89,8 +79,8 @@ class DetalleController extends GetxController {
 
   getDetail(BuildContext context) => SingleChildScrollView(
         child: Card(
-          elevation: 5,
-          color: Theme.of(context).canvasColor,
+          //elevation: 5,
+          //color: Theme.of(context).canvasColor,
           margin: MediaQuery.of(context).size.width >= responsiveDashboardWidth ? EdgeInsets.all(20) : EdgeInsets.all(5),
           child: Padding(
             padding: EdgeInsets.all(MediaQuery.of(context).size.width < responsiveDashboardWidth ? 32.0 : 5),
@@ -109,7 +99,12 @@ class DetalleController extends GetxController {
                                     } else {
                                       return const SizedBox.shrink();
                                     }
-                                  }).toList())));
+                                  }).toList() /* +
+                                      <Widget>[
+                                        if (AdminController.buttonLocation == ButtonLocation.Bottom)
+                                          ElevatedButton.icon(onPressed: () => doGuardar(), icon: Icon(Icons.save), label: Text("Guardar"))
+                                      ]*/
+                                  )));
                     })),
           ),
         ),
@@ -118,7 +113,7 @@ class DetalleController extends GetxController {
   CollectionReference _getCollection() {
     print("getCollection");
     // no usamos el AdminController por si es un detalle sin listado
-    //AdminController adminController = Get.find<AdminController>(tag: module.name);
+    //AdminController adminController = Modular.get<AdminController>(tag: module.name);
     AdminController adminController = AdminController(module: module);
     return adminController.getCollectionReference();
   }
@@ -136,10 +131,10 @@ class DetalleController extends GetxController {
         duration: Duration(seconds: 2), backgroundColor: Colors.red, snackPosition: SnackPosition.BOTTOM, margin: EdgeInsets.all(20));
   }
 
-  doGuardar() async {
-    print("datos validos?");
+  doGuardar(BuildContext context) async {
+    Get.log("datos validos?");
     if (_formKey.currentState!.validate()) {
-      print("  si, válidos. Guardamos...");
+      Get.log("  si, válidos. Guardamos...");
       _formKey.currentState!.save();
 
       // ñapa para guardar el documentref /values/null como nulo!!!
@@ -162,26 +157,27 @@ class DetalleController extends GetxController {
 
       bool doUpdate = true;
       if (module.onSave != null) {
-        doUpdate = await module.onSave!(isNew, _updateData);
+        doUpdate = await module.onSave!(isNew, _updateData, object);
       }
       print("doUpdate $doUpdate. isNew = $isNew");
-      print(_updateData);
+      //print(_updateData);
       if (msgValidation == null) {
         if (doUpdate) {
           if (!isNew) {
             object!.reference.set(_updateData!, SetOptions(merge: true)).then((value) {
               if (module.onUpdated != null) module.onUpdated!(isNew, object!.reference);
-              Get.nestedKey(DashboardMainScreen.dashboardKeyId)?.currentState?.pop();
+              DashboardService.instance.pop();
+
               ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
                 content: Text("Elemento guardado con éxito"),
                 duration: Duration(seconds: 3),
               ));
+
               //Get.snackbar("Atención", "Elemento guardado con éxito", duration: Duration(seconds: 2), snackPosition: SnackPosition.BOTTOM, margin: EdgeInsets.all(20));
             }).catchError((e) {
               showError(e);
             });
           } else if (isNew) {
-            print("guardamos datos nuevos");
             // si en updateData hay un id, lo usamos
             String? id = _updateData!['id'] ?? null;
             Future? action;
@@ -193,7 +189,7 @@ class DetalleController extends GetxController {
 
             action.then((value) {
               if (module.onUpdated != null) module.onUpdated!(isNew, value);
-              Get.nestedKey(DashboardMainScreen.dashboardKeyId)?.currentState?.pop();
+              DashboardService.instance.pop();
               ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
                 content: Text("Elemento creado con éxito"),
                 duration: Duration(seconds: 3),

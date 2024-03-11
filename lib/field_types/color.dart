@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -9,7 +9,7 @@ class FieldTypeColor extends FieldType {
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     String color = _object.getFieldAdm(column.field, Colors.grey.toHex());
-    return Container(width: 30, height: 30, color: color.fromHexAdmin);
+    return Container(width: 30, height: 30, color: color.fromHex);
   }
 
   @override
@@ -27,7 +27,7 @@ class FieldTypeColor extends FieldType {
                       title: const Text('Pick a color!'),
                       content: SingleChildScrollView(
                         child: ColorPicker(
-                          pickerColor: strColor.fromHexAdmin,
+                          pickerColor: strColor.fromHex,
                           onColorChanged: (newColor) {
                             strColor = newColor.toHex(leadingHashSign: false);
                             updateData(context, column, newColor.toHex(leadingHashSign: false));
@@ -66,7 +66,7 @@ class FieldTypeColor extends FieldType {
                   },
                 );
               },
-              child: Container(width: 30, height: 30, color: strColor.fromHexAdmin));
+              child: Container(width: 30, height: 30, color: strColor.fromHex));
         }),
         Spacer(),
       ],
@@ -75,7 +75,7 @@ class FieldTypeColor extends FieldType {
 }
 
 extension HexColorExt on String {
-  Color get fromHexAdmin {
+  Color get fromHex {
     final buffer = StringBuffer();
     if (this.length == 6 || this.length == 7) {
       buffer.write('ff');

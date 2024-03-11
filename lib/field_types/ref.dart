@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/scheduler.dart';
 
 class FieldTypeRef extends FieldType {
@@ -17,12 +17,13 @@ class FieldTypeRef extends FieldType {
   final bool search;
   final TextOverflow? overflow;
   final int? maxLines;
+  final void Function(DocumentSnapshot)? onClick;
   final Iterable<DocumentSnapshot> Function(Iterable<DocumentSnapshot>)? doFilter;
   final String? labelField;
 
   static final DocumentReference nullValue = FirebaseFirestore.instance.doc("/values/null");
 
-  late ColumnModule column;
+  ColumnModule? column;
   FieldTypeRef(
       {this.collection,
       required this.refLabel,
@@ -34,6 +35,7 @@ class FieldTypeRef extends FieldType {
       this.filterFunction,
       this.overflow,
       this.maxLines,
+      this.onClick,
       this.labelField,
       this.doFilter,
       this.search = false,
@@ -86,13 +88,19 @@ class FieldTypeRef extends FieldType {
     }
   }
 
-  Widget getListWidget(BuildContext context, DocumentSnapshot _object, String content, {TextStyle? style}) => Text(
+  Widget getListWidget(BuildContext context, DocumentSnapshot _object, String content, {TextStyle? style}) {
+    if (onClick != null) {
+      return TextButton(child: Text(content), onPressed: () => onClick!(_object));
+    } else {
+      return Text(
         content,
         style: style,
         overflow: overflow,
         maxLines: maxLines,
         textAlign: TextAlign.end,
       );
+    }
+  }
 
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
@@ -169,7 +177,7 @@ class FieldTypeRef extends FieldType {
       }
 
       if (search) {
-        print("search ${this.column.label}");
+        print("search ${this.column?.label}");
         List<DocumentReference> docRefs = preloadedData.entries.map((e) => FirebaseFirestore.instance.doc(e.key)).toList();
         TextEditingController textEditingController = TextEditingController();
         print("value = $value");

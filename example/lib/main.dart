@@ -1,23 +1,25 @@
-import 'package:example/home.dart';
+import 'package:example/firebase_options.dart';
+import 'package:example/routes.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-void main() {
+void main() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        pageTransitionsTheme: PageTransitionsTheme(builders: {
-          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-        }),
-      ),
-      home: HomeScreen(),
+      initialRoute: '/',
+      getPages: Routes.pages,
     );
   }
 }

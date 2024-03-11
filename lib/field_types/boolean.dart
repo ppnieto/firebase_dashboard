@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/responsive.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 
 class FieldTypeBoolean extends FieldType {
@@ -9,18 +8,14 @@ class FieldTypeBoolean extends FieldType {
 
   FieldTypeBoolean({this.editOnList = false, this.defValue = false});
   @override
-  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(
+      BuildContext  context, DocumentSnapshot _object, ColumnModule column) {
     var value = getValue(_object, column) ?? false;
 
-    return IconButton(
-      icon: Icon(
-        value ? Icons.check_box_outlined : Icons.check_box_outline_blank,
-        color: Theme.of(context).primaryColorDark,
-      ),
-      onPressed: column.editable && editOnList
-          ? () {
-              _object.reference.set({column.field: !value}, SetOptions(merge: true)).then((value) => print("updated!!!"));
-            }
+    return Checkbox(
+      value: value,
+      onChanged: column.editable && editOnList
+          ? (v) => _object.reference.update({column.field: v})
           : null,
     );
   }
@@ -35,15 +30,20 @@ class FieldTypeBoolean extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object,
+      Map<String, dynamic> values, ColumnModule column) {
     {
-      var value = _object == null ? values[column.field] : getValue(_object, column);
+      var value =
+          _object == null ? values[column.field] : getValue(_object, column);
       if (value == null) value = false;
-      return StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+      return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
         if (Responsive.isMobile(context)) {
           return Row(
             children: [
-              Container(constraints: BoxConstraints(minWidth: 120), child: Text(column.label)),
+              Container(
+                  constraints: BoxConstraints(minWidth: 120),
+                  child: Text(column.label)),
               SizedBox(width: 20),
               Checkbox(
                   value: value ?? false,
@@ -73,23 +73,6 @@ class FieldTypeBoolean extends FieldType {
                     : null),
           );
         }
-        /*
-        return Container(
-          constraints: BoxConstraints(maxWidth: 100),
-          color: Colors.red,
-          child: CheckboxListTile(
-              value: value ?? false,
-              title: Responsive.isMobile(context) ? Text(column.label) : null,
-              onChanged: column.editable
-                  ? (val) {
-                      updateData(context, column, val);
-                      setState(() {
-                        value = !value;
-                      });
-                    }
-                  : null),
-                  
-        );*/
       });
     }
   }

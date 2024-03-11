@@ -1,16 +1,13 @@
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FieldTypeLink extends FieldType {
   @override
-  getListContent(
-      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
-    print("getLinkContent");
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (hasField(_object, column.field)) {
       String texto = getField(_object, column.field, "").toString();
-      print("   texto");
       if (texto.isNotEmpty) {
         return IconButton(
             onPressed: () {
@@ -26,8 +23,7 @@ class FieldTypeLink extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = getFieldFromMap(values, column.field, null);
     final TextEditingController controller = TextEditingController();
 
@@ -46,12 +42,9 @@ class FieldTypeLink extends FieldType {
                 decoration: InputDecoration(
                     labelText: column.label,
                     filled: !column.editable,
-                    fillColor: column.editable
-                        ? Theme.of(context).canvasColor.withAlpha(1)
-                        : Theme.of(context).disabledColor),
+                    fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor),
                 validator: (value) {
-                  if (column.mandatory && (value == null || value.isEmpty))
-                    return "Campo obligatorio";
+                  if (column.mandatory && (value == null || value.isEmpty)) return "Campo obligatorio";
                   return null;
                 },
                 onSaved: (val) {
@@ -66,5 +59,4 @@ class FieldTypeLink extends FieldType {
               icon: Icon(Icons.launch, color: Theme.of(context).primaryColor))
         ]));
   }
-
 }

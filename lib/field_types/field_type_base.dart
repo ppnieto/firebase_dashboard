@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/controllers/dashboard.dart';
 import 'package:firebase_dashboard/controllers/detalle.dart';
+import 'package:firebase_dashboard/dashboard.dart';
+import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 abstract class FieldType {
   final Map<String, String> preloadedData = {};
@@ -13,25 +12,7 @@ abstract class FieldType {
 
   dynamic getFieldFromMap(Map<String, dynamic> data, String fieldName, dynamic defValue) {
     try {
-      if (fieldName.contains('.')) {
-        List<String> fields = fieldName.split('.');
-        var obj = data;
-        while (fields.isNotEmpty) {
-          if (obj.containsKey(fields.first)) {
-            if (obj[fields.first] is Map) {
-              obj = obj[fields.first];
-              fields.removeAt(0);
-            } else {
-              return obj[fields.first];
-            }
-          } else {
-            return defValue;
-          }
-        }
-      } else {
-        if (!data.containsKey(fieldName)) return defValue;
-        return data[fieldName] ?? defValue;
-      }
+      return data.valueFor(keyPath: fieldName);
     } catch (e) {
       return defValue;
     }
@@ -43,8 +24,7 @@ abstract class FieldType {
 
   bool hasField(DocumentSnapshot object, String fieldName) {
     if (fieldName.contains('.')) {
-      List<String> fields = fieldName.split('.');
-      fieldName = fields[0];
+      return (object.data() as Map).valueFor(keyPath: fieldName) != null;
     }
     if (object.data() == null) return false;
     if (!(object.data() as Map).containsKey(fieldName)) return false;
@@ -87,42 +67,77 @@ abstract class FieldType {
   }
 
   updateDataColumnName(BuildContext context, String columnName, value) {
-    print("updateData ${columnName} => $value");
-    DetalleController detalleController = Get.find<DetalleController>(tag: DashboardController.tag);
-    detalleController.updateData(columnName, value);
+    print("updateData $columnName => $value");
+    DashboardUtils.serviceLocator<DetalleController>(context).updateData(columnName, value);
   }
 }
 
 extension SafeFieldAdmin on DocumentSnapshot {
   dynamic getFieldAdm(String fieldName, dynamic defValue) {
-    bool hasdot = false;
-    String subfield = "";
-    if (fieldName.contains('.')) {
-      List<String> fields = fieldName.split('.');
-      fieldName = fields[0];
-      subfield = fields[1];
-      hasdot = true;
-    }
-
     if (!hasFieldAdm(fieldName)) return defValue;
-    Map data = this.data() as Map;
-    return hasdot ? data[fieldName][subfield] : data[fieldName];
+    return get(fieldName);
   }
 
   bool hasFieldAdm(String fieldName) {
-    if (fieldName.contains('.')) {
-      List<String> split = fieldName.split('.');
-      if (this.hasFieldAdm(split[0])) {
-        Map data = this.get(split[0]);
-        if (data.containsKey(split[1])) return true;
-      }
-      return false;
+    var docdata = this.data();
+    if (docdata is Map) return docdata.valueFor(keyPath: fieldName) != null;
+    return false;
+  }
+}
+
+extension KeyPath on Map {
+  Object? valueFor({required String keyPath}) {
+    final keysSplit = keyPath.split('.');
+    final thisKey = keysSplit.removeAt(0);
+    var thisValue;
+    if (thisKey.contains('[')) {
+      String key = thisKey.substring(0, thisKey.indexOf('['));
+      String indexStr = thisKey.substring(thisKey.indexOf('[') + 1, thisKey.indexOf(']'));
+      int index = int.parse(indexStr);
+      thisValue = this[key][index];
     } else {
-      Map data = this.data() as Map;
-      //if (data == null) return false;
-      if (!data.containsKey(fieldName)) return false;
-      if (data[fieldName] == null) return false;
-      return true;
+      thisValue = this[thisKey];
+    }
+    if (keysSplit.isEmpty) {
+      return thisValue;
+    } else if (thisValue is Map) {
+      return thisValue.valueFor(keyPath: keysSplit.join('.'));
+    }
+    return null;
+  }
+
+  void updateValueFor({required String keyPath, required value}) {
+    Map docdata = this;
+
+    void updateValue(String key, dynamic value) {
+      docdata[key] = value;
+    }
+
+    Map navigate(String key) {
+      if (key.contains('[')) {
+        // array de por medio
+        String mapKey = key.substring(0, key.indexOf('['));
+        int arrayKey = int.parse(key.substring(key.indexOf('[') + 1, key.indexOf(']')));
+
+        return docdata[mapKey][arrayKey];
+      } else {
+        if (docdata.containsKey(key)) {
+          return docdata[key];
+        } else {
+          return {};
+        }
+      }
+    }
+
+    List<String> split = keyPath.split('.');
+
+    while (split.isNotEmpty) {
+      var key = split.removeAt(0);
+      if (split.isEmpty) {
+        updateValue(key, value);
+      } else {
+        docdata = navigate(key);
+      }
     }
   }
 }

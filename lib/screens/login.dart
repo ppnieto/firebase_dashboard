@@ -1,5 +1,6 @@
 import 'package:firebase_dashboard/controllers/login.dart';
-import 'package:firebase_dashboard/responsive.dart';
+import 'package:firebase_dashboard/dashboard.dart';
+import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -55,31 +56,18 @@ class LoginScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).canvasColor,
-      /*
-      bottomNavigationBar: Container(
-          height: 30,
-          color: Colors.transparent,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
-                child: FutureBuilder(
-                  future: PackageInfo.fromPlatform(),
-                  builder: (context, AsyncSnapshot<PackageInfo> snapshot) {
-                    if (!snapshot.hasData) return SizedBox.shrink();
-                    return Text(snapshot.data!.version, style: TextStyle(color: Colors.grey));
-                  },
-                )),
-          )),
-          */
-      body: Responsive(
-        mobile: _LoginMobile(parent: this),
-        desktop: _LoginDesktop(parent: this),
-      ),
-    );
+  Widget build(context) {
+    return GetBuilder<LoginController>(
+        init: LoginController(),
+        builder: (controller) {
+          return Scaffold(
+            backgroundColor: Theme.of(context).canvasColor,
+            body: Responsive(
+              mobile: _LoginMobile(parent: this),
+              desktop: _LoginDesktop(parent: this),
+            ),
+          );
+        });
   }
 }
 
@@ -88,7 +76,9 @@ class _LoginMobile extends StatelessWidget {
 
   _LoginMobile({Key? key, required this.parent}) : super(key: key);
 
-  Future<void> doEnter(LoginController controller) async {
+  Future<void> doEnter(BuildContext context) async {
+    LoginController controller = DashboardUtils.serviceLocator<LoginController>(context);
+
     controller.loading = true;
     controller.setPreferences();
     await parent.onEntrar(LoginMethod.loginPassword, controller.emailController.text, controller.passwordController.text);
@@ -97,72 +87,70 @@ class _LoginMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<LoginController>(
-        init: LoginController(),
-        builder: (controller) {
-          return Center(
-              child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 50.0),
-                  constraints: BoxConstraints(
-                    maxWidth: 500,
+    return Center(
+        child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 50.0),
+            constraints: BoxConstraints(
+              maxWidth: 500,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            child: ListView(
+                shrinkWrap: true,
+                //crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (!Responsive.isDesktop(context)) parent.getLogo(),
+                  SizedBox(height: 20),
+                  Text(parent.title, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                  SizedBox(height: 50),
+                  Text('Usuario'),
+                  SizedBox(
+                    height: 10,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(5.0),
+                  TextField(
+                    decoration: InputDecoration(suffixIcon: Icon(Icons.person)),
+                    textInputAction: TextInputAction.next,
+                    //decoration: InputDecoration(labelText: "email"),
+                    controller: DashboardUtils.serviceLocator<LoginController>(context).emailController,
                   ),
-                  child: ListView(
-                      shrinkWrap: true,
-                      //crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (!Responsive.isDesktop(context)) parent.getLogo(),
-                        SizedBox(height: 20),
-                        Text(parent.title, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                        SizedBox(height: 50),
-                        Text('Usuario'),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        TextField(
-                          decoration: InputDecoration(suffixIcon: Icon(Icons.person)),
-                          textInputAction: TextInputAction.next,
-                          //decoration: InputDecoration(labelText: "email"),
-                          controller: controller.emailController,
-                        ),
-                        SizedBox(height: 20),
-                        Text('Contraseña'),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                            obscureText: true,
-                            decoration: InputDecoration(suffixIcon: Icon(Icons.lock)),
-                            onFieldSubmitted: (value) async {
-                              await doEnter(controller);
-                            },
-                            textInputAction: TextInputAction.send,
-                            controller: controller.passwordController),
-                        SizedBox(height: 10),
-                        parent.remindCredentials
-                            ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                SizedBox(),
-                                Expanded(
-                                  child: CheckboxListTile(
-                                      title: Text("Recordar credenciales"),
-                                      value: controller.recordarCredenciales,
-                                      onChanged: (val) {
-                                        controller.recordarCredenciales = val ?? false;
-                                      }),
-                                )
-                              ])
-                            : SizedBox.shrink(),
-                        SizedBox(height: 10),
-                        parent.allowReminder
-                            ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                Container(),
-                                TextButton(
-                                  child: Text("Olvidé mi contraseña", style: TextStyle(color: Theme.of(context).primaryColor)),
-                                  onPressed: () {
-                                    TextEditingController emailController = TextEditingController();
+                  SizedBox(height: 20),
+                  Text('Contraseña'),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  TextFormField(
+                      obscureText: true,
+                      decoration: InputDecoration(suffixIcon: Icon(Icons.lock)),
+                      onFieldSubmitted: (value) async {
+                        await doEnter(context);
+                      },
+                      textInputAction: TextInputAction.send,
+                      controller: DashboardUtils.serviceLocator<LoginController>(context).passwordController),
+                  SizedBox(height: 10),
+                  parent.remindCredentials
+                      ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          SizedBox(),
+                          Expanded(
+                            child: CheckboxListTile(
+                                title: Text("Recordar credenciales"),
+                                value: DashboardUtils.serviceLocator<LoginController>(context).recordarCredenciales,
+                                onChanged: (val) {
+                                  DashboardUtils.serviceLocator<LoginController>(context).recordarCredenciales = val ?? false;
+                                }),
+                          )
+                        ])
+                      : SizedBox.shrink(),
+                  SizedBox(height: 10),
+                  parent.allowReminder
+                      ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          Container(),
+                          TextButton(
+                            child: Text("Olvidé mi contraseña", style: TextStyle(color: Theme.of(context).primaryColor)),
+                            onPressed: () {
+                              TextEditingController emailController = TextEditingController();
+                              /*
                                     Get.defaultDialog(
                                       titlePadding: EdgeInsets.all(30),
                                       contentPadding: EdgeInsets.all(20),
@@ -197,42 +185,42 @@ class _LoginMobile extends StatelessWidget {
                                                 child: Text("Obtener nueva contraseña", style: TextStyle(color: Colors.white, fontSize: 18))))
                                       ],
                                     );
-                                  },
-                                )
-                              ])
-                            : SizedBox.shrink(),
-                        SizedBox(height: 40),
-                        TextButtonTheme(
-                            data: TextButtonThemeData(
-                                style: TextButton.styleFrom(
-                              minimumSize: Size(300, 50),
-                              padding: EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
-                              foregroundColor: Theme.of(context).canvasColor,
-                              backgroundColor: Theme.of(context).primaryColor,
-                            )),
-                            child: Container(
-                              height: 60,
-                              child: TextButton(
-                                  child: controller.loading
-                                      ? const Center(child: SizedBox(width: 40, height: 40, child: CircularProgressIndicator()))
-                                      : Text("Entrar", style: TextStyle(fontSize: 22)),
-                                  onPressed: controller.loading
-                                      ? null
-                                      : () async {
-                                          await doEnter(controller);
-                                        }),
-                            )),
-                        SizedBox(height: 40),
-                        parent.useGoogle
-                            ? TextButton.icon(
-                                onPressed: () {
-                                  parent.onEntrar(LoginMethod.google, "", "");
-                                },
-                                icon: Icon(FontAwesomeIcons.google, color: Theme.of(context).colorScheme.secondary),
-                                label: Text("Entrar usando Google", style: TextStyle(color: Theme.of(context).colorScheme.secondary)))
-                            : SizedBox.shrink(),
-                      ])));
-        });
+                                    */
+                            },
+                          )
+                        ])
+                      : SizedBox.shrink(),
+                  SizedBox(height: 40),
+                  TextButtonTheme(
+                      data: TextButtonThemeData(
+                          style: TextButton.styleFrom(
+                        minimumSize: Size(300, 50),
+                        padding: EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
+                        foregroundColor: Theme.of(context).canvasColor,
+                        backgroundColor: Theme.of(context).primaryColor,
+                      )),
+                      child: Container(
+                        height: 60,
+                        child: TextButton(
+                            child: DashboardUtils.serviceLocator<LoginController>(context).loading
+                                ? const Center(child: SizedBox(width: 40, height: 40, child: CircularProgressIndicator()))
+                                : Text("Entrar", style: TextStyle(fontSize: 22)),
+                            onPressed: DashboardUtils.serviceLocator<LoginController>(context).loading
+                                ? null
+                                : () async {
+                                    await doEnter(context);
+                                  }),
+                      )),
+                  SizedBox(height: 40),
+                  parent.useGoogle
+                      ? TextButton.icon(
+                          onPressed: () {
+                            parent.onEntrar(LoginMethod.google, "", "");
+                          },
+                          icon: Icon(FontAwesomeIcons.google, color: Theme.of(context).colorScheme.secondary),
+                          label: Text("Entrar usando Google", style: TextStyle(color: Theme.of(context).colorScheme.secondary)))
+                      : SizedBox.shrink(),
+                ])));
   }
 }
 

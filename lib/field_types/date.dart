@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class FieldTypeDate extends FieldType {
@@ -72,7 +73,7 @@ class FieldTypeDate extends FieldType {
             return null;
           }
           try {
-            var tmp = new DateFormat(this.format).parse(val);
+            DateFormat(this.format).parse(val);
             return null;
           } catch (e) {
             return "Formato incorrecto";
@@ -94,6 +95,7 @@ class FieldTypeDate extends FieldType {
           icon: Icon(FontAwesomeIcons.calendar, color: Theme.of(context).primaryColor),
           onPressed: () async {
             final DateTime? picked = await showDatePicker(
+                locale: Get.locale,
                 context: context,
                 firstDate: DateTime(2020, 1),
                 lastDate: DateTime(2101),

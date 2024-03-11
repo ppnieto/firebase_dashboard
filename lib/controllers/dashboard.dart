@@ -1,20 +1,20 @@
-import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/controllers/menu.dart' as menuC;
+import 'package:firebase_dashboard/classes/dashboard_data.dart';
+import 'package:firebase_dashboard/components/menu/menu_base.dart';
+import 'package:firebase_dashboard/components/menu/menu_group.dart';
+import 'package:firebase_dashboard/controllers/admin.dart';
+import 'package:firebase_dashboard/controllers/menu.dart';
 import 'package:firebase_dashboard/dashboard.dart';
+import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DashboardController extends GetxController {
-  bool isSidebar = false;
-  int active = 0;
+  DashboardData data;
   bool _isMenu = true;
-  //Rx<Widget> _currentWidget = const SizedBox.shrink().obs;
-  final DashboardTheme? theme;
-  List<MenuBase>? menus;
-  //Rx<MenuBase>? currentMenu;
-  static String? tag;
 
-  DashboardController({this.menus, this.theme});
+  static final int idNestedNavigation = 100;
+
+  DashboardController({required this.data});
 
   bool get isMenu => _isMenu;
   set isMenu(i) {
@@ -22,50 +22,65 @@ class DashboardController extends GetxController {
     update();
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-
-    //DashboardMainScreen.dashboardTheme = widget.theme;
-    Get.put(menuC.MenuController());
-    menuC.MenuController menuController = Get.find<menuC.MenuController>();
-
-    if (menus != null && menus!.isNotEmpty) {
-      if (menus!.first is Menu) {
-        menuController.currentMenu = menus!.first;
-      } else if (menus!.first is MenuGroup) {
-        MenuGroup mg = menus!.first as MenuGroup;
-        menuController.currentMenu = (mg.children!.first as Menu);
-      }
-    }
-    if (menuController.currentMenu != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showScreen(menuController.currentMenu! as Menu);
-      });
-    }
-  }
-
   void reload(List<MenuBase> newMenus) {
-    print('reload menus ' + newMenus.length.toString());
-    menus = newMenus;
+    data.menus = newMenus;
     update();
   }
 
-  Future<void> showScreen(Menu menu) async {
-    Get.log('showScreen ${menu.label} - ${menu.id}');
-    menuC.MenuController menuController = Get.find<menuC.MenuController>();
+  Future<void> showScreen(
+      {required BuildContext context,
+      required Menu menu,
+      bool offAll = true}) async {
+    Get.log('showScreen ${menu.label} - ${menu.id} - ${menu.route}');
 
-    menuController.currentMenu = menu;
-    Widget widget = await menu.builder(Get.context);
-    //Get.offAllNamed(menu.id!, id: DashboardMainScreen.dashboardKeyId, arguments: widget);
-    Get.offAll(() => widget, id: DashboardMainScreen.dashboardKeyId, transition: Transition.noTransition);
-    //update();
+    if (menu.route != null) {
+      if (offAll) {
+        Get.offAllNamed(menu.route!,
+            id: DashboardController.idNestedNavigation);
+      } else {
+        Get.toNamed(menu.route!,
+            id: DashboardController.idNestedNavigation,
+            preventDuplicates: true);
+      }
+    } else if (menu.builder != null) {
+      Widget widget = await menu.builder!(context);
+      if (offAll) {
+        Get.offAll(() => widget, id: DashboardController.idNestedNavigation);
+      } else {
+        Get.to(() => widget,
+            id: DashboardController.idNestedNavigation,
+            preventDuplicates: true);
+      }
+    } else {
+      throw new Exception("Menu ${menu.id} no tiene route o builder");
+    }
   }
 
-  MenuBase? findMenu(String id) {
-    Iterable<MenuBase>? itMenus = (this.menus ?? []).where((element) => element.id == id);
-    if (itMenus.isNotEmpty) {
-      return itMenus.first;
+  void showMenu(
+      {required String menuId,
+      bool offAll = true,
+      required BuildContext context}) {
+    Get.log('showMenu ${menuId} ${data.id}');
+    MenuBase? menu = findMenu(id: menuId);
+    if (menu != null) {
+      if (menu is Menu) {
+        showScreen(context: context, menu: menu, offAll: offAll);
+      }
+    } else {
+      throw new Exception("No puedo encontrar menu " + menuId);
+    }
+  }
+
+  MenuBase? findMenu({required String id, MenuGroup? group}) {
+    //Iterable<MenuBase>? itMenus = data.menus.where((element) => element.id == id);
+    List<MenuBase> menus = group != null ? group.children! : data.menus;
+
+    for (var menu in menus) {
+      if (menu.id == id) return menu;
+      if (menu is MenuGroup) {
+        MenuBase? find = findMenu(id: id, group: menu);
+        if (find != null) return find;
+      }
     }
     return null;
   }

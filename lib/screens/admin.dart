@@ -1,21 +1,22 @@
-import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/controllers/admin.dart';
-import 'package:firebase_dashboard/dashboard.dart';
-import 'package:firebase_dashboard/screens/detalle.dart';
+import 'package:app_bar_with_search_switch/app_bar_with_search_switch.dart';
 import 'package:firebase_dashboard/components/syncfusion_datatable.dart';
+import 'package:firebase_dashboard/controllers/admin.dart';
+import 'package:firebase_dashboard/controllers/detalle.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:settings_ui/settings_ui.dart';
 import 'package:sweetsheet/sweetsheet.dart';
-import 'package:app_bar_with_search_switch/app_bar_with_search_switch.dart';
 
 class AdminScreen extends StatelessWidget {
   final bool showScaffoldBack;
   final double minWidth;
   final double labelWidth;
-  final Module module;
+  final DashboardModule module;
   final String? title;
   final Map<String, dynamic>? filtroInicial;
 
@@ -29,61 +30,58 @@ class AdminScreen extends StatelessWidget {
     this.filtroInicial,
   }) : super(key: key);
 
+  final GlobalKey<ScaffoldState> _key = GlobalKey();
   final scrollController = ScrollController();
 
-  Widget getDataTable(BuildContext context) {
-    return SyncfusionDataTable(module: module);
-  }
+  Widget getDataTable(BuildContext context, AdminController adminController) =>
+      SyncfusionDataTable(module: module);
 
-  void addRecord() {
+  void addRecord(BuildContext context, AdminController controller) {
     {
-      AdminController controller = Get.find<AdminController>(tag: module.name);
-      Get.to(
-          () => DetalleScreen(
-                module: controller.module,
-                labelWidth: labelWidth,
-              ),
-          id: DashboardMainScreen.dashboardKeyId);
+      DashboardService.instance.showDetalle(module: controller.module);
     }
   }
 
-  List<Widget> getLeading(BuildContext context) {
-    AdminController controller = Get.find<AdminController>(tag: module.name);
-
+  List<Widget> getLeading(BuildContext context, AdminController controller) {
+    bool showColumnSelectorInPopupMenu = module.showColumnSelection &&
+        module.compactColumnSelection &&
+        !Responsive.isMobile(context);
     return [
-      SizedBox(width: 10),
-      if (Navigator.of(context).canPop())
-        IconButton(
-          icon: Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      if (module.showColumnSelection && module.compactColumnSelection)
+      if (showColumnSelectorInPopupMenu)
         PopupMenuButton(
           icon: Icon(Icons.list),
+          tooltip: "Selección de columnas",
           itemBuilder: (context) {
-            return controller.module.columns.where((element) => element.listable).map((ColumnModule columnModule) {
+            return controller.module.columns
+                .where((element) => element.listable)
+                .map((ColumnModule columnModule) {
               return PopupMenuItem(
                   child: Obx(() => CheckboxListTile(
                         title: Text(columnModule.label),
                         value: controller.visibleColumns[columnModule] ?? false,
                         onChanged: (value) {
-                          controller.setColumnaSeleccionada(columnModule, value!);
+                          controller.setColumnaSeleccionada(
+                              columnModule, value!);
                           Navigator.of(context).pop();
                         },
                       )));
             }).toList();
           },
         ),
-      if (module.showColumnSelection && !module.compactColumnSelection)
+      if (!showColumnSelectorInPopupMenu)
         IconButton(
             icon: Icon(FontAwesomeIcons.listUl),
+            tooltip: "Selección de columnas",
             onPressed: () async {
-              var items = controller.module.columns.where((element) => element.listable).map((ColumnModule columnModule) {
+              var items = controller.module.columns
+                  .where((element) => element.listable)
+                  .map((ColumnModule columnModule) {
                 return MultiSelectItem(columnModule.field, columnModule.label);
               }).toList();
-              var initialValue = controller.visibleColumns.entries.where((element) => element.value).map<String>((e) => e.key.field).toList();
+              var initialValue = controller.visibleColumns.entries
+                  .where((element) => element.value)
+                  .map<String>((e) => e.key.field)
+                  .toList();
 
               print("items $items");
               print("initialValue $initialValue");
@@ -101,7 +99,8 @@ class AdminScreen extends StatelessWidget {
                     onConfirm: (Iterable<String> values) {
                       //setState(() {
                       for (var columna in controller.visibleColumns.entries) {
-                        controller.setColumnaSeleccionada(columna.key, values.contains(columna.key.field));
+                        controller.setColumnaSeleccionada(
+                            columna.key, values.contains(columna.key.field));
                       }
                     },
                   );
@@ -116,76 +115,72 @@ class AdminScreen extends StatelessWidget {
                 color: SweetSheetColor.NICE,
                 onPos: () {
                   controller.clearColumnWidths();
-                  Navigator.of(context).pop();
                 },
                 title: "Atención",
                 description: "¿Desea restablecer el ancho de las columnas?");
           },
+          tooltip: "Reestablecer columnas",
           icon: Icon(Icons.width_normal))
     ];
   }
 
-/*
-  Widget getGlobalSearch(BuildContext context) {
-    AdminController controller = Get.find<AdminController>(tag: module.name);
-
-    Color
-        highlightColor = //context.findAncestorStateOfType<DashboardMainScreenState>()?.widget.theme?.appBar1TextColor ??
-        Theme.of(context).primaryColor;
-
-    return Container(
-      width: 280,
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: TextField(
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Theme.of(context).cardColor,
-          suffixIcon: Icon(Icons.search, color: highlightColor),
-          focusedBorder: OutlineInputBorder(
-            borderSide:
-                BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
-            borderRadius: BorderRadius.circular(6.0),
-          ),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(color: highlightColor, width: 2.0)),
-          hintText: "Buscar...",
-          hintStyle: TextStyle(color: highlightColor),
-          contentPadding: EdgeInsets.all(10),
-        ),
-        style: TextStyle(color: highlightColor),
-        onChanged: (value) {
-          //setState(() {
-          controller.globalSearch = value;
-          //});
-        },
-      ),
-    );
-  }
-*/
-  getActions(BuildContext context) {
-    AdminController controller = Get.find<AdminController>(tag: module.name);
-
+  List<Widget> getActions(BuildContext context, AdminController controller) {
     List<Widget> result = [];
-
-    if (controller.module.getScaffoldActions != null) {
-      result.addAll(controller.module.getScaffoldActions!(context));
-    }
-/*
-    if (controller.module
-        .globalSearch /* && dataTableImplementation == DataTableImplementation.AdminDataTable*/) {
-      result.add(getGlobalSearch(context));
-    }*/
+    bool deleteDisabled = module.deleteDisabled &&
+        controller.rowsSelected.any((element) =>
+            !controller.deleteEnabled.contains(element.reference.path));
 
     if (module.canRemove) {
+      if (controller.rowsSelected.isNotEmpty) {
+        result.add(IconButton(
+            icon: Icon(Icons.delete),
+            tooltip: "Borrar",
+            onPressed: deleteDisabled
+                ? null
+                : () {
+                    // falta comprobar si rows selected pueden ser eliminados
+                    /*
+                if (module.deleteDisabled &&
+                    controller.rowsSelected.any((element) => !adminController.deleteEnabled.contains(element.reference.path))) {
+                  Get.snackbar("Atención", "No se puede borrar la selección porque algunos elementos no se pueden eliminar",
+                      duration: Duration(seconds: 2), snackPosition: SnackPosition.BOTTOM, margin: EdgeInsets.all(20));
+                } else {
+                  */
+                    DashboardUtils.confirm(
+                        context: context,
+                        textPos: "Borrar",
+                        onPos: () {
+                          controller.rowsSelected.forEach((element) {
+                            element.reference.delete();
+                            if (module.onRemove != null) {
+                              module.onRemove!(element);
+                            }
+                          });
+                          controller.rowsSelected.clear();
+                          //Navigator.of(context).pop();
+                          //Get.nestedKey(DashboardMainScreen.dashboardKeyId)?.currentState?.pop();
+                          Get.snackbar(
+                              "Atención", "Los elementos han sido borrados",
+                              duration: Duration(seconds: 2),
+                              snackPosition: SnackPosition.BOTTOM,
+                              margin: EdgeInsets.all(20));
+                        },
+                        title: "Atención",
+                        description: "¿Está seguro de borrar " +
+                            controller.rowsSelected.length.toString() +
+                            " elementos?");
+                  }
+            //},
+
+            ));
+      }
+/*
       result.add(Obx(() {
-        AdminController adminController = Get.find<AdminController>(tag: module.name);
-        bool deleteDisabled =
-            module.deleteDisabled && controller.rowsSelected.any((element) => !adminController.deleteEnabled.contains(element.reference.path));
         return controller.rowsSelected.isEmpty
             ? const SizedBox.shrink()
             : IconButton(
                 icon: Icon(Icons.delete),
+                tooltip: "Borrar",
                 onPressed: deleteDisabled
                     ? null
                     : () {
@@ -208,151 +203,239 @@ class AdminScreen extends StatelessWidget {
                                 }
                               });
                               controller.rowsSelected.clear();
-                              Navigator.of(context).pop();
+                              //Navigator.of(context).pop();
                               //Get.nestedKey(DashboardMainScreen.dashboardKeyId)?.currentState?.pop();
-                              Get.snackbar("Atención", "Los elementos han sido borrados",
-                                  duration: Duration(seconds: 2), snackPosition: SnackPosition.BOTTOM, margin: EdgeInsets.all(20));
+                              Get.snackbar(
+                                  "Atención", "Los elementos han sido borrados",
+                                  duration: Duration(seconds: 2),
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: EdgeInsets.all(20));
                             },
                             title: "Atención",
-                            description: "¿Está seguro de borrar " + controller.rowsSelected.length.toString() + " elementos?");
+                            description: "¿Está seguro de borrar " +
+                                controller.rowsSelected.length.toString() +
+                                " elementos?");
                       }
                 //},
 
                 );
-      }));
+      }));*/
     }
 
-    result.add(IconButton(
-        onPressed: () {
-          AdminController controller = Get.find<AdminController>(tag: module.name);
-          controller.toggleSelect();
-        },
-        icon: Icon(Icons.checklist)));
+    if (controller.module.getScaffoldActions != null) {
+      result.addAll(controller.module.getScaffoldActions!(context));
+    }
+
+    if (module.canSelect || module.canRemove)
+      result.add(IconButton(
+          onPressed: () {
+            controller.toggleSelect();
+          },
+          tooltip: "Seleccionar",
+          icon: Icon(Icons.checklist)));
 
     if (controller.module.exportExcel) {
-      result.add(Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: IconButton(
-            icon: Icon(FontAwesomeIcons.fileExcel),
-            onPressed: () {
-              controller.exportExcel(context);
-            },
-          )));
+      result.add(IconButton(
+        tooltip: "Exportar",
+        icon: Icon(FontAwesomeIcons.fileExcel),
+        onPressed: () {
+          controller.exportExcel(context);
+        },
+      ));
     }
-    if (controller.module.canAdd && !controller.module.floatingButtons) {
-      result.add(IconButton(padding: EdgeInsets.all(0), icon: Icon(Icons.add), onPressed: () => addRecord()));
+    if (controller.module.canAdd &&
+        AdminController.buttonLocation == ButtonLocation.ActionBar) {
+      result.add(IconButton(
+          icon: Icon(Icons.add),
+          tooltip: "Añadir",
+          onPressed: () => addRecord(context, controller)));
     }
     if (controller.module.globalSearch) {
       result.add(AppBarSearchButton(
         toolTipLastText: "Última búsqueda: ",
         toolTipStartText: "Click para buscar",
       ));
-      /*
-      result.add(IconButton(
-        icon: Icon(Icons.search),
-        onPressed: () async {
-          List<DocumentSnapshot> allDocs = await controller.loadAll();
-          showSearch(context: context, delegate: _Search(allDocs: allDocs, module: module));
-        },
-      ));
-      */
-      /*
-      result.add(Theme(
-          data: ThemeData(
-              inputDecorationTheme: InputDecorationTheme(
-            /*border: InputBorder.none, focusedBorder: InputBorder.none, enabledBorder: InputBorder.none, */ contentPadding: EdgeInsets.all(3),
-          )),
-          child: Center(
-              child: Container(
-            height: 42,
-            child: AnimSearchBar(
-              width: 240,
-              color: Theme.of(context).primaryColor,
-              textFieldColor: Theme.of(context).canvasColor,
-              textFieldIconColor: Theme.of(context).colorScheme.secondary,
-              searchIconColor: Theme.of(context).canvasColor,
-              autoFocus: true,
-              helpText: "Buscar",
-              textController: controller.searchController,
-              onSuffixTap: () {
-                controller.searchController.text = "";
-              },
-              onSubmitted: (text) {
-                print("search for $text");
-              },
-            ),
-            /*
-                      SearchBarAnimation(
-                    textEditingController: controller.searchController,
-                    isOriginalAnimation: false,
-                    onPressButton: (isSearchBarOpens) {
-                      debugPrint('do something before animation started. It\'s the ${isSearchBarOpens ? 'opening' : 'closing'} animation');
-                    },
-                    onChanged: (value) {
-                      controller.globalSearch = value;
-                      print("global search ${value}");
-                    },
-                    trailingWidget: const Icon(
-                      Icons.search,
-                      size: 20,
-                      color: Colors.black,
-                    ),
-                    secondaryButtonWidget: const Icon(
-                      Icons.close,
-                      size: 20,
-                      color: Colors.black,
-                    ),
-                    buttonWidget: const Icon(
-                      Icons.search,
-                      size: 20,
-                      color: Colors.black,
-                    ),                  
-                  )*/
-          ))));
-          */
     }
+
+    result.add(IconButton(
+      icon: Icon(Icons.settings),
+      tooltip: "Ajustes",
+      onPressed: () {
+        _key.currentState!.openEndDrawer();
+      },
+    ));
 
     return result;
   }
 
+  Widget getSidebar(AdminController adminController) {
+    return Container(
+      width: 400,
+      color: Colors.white,
+      child: StatefulBuilder(builder: (context, innerSetState) {
+        return SettingsList(
+          sections: [
+            SettingsSection(
+              title: Text('Botones de accion'),
+              tiles: <SettingsTile>[
+                SettingsTile(
+                  leading: Icon(Icons.smart_button),
+                  title: Text('Botones de acción'),
+                  description:
+                      Text(AdminController.buttonLocation.description()),
+                  onPressed: (context) {
+                    adminController.toggleButtonLocation();
+                  },
+                ),
+                SettingsTile(
+                  leading: Icon(Icons.smart_button),
+                  title: Text("Botones de la barra"),
+                  description: Text(AdminController.buttonAction.description()),
+                  onPressed: (context) {
+                    adminController.toggleButtonAction();
+                  },
+                )
+              ],
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  PopupMenuItem getPopupMenu(Widget widget) {
+    if (widget is IconButton) {
+      return PopupMenuItem(
+          value: widget,
+          child: ListTile(
+              leading: widget.icon,
+              title: widget.tooltip != null ? Text(widget.tooltip!) : null));
+    } else if (widget is AppBarSearchButton) {
+      return PopupMenuItem(
+          value: widget,
+          child: ListTile(
+              leading: const Icon(Icons.search), title: Text("Buscar")));
+    } else {
+      return PopupMenuItem(child: widget);
+    }
+  }
+
+  List<Widget> processActions(BuildContext context, List<Widget> actions) {
+    if (!Responsive.isMobile(context)) {
+      return actions;
+    } else {
+      return [
+        PopupMenuButton(
+            onSelected: (value) {
+              if (value is IconButton) {
+                value.onPressed?.call();
+              } else if (value is AppBarSearchButton) {
+                AppBarWithSearchSwitch.of(context)?.startSearch();
+              }
+            },
+            itemBuilder: (ctx) => actions.map((w) => getPopupMenu(w)).toList())
+      ];
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(context) {
     return GetBuilder<AdminController>(
-        init: AdminController(module: module, filtroInicial: filtroInicial),
-        tag: module.name,
+        init: AdminController(module: module),
+        global: false,
         builder: (controller) {
+          if (controller.module.name != module.name) {
+            Get.log('ERROR, no se ha cargado el módulo corectamente');
+            controller = AdminController(module: module);
+            Get.put(controller);
+          }
           String _title = controller.module.title;
           if (title != null) {
-            _title += " / $title";
+            _title += " / ${title}";
           }
 
-          List<Widget> leading = getLeading(context);
           return Scaffold(
+            key: _key,
             appBar: AppBarWithSearchSwitch(
-              tooltipForClearButton: "Limpiar",
-              tooltipForCloseButton: "Cerrar",
-              fieldHintText: "Buscar",
-              onChanged: (value) {
-                controller.globalSearch = value;
+              onChanged: (text) {
+                controller.globalSearch = text;
               },
               appBarBuilder: (context) {
-                return AppBar(
-                  backgroundColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
-                  title: Text(_title),
-                  leadingWidth: leading.length * 40,
-                  leading: Row(children: leading),
-                  actions: getActions(context),
-                );
+                return PreferredSize(
+                    preferredSize: const Size(double.infinity, kToolbarHeight),
+                    child: GetBuilder<AdminController>(
+                      id: "toolbar",
+                      builder: (controller) {
+                        return AppBar(
+                          title: Text(_title),
+                          actions: processActions(
+                              context,
+                              getActions(context, controller) +
+                                  //<Widget>[] +
+                                  getLeading(context, controller)),
+                        );
+                      },
+                    ));
               },
+              fieldHintText: "Buscar",
+              tooltipForCloseButton: "Cerrar búsqueda",
+              tooltipForClearButton: "Limpiar",
             ),
-            floatingActionButton: module.floatingButtons && module.canAdd
-                ? FloatingActionButton(
-                    child: Icon(Icons.add),
-                    onPressed: () => addRecord(),
-                  )
-                : null,
-            body: getDataTable(context),
+            endDrawer: getSidebar(controller),
+            /*
+          appBar: AppBarWithSearchSwitch(
+            tooltipForClearButton: "Limpiar",
+            tooltipForCloseButton: "Cerrar",
+            fieldHintText: "Buscar",
+            onChanged: (value) {
+              controller.globalSearch = value;
+            },
+            appBarBuilder: (context) {
+              return AppBar(
+                backgroundColor: /*DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? */ Theme.of(context).primaryColor,
+                title: Text(_title),
+                leadingWidth: leading.length * 40,
+                leading: Row(children: leading),
+                actions: getActions(context),
+              );
+            },
+          ),
+          */
+            bottomNavigationBar:
+                AdminController.buttonLocation == ButtonLocation.Bottom &&
+                        module.canAdd
+                    ? ElevatedButton.icon(
+                            icon: Icon(Icons.add),
+                            onPressed: () => addRecord(context, controller),
+                            label: Text("Añadir"))
+                        .paddingAll(24)
+                    : null,
+            floatingActionButton:
+                AdminController.buttonLocation == ButtonLocation.Floating &&
+                        module.canAdd
+                    ? FloatingActionButton(
+                        child: Icon(Icons.add),
+                        onPressed: () => addRecord(context, controller),
+                      ).paddingAll(24)
+                    : null,
+            body: getDataTable(context, controller),
           );
         });
+  }
+}
+
+extension _BLTS on ButtonLocation {
+  String description() {
+    return this == ButtonLocation.Floating
+        ? "Flotante"
+        : this == ButtonLocation.ActionBar
+            ? "Barra de acciones"
+            : "Inferior";
+  }
+}
+
+extension _BATS on ButtonAction {
+  String description() {
+    return this == ButtonAction.Short ? "Compactos" : "Completos";
   }
 }

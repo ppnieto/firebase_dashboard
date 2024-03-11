@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:super_tag_editor/tag_editor.dart';
 
@@ -7,13 +7,18 @@ class FieldTypeTagsAutocomplete extends FieldType {
   final String hint;
   final TextStyle listStyle;
   final int maxTagsInList;
-  final Future<List<String>> Function(String query, DocumentSnapshot? object) findSuggestion;
+  final Future<List<String>> Function(String query, DocumentSnapshot? object)
+      findSuggestion;
 
   FieldTypeTagsAutocomplete(
-      {this.hint = "", this.maxTagsInList = 0, this.listStyle = const TextStyle(fontSize: 12, color: Colors.white), required this.findSuggestion});
+      {this.hint = "",
+      this.maxTagsInList = 0,
+      this.listStyle = const TextStyle(fontSize: 12, color: Colors.white),
+      required this.findSuggestion});
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object,
+      Map<String, dynamic> values, ColumnModule column) {
     var value;
     if (_object != null && hasField(_object, column.field)) {
       value = _object.get(column.field);
@@ -54,7 +59,9 @@ class FieldTypeTagsAutocomplete extends FieldType {
               updateData(context, column, valueString.join(","));
             });
           },
-          suggestionBuilder: (context, state, data, index, lenght, highlight, suggestionValid) => ListTile(
+          suggestionBuilder: (context, state, data, index, lenght, highlight,
+                  suggestionValid) =>
+              ListTile(
                 key: ObjectKey(data),
                 title: Text(data?.toString() ?? "-"),
                 onTap: () {
@@ -72,7 +79,8 @@ class FieldTypeTagsAutocomplete extends FieldType {
   }
 
   @override
-  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(
+      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
       var value = _object.get(column.field);
       List<String> valueString = [];
@@ -93,7 +101,9 @@ class FieldTypeTagsAutocomplete extends FieldType {
             spacing: 5.0,
             children: value
                 .map<Widget>((e) => Container(
-                      decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.all(Radius.circular(5))),
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.all(Radius.circular(5))),
                       padding: EdgeInsets.all(6),
                       child: Text(e, style: listStyle),
                     ))

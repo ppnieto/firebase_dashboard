@@ -1,8 +1,7 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FieldTypeImageURL extends FieldType {
@@ -13,6 +12,7 @@ class FieldTypeImageURL extends FieldType {
   bool clickToOpen;
   String storePath;
   Widget? noImageWidget;
+  bool showImageOnEdit;
   TextEditingController textController = TextEditingController();
   TextEditingController pathController = TextEditingController();
 
@@ -22,6 +22,7 @@ class FieldTypeImageURL extends FieldType {
       this.allowURL = true,
       this.allowUpload = false,
       required this.storePath,
+      this.showImageOnEdit = false,
       this.clickToOpen = false,
       this.noImageWidget});
 
@@ -51,12 +52,30 @@ class FieldTypeImageURL extends FieldType {
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
+    String url = "";
+    ;
     if (value is Map) {
-      textController.text = value['url'] ?? "";
+      textController.text = url ?? "";
       pathController.text = value['path'] ?? "";
+      url = value['url'];
     } else {
       textController.text = "";
       pathController.text = "";
+    }
+
+    Widget image = url.isNotEmpty
+        ? Image.network(
+            url,
+            height: 300,
+          )
+        : const SizedBox.shrink();
+
+    if (url.isNotEmpty && clickToOpen) {
+      image = InkWell(
+          child: image,
+          onTap: () {
+            launchUrl(Uri.parse(url));
+          });
     }
 
     return Row(
@@ -71,6 +90,7 @@ class FieldTypeImageURL extends FieldType {
                 onSaved: (val) {
                   updateData(context, column, {'url': val, 'path': pathController.text});
                 })),
+        if (showImageOnEdit) image,
         if (allowUpload) SizedBox(width: 20),
         if (allowUpload)
           IconButton(

@@ -1,130 +1,49 @@
-library dashboard;
+import 'dart:async';
 
-import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:firebase_dashboard/components/menu.dart';
-import 'package:firebase_dashboard/controllers/dashboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_dashboard/classes/column.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
-final int responsiveDashboardWidth = 1000;
-
-class DashboardMainScreen extends StatelessWidget {
-  final List<MenuBase> menus;
-  final List<Widget>? actions;
-  final String? title;
-  final Widget? titleWidget;
-  final Widget? sideBar;
-  final double sideBarWidth;
-  final IconData? sideBarIcon;
-  final DashboardTheme? theme;
-  static DashboardTheme? dashboardTheme;
-  final Function? getRolesFunction;
-
-  static int dashboardKeyId = 100;
-
-  DashboardMainScreen(
-      {Key? key,
-      required this.menus,
-      this.actions,
-      this.title,
-      this.getRolesFunction,
-      this.titleWidget,
-      this.sideBar,
-      this.sideBarWidth = 100,
-      this.theme,
-      this.sideBarIcon = Icons.view_sidebar}) {
-    Get.put(DashboardController(menus: menus, theme: theme));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GetBuilder<DashboardController>(builder: (controller) {
-      Get.log('dashboard build');
-      //Widget drawerItems = listDrawerItems(context);
-      return Theme(
-        data: Theme.of(context).copyWith(
-          scaffoldBackgroundColor: theme?.canvasColor ?? Theme.of(context).canvasColor,
-          highlightColor: DashboardMainScreen.dashboardTheme?.iconButtonColor,
-          primaryColor: DashboardMainScreen.dashboardTheme?.appBar2BackgroundColor ?? Theme.of(context).secondaryHeaderColor,
-        ),
-        child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: theme?.appBar1BackgroundColor,
-            leading: MediaQuery.of(context).size.width >= responsiveDashboardWidth
-                ? IconButton(
-                    icon: Icon(Icons.menu),
-                    onPressed: () {
-                      controller.isMenu = !controller.isMenu;
-                    },
-                  )
-                : null,
-            automaticallyImplyLeading: MediaQuery.of(context).size.width < responsiveDashboardWidth ? true : false,
-            title: Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-              if (title != null)
-                Container(
-                  child: Text(
-                    title!, // + " - " + subtitle,
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              if (titleWidget != null) titleWidget!
-            ]),
-            actions: (actions ?? []) +
-                (sideBar != null
-                    ? [
-                        IconButton(
-                            icon: Icon(sideBarIcon),
-                            onPressed: () {
-                              /*
-                            setState(() {
-                              isSidebar = !isSidebar;
-                            });
-                            */
-                            })
-                      ]
-                    : []),
-          ),
-          body: Row(
-            children: <Widget>[
-              MediaQuery.of(context).size.width < responsiveDashboardWidth || !controller.isMenu
-                  ? Container()
-                  : Container(
-                      color: theme?.menuBackgroundColor,
-                      child: Card(
-                        elevation: 2.0,
-                        child: Container(
-                          color: theme?.menuBackgroundColor,
-                          margin: EdgeInsets.all(0),
-                          height: MediaQuery.of(context).size.height,
-                          width: 300,
-                          child: MenuDrawer(parent: this),
-                        ),
-                      ),
-                    ),
-              Expanded(
-                child: Navigator(
-                    key: Get.nestedKey(dashboardKeyId),
-                    onGenerateRoute: (RouteSettings settings) {
-                      print("onGenerateRoute ${settings.name}");
-                      //MenuBase menu = menus.firstWhere((element) => element.id == settings.name);
-                      if (settings.arguments != null) {
-                        Widget widget = settings.arguments as Widget;
-                        return MaterialPageRoute(builder: (_) => widget);
-                      } else {
-                        return MaterialPageRoute(builder: (_) => const SizedBox.shrink());
-                      }
-                    }),
-              ),
-              controller.isSidebar ? Container(width: sideBarWidth, child: sideBar) : SizedBox.shrink(),
-            ],
-          ),
-          drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: MenuDrawer(parent: this))),
-        ),
-      );
-    });
-  }
-}
+export 'field_types/field_type_base.dart';
+export 'field_types/actions.dart';
+export 'field_types/image_url.dart';
+export 'field_types/location.dart';
+export 'field_types/date.dart';
+export 'field_types/double.dart';
+export 'field_types/multiref.dart';
+export 'field_types/ref.dart';
+export 'field_types/inline_ref.dart';
+export 'field_types/datetime.dart';
+export 'field_types/spin.dart';
+export 'field_types/boolean.dart';
+export 'field_types/text.dart';
+export 'field_types/ref_childs.dart';
+export 'field_types/defecto.dart';
+export 'field_types/subcollection.dart';
+export 'field_types/memo.dart';
+export 'field_types/qr.dart';
+export 'field_types/rating.dart';
+export 'field_types/select.dart';
+export 'field_types/multi_select.dart';
+export 'field_types/file.dart';
+export 'field_types/link.dart';
+export 'field_types/color.dart';
+export 'field_types/async.dart';
+export 'field_types/tags.dart';
+export 'field_types/widget.dart';
+export 'components/menu/menu.dart';
+export 'components/responsive.dart';
+export 'components/admin_action_button.dart';
+export 'classes/dashboard_data.dart';
+export 'classes/dash_view_controller.dart';
+export 'classes/column.dart';
+export 'classes/module.dart';
+export 'classes/app_user.dart';
+export 'screens/dashboard.dart';
+export 'screens/admin.dart';
+export 'screens/detalle.dart';
+export 'services/dashboard.dart';
+export 'controllers/dashboard.dart';
+export 'widgets/loading.dart';
+export 'widgets/noelements.dart';
+export 'widgets/listview_builder.dart';

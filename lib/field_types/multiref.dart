@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class FieldTypeMultiref extends FieldType {
@@ -8,7 +8,8 @@ class FieldTypeMultiref extends FieldType {
   final String refLabel;
   final Function? getFilter;
   final String? rawField;
-  final Iterable<DocumentSnapshot> Function(Iterable<DocumentSnapshot>, DocumentSnapshot? object)? doFilter;
+  final Iterable<DocumentSnapshot> Function(
+      Iterable<DocumentSnapshot>, DocumentSnapshot? object)? doFilter;
   final dynamic initialValue;
   final MultiSelectListType listType;
   final CollectionReference Function(DocumentSnapshot?)? getQueryCollection;
@@ -24,10 +25,12 @@ class FieldTypeMultiref extends FieldType {
       this.doFilter,
       this.listType = MultiSelectListType.CHIP});
 
-  Widget getListWidget(String content, {TextStyle? style}) => Text(content, style: style);
+  Widget getListWidget(String content, {TextStyle? style}) =>
+      Text(content, style: style);
 
   @override
-  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(
+      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
       var value = _object[column.field];
       if (value is List) {
@@ -74,7 +77,8 @@ class FieldTypeMultiref extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object,
+      Map<String, dynamic> values, ColumnModule column) {
     var tmp = values[column.field];
     List<DocumentReference>? value = [];
     if (tmp is List) {
@@ -104,7 +108,9 @@ class FieldTypeMultiref extends FieldType {
             buttonText: Text("Seleccione " + column.label),
             title: Text("Seleccione " + column.label),
             initialValue: value,
-            items: docMap.entries.map((e) => MultiSelectItem(e.key, e.value.get(this.refLabel))).toList(),
+            items: docMap.entries
+                .map((e) => MultiSelectItem(e.key, e.value.get(this.refLabel)))
+                .toList(),
             listType: listType,
             onConfirm: (values) {
               updateData(context, column, values);

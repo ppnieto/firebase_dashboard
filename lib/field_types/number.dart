@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 
 class FieldTypeNumber extends FieldType {
   final double maxValue;
@@ -11,10 +11,16 @@ class FieldTypeNumber extends FieldType {
   final int decimals;
   final TextEditingController _controller = TextEditingController();
 
-  FieldTypeNumber({this.defaultValue, this.decimals = 0, this.maxValue = 100000, this.minValue = 0, this.formatter});
+  FieldTypeNumber(
+      {this.defaultValue,
+      this.decimals = 0,
+      this.maxValue = 100000,
+      this.minValue = 0,
+      this.formatter});
 
   @override
-  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(
+      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     var num = getField(_object, column.field, null);
     if (num == null) {
       return const Text("-");
@@ -34,7 +40,8 @@ class FieldTypeNumber extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object,
+      Map<String, dynamic> values, ColumnModule column) {
     var value = getFieldFromMap(values, column.field, null);
 
     if (_object == null) value = defaultValue;
@@ -56,7 +63,9 @@ class FieldTypeNumber extends FieldType {
         decoration: InputDecoration(
             labelText: column.label,
             filled: !column.editable,
-            fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor),
+            fillColor: column.editable
+                ? Theme.of(context).canvasColor.withAlpha(1)
+                : Theme.of(context).disabledColor),
         validator: (value) {
           //print("validator ${column.field} = $value");
           if (column.editable == false) return null;
@@ -68,8 +77,8 @@ class FieldTypeNumber extends FieldType {
             }
           }
 
-          if (value != null && value!.contains(',')) {
-            value = value!.replaceAll(',', '.');
+          if (value.contains(',')) {
+            value = value.replaceAll(',', '.');
           }
 
           if (double.tryParse(value.toString()) == null) {
@@ -89,7 +98,9 @@ class FieldTypeNumber extends FieldType {
         onSaved: (val) {
           if (!column.editable) return;
           val = (val ?? "").isEmpty ? null : val;
-          var valueToSave = val == null ? null : double.parse(val.toString().replaceAll(',', '.'));
+          var valueToSave = val == null
+              ? null
+              : double.parse(val.toString().replaceAll(',', '.'));
           updateData(context, column, valueToSave);
         });
   }

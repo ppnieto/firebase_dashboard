@@ -1,21 +1,18 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:firebase_dashboard/components/syncfusion_datasource.dart';
-import 'package:firebase_dashboard/controllers/dashboard.dart';
 import 'package:firebase_dashboard/dashboard.dart';
-import 'package:firebase_dashboard/screens/detalle.dart';
 import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 
 class AdminController extends GetxController {
   late int pageSize;
-  final Module module;
+  final DashboardModule module;
 
   bool canSelect = false;
 
@@ -30,8 +27,10 @@ class AdminController extends GetxController {
 
   bool sortAscending = true;
   int? sortColumnIndex;
-  RxList<DocumentSnapshot> rowsSelected = <DocumentSnapshot>[].obs;
+  List<DocumentSnapshot> rowsSelected = <DocumentSnapshot>[].obs;
   RxList<String> deleteEnabled = <String>[].obs;
+  //List<DocumentSnapshot> rowsSelected = [];
+  //List<String> deleteEnabled = [];
   StreamSubscription<QuerySnapshot>? dataSubscription;
   bool finalAlcanzado = false;
   Map<String, double> _columnWidths = {};
@@ -44,8 +43,15 @@ class AdminController extends GetxController {
 
   SyncfusionDataSource? get datagridSource => _datagridSource;
 
+  static ButtonLocation buttonLocation =
+      GetStorage().read('button_location').toString().toButtonLocation();
+  static ButtonAction buttonAction =
+      GetStorage().read('button_action').toString().toButtonAction();
+
   AdminController({required this.module, this.filtroInicial}) {
     this.pageSize = module.rowsPerPage;
+    Get.log('init AdminController ${module.name}');
+    Get.put(this);
   }
 
   Map<String, double> get columnWidths => _columnWidths;
@@ -56,12 +62,12 @@ class AdminController extends GetxController {
 
   @override
   void onInit() async {
-    print("admin controller on init!!! " + module.name);
     super.onInit();
 
     //searchController.addListener(globalSearchListener);
 
     await initAdmin();
+    //Get.put(this, tag: "last");
   }
 
   @override
@@ -74,6 +80,32 @@ class AdminController extends GetxController {
     globalSearch = searchController.text;
   }
   */
+
+  void toggleButtonAction() {
+    buttonAction = buttonAction == ButtonAction.Large
+        ? ButtonAction.Short
+        : ButtonAction.Large;
+    GetStorage gs = GetStorage();
+    gs.write('button_action', buttonAction.toString());
+    gs.save();
+    update();
+  }
+
+  void toggleButtonLocation() {
+    if (buttonLocation == ButtonLocation.Floating) {
+      buttonLocation = ButtonLocation.ActionBar;
+    } else if (buttonLocation == ButtonLocation.ActionBar) {
+      buttonLocation = ButtonLocation.Bottom;
+    } else {
+      buttonLocation = ButtonLocation.Floating;
+    }
+
+    // no usar box, esto es para todas las instancias de admin
+    GetStorage gs = GetStorage();
+    gs.write('button_location', buttonLocation.toString());
+    gs.save();
+    update();
+  }
 
   List<DocumentSnapshot> get docs {
     if (module.doFilter != null) {
@@ -92,19 +124,20 @@ class AdminController extends GetxController {
 
   void toggleSelect() {
     canSelect = !canSelect;
+    if (!canSelect) {
+      rowsSelected.clear();
+    }
     update();
   }
 
   Future<bool> initAdmin() async {
-    print("initAdmin");
     if (filtroInicial != null) {
       filtro = filtroInicial!;
     }
-    DashboardController.tag = module.name;
 
     _orderBy = module.orderBy;
     canSelect = module.canSelect;
-    rowsSelected = <DocumentSnapshot>[].obs;
+    rowsSelected = <DocumentSnapshot>[];
     _docs = <DocumentSnapshot>[].obs;
     finalAlcanzado = false;
 
@@ -126,14 +159,17 @@ class AdminController extends GetxController {
 
   void reinit() {
     columns = getColumns();
-    _datagridSource = SyncfusionDataSource(columns: columns, module: module);
+    _datagridSource = SyncfusionDataSource(
+        columns: columns, module: module, controller: this);
     finalAlcanzado = false;
     nextPage();
   }
 
   List<ColumnModule> getColumns() {
     List<ColumnModule> columns = List.from(module.columns.where((column) {
-      return visibleColumns.containsKey(column) && visibleColumns[column] == true && column.listable;
+      return visibleColumns.containsKey(column) &&
+          visibleColumns[column] == true &&
+          column.listable;
     }));
 
     if (module.canRemove || module.getActions != null) {
@@ -146,29 +182,40 @@ class AdminController extends GetxController {
           width: module.actionColumnWidth,
           type: FieldTypeWidget(
             builder: (context, object, inList) {
-              return ListView(
-                scrollDirection: Axis.horizontal,
-                children: <Widget>[
-                  ...module.getActions != null ? module.getActions!(object!, context) : [],
-                  if (module.canRemove && module.deleteDisabled)
-                    Obx(() => deleteEnabled.contains(object!.reference.path)
-                        ? IconButton(
-                            icon: Icon(Icons.delete, color: Theme.of(context).primaryColorDark),
-                            onPressed: () {
-                              doBorrar(context, object, () {});
-                            },
-                          )
-                        : const SizedBox.shrink()),
-                  if (module.canRemove && !module.deleteDisabled && module.canRemoveInList)
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Theme.of(context).primaryColorDark),
-                      onPressed: () {
-                        doBorrar(context, object!, () {});
-                      },
-                    ),
-                  //SizedBox(width: 15)
-                ].spacing(5),
-              );
+              return Theme(
+                  data: ThemeData(
+                      iconButtonTheme: IconButtonThemeData(
+                          style: ButtonStyle(
+                              iconColor: MaterialStatePropertyAll(
+                                  Theme.of(context).highlightColor)))),
+                  child: ListView(
+                    padding: EdgeInsets.only(left: 20),
+                    scrollDirection: Axis.horizontal,
+                    children: <Widget>[
+                      ...module.getActions != null
+                          ? module.getActions!(object!, context)
+                          : [],
+                      if (module.canRemove && module.deleteDisabled)
+                        Obx(() => deleteEnabled.contains(object!.reference.path)
+                            ? IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () {
+                                  doBorrar(context, object, () {});
+                                },
+                              )
+                            : const SizedBox.shrink()),
+                      if (module.canRemove &&
+                          !module.deleteDisabled &&
+                          module.canRemoveInList)
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            doBorrar(context, object!, () {});
+                          },
+                        ),
+                      //SizedBox(width: 15)
+                    ].spacing(5),
+                  ));
             },
           )));
     }
@@ -200,7 +247,10 @@ class AdminController extends GetxController {
         print(e);
       }
     } else {
-      _columnWidths = {for (var v in module.columns.where((element) => element.width != null)) v.field: v.width!};
+      _columnWidths = {
+        for (var v in module.columns.where((element) => element.width != null))
+          v.field: v.width!
+      };
     }
   }
 
@@ -211,9 +261,13 @@ class AdminController extends GetxController {
     String key = 'admin_columns';
     if (keys.contains(key)) {
       List<String> sel = List<String>.from(box.read(key));
-      visibleColumns = <ColumnModule, bool>{for (var column in module.columns) column: sel.contains(column.field)}.obs;
+      visibleColumns = <ColumnModule, bool>{
+        for (var column in module.columns) column: sel.contains(column.field)
+      }.obs;
     } else {
-      visibleColumns = <ColumnModule, bool>{for (var column in module.columns) column: true}.obs;
+      visibleColumns = <ColumnModule, bool>{
+        for (var column in module.columns) column: true
+      }.obs;
     }
   }
 
@@ -233,11 +287,18 @@ class AdminController extends GetxController {
     Iterable<DocumentSnapshot> tmpList = List<DocumentSnapshot>.from(docs);
 
     for (MapEntry filterEntry in filtro.entries) {
-      if (filterEntry.value != null && filterEntry.value.toString().isNotEmpty) {
-        print("   add filter " + filterEntry.key + " = " + filterEntry.value.toString());
+      if (filterEntry.value != null &&
+          filterEntry.value.toString().isNotEmpty) {
+        print("   add filter " +
+            filterEntry.key +
+            " = " +
+            filterEntry.value.toString());
         if (filterEntry.value is String) {
           print("    string lo implemento sobre la lista de docs");
-          tmpList = tmpList.where((element) => element.get(filterEntry.key).toString().contains(filterEntry.value));
+          tmpList = tmpList.where((element) => element
+              .get(filterEntry.key)
+              .toString()
+              .contains(filterEntry.value));
         }
       }
     }
@@ -248,20 +309,21 @@ class AdminController extends GetxController {
   }
 
   void updateData() async {
-    _datagridSource = SyncfusionDataSource(columns: columns, module: module);
+    _datagridSource = SyncfusionDataSource(
+        columns: columns, module: module, controller: this);
     await _datagridSource?.buildDataGridRows();
     update();
   }
 
   void setFilter(Map<String, dynamic> f) {
-    print("set filter $f");
+    Get.log("set filter $f");
     filtro = f;
     initAdmin();
     update();
   }
 
   void nextPage() {
-    print('nextPage');
+    Get.log('nextPage');
     if (finalAlcanzado) {
       Get.log('final alzanzado!!!!');
       return;
@@ -270,8 +332,6 @@ class AdminController extends GetxController {
     Get.log('nextPage limit = $limit');
     dataSubscription?.cancel();
     dataSubscription = getQuery().limit(limit).snapshots().listen((value) {
-      print(" data subscription nuevos datos - ${value.docs.length}");
-
       _allDocs.clear();
       _allDocs.addAll(value.docs);
 
@@ -339,8 +399,12 @@ class AdminController extends GetxController {
   Query addFilters(Map<String, dynamic> filtro, Query query) {
     Query result = query;
     for (MapEntry filterEntry in filtro.entries) {
-      if (filterEntry.value != null && filterEntry.value.toString().isNotEmpty) {
-        print("   add filter " + filterEntry.key + " = " + filterEntry.value.toString());
+      if (filterEntry.value != null &&
+          filterEntry.value.toString().isNotEmpty) {
+        print("   add filter " +
+            filterEntry.key +
+            " = " +
+            filterEntry.value.toString());
         if (filterEntry.value is String == false) {
           print("    string me lo salto");
           result = result.where(filterEntry.key, isEqualTo: filterEntry.value);
@@ -374,7 +438,8 @@ class AdminController extends GetxController {
     for (DocumentSnapshot doc in _allDocs) {
       List<String> terminos = _searchIndex[doc] ?? [];
       for (var termino in terminos) {
-        bool encontrado = termino.toLowerCase().contains(_globalSearch!.toLowerCase());
+        bool encontrado =
+            termino.toLowerCase().contains(_globalSearch!.toLowerCase());
         if (encontrado) {
           result.add(doc);
           break;
@@ -397,14 +462,11 @@ class AdminController extends GetxController {
 
   showDetalleObject(BuildContext context, object) {
     if (module.canEdit) {
-      Get.to(
-          () => DetalleScreen(
-                object: object,
-                module: module,
-                labelWidth: 20,
-                canDelete: deleteEnabled.contains(object.reference.path),
-              ),
-          id: DashboardMainScreen.dashboardKeyId);
+      DashboardService.instance.showDetalle(
+        object: object,
+        module: module,
+        canDelete: deleteEnabled.contains(object.reference.path),
+      );
     }
   }
 
@@ -427,10 +489,14 @@ class AdminController extends GetxController {
   }
 
   doBorrar(BuildContext context, DocumentSnapshot object, Function postDelete) {
-    if (module.deleteDisabled && !deleteEnabled.contains(object.reference.path)) {
+    if (module.deleteDisabled &&
+        !deleteEnabled.contains(object.reference.path)) {
       // esto no debe darse
       Get.snackbar("Atención", "No se puede borrar el elemento",
-          snackPosition: SnackPosition.BOTTOM, backgroundColor: Theme.of(context).primaryColor, colorText: Colors.white, margin: EdgeInsets.all(20));
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Theme.of(context).primaryColor,
+          colorText: Colors.white,
+          margin: EdgeInsets.all(20));
       return;
     }
 //    final SweetSheet _sweetSheet = SweetSheet();
@@ -439,9 +505,13 @@ class AdminController extends GetxController {
         textPos: "Borrar",
         onPos: () {
           object.reference.delete();
-          Navigator.of(context).pop();
+          //Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("El elemento ha sido borrado"),
+          ));
+/*
           Get.snackbar("Atención", "El elemento ha sido borrado",
-              duration: Duration(seconds: 2), backgroundColor: Theme.of(context).primaryColor, colorText: Colors.white, margin: EdgeInsets.all(20));
+              duration: Duration(seconds: 2), backgroundColor: Theme.of(context).primaryColor, colorText: Colors.white, margin: EdgeInsets.all(20));*/
           if (module.onRemove != null) {
             module.onRemove!(object);
           }
@@ -452,7 +522,7 @@ class AdminController extends GetxController {
   }
 
   void multiselectRow(BuildContext context, DocumentSnapshot object, bool add) {
-    print("multiSelectRow " + object.reference.path);
+    //print("multiSelectRow " + object.reference.path);
 
     if (add) {
       //setState(() {
@@ -462,9 +532,11 @@ class AdminController extends GetxController {
     } else {
       //setState(() {
       //adminScreenState.indexSelected.remove(index);
-      rowsSelected.removeWhere((obj) => obj.reference.path == object.reference.path);
+      rowsSelected
+          .removeWhere((obj) => obj.reference.path == object.reference.path);
       //});
     }
+    update(["toolbar"]);
   }
 
   void selectRow(BuildContext context, DocumentSnapshot object) {
@@ -472,11 +544,13 @@ class AdminController extends GetxController {
     rowsSelected.clear();
     rowsSelected.add(object);
     //});
+    update(["toolbar"]);
   }
 
   void unselectAll() {
     //setState(() {
     rowsSelected.clear();
+    update(["toolbar"]);
 
     //});
   }
@@ -494,7 +568,8 @@ class AdminController extends GetxController {
 
       List<xlsio.ExcelDataRow> rows = [];
 
-      List<ColumnModule> columnasExportables = module.columns.where((e) => e.excellable).toList();
+      List<ColumnModule> columnasExportables =
+          module.columns.where((e) => e.excellable).toList();
 
       for (var doc in _allDocs) {
         List<xlsio.ExcelDataCell> cells = [];
@@ -505,7 +580,8 @@ class AdminController extends GetxController {
           } else {
             value = value.toString();
           }
-          cells.add(xlsio.ExcelDataCell(value: value, columnHeader: column.label));
+          cells.add(
+              xlsio.ExcelDataCell(value: value, columnHeader: column.label));
         }
 
         rows.add(xlsio.ExcelDataRow(cells: cells));
@@ -520,5 +596,27 @@ class AdminController extends GetxController {
     } finally {
       Navigator.of(context).pop();
     }
+  }
+}
+
+enum ButtonLocation { Floating, ActionBar, Bottom }
+
+enum ButtonAction { Short, Large }
+
+extension _BL on String {
+  ButtonLocation toButtonLocation() {
+    // default
+    // if (this == _ButtonLocation.Floating.toString()) return _ButtonLocation.Floating;
+    if (this == ButtonLocation.ActionBar.toString())
+      return ButtonLocation.ActionBar;
+    if (this == ButtonLocation.Bottom.toString()) return ButtonLocation.Bottom;
+    return ButtonLocation.Floating;
+  }
+}
+
+extension _BA on String {
+  ButtonAction toButtonAction() {
+    if (this == ButtonAction.Large.toString()) return ButtonAction.Short;
+    return ButtonAction.Short;
   }
 }

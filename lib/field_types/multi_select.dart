@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:multiselect/multiselect.dart';
@@ -12,7 +12,8 @@ class FieldTypeMultiSelect extends FieldType {
   FieldTypeMultiSelect({required this.hint, required this.options});
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object,
+      Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
 
     List<String> valueString = value == null ? [] : List<String>.from(value);
@@ -46,7 +47,8 @@ class FieldTypeMultiSelect extends FieldType {
   }
 
   @override
-  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(
+      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
       var value = _object[column.field];
       if (value is List) {

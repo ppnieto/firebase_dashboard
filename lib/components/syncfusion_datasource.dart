@@ -1,28 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:firebase_dashboard/controllers/admin.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 class SyncfusionDataSource extends DataGridSource {
   final List<ColumnModule> columns;
-  final Module module;
+  final DashboardModule module;
+  final AdminController controller;
   List<DataGridRow> dataGridRows = [];
 
-  SyncfusionDataSource({required this.columns, required this.module});
+  SyncfusionDataSource({required this.columns, required this.module, required this.controller});
 
   @override
   Future<void> handleLoadMoreRows() async {
     Get.log('handleLoadMoreRows');
-    AdminController controller = Get.find<AdminController>(tag: module.name);
     controller.nextPage();
   }
 
   Future<bool> buildDataGridRows() async {
-    print("buildDataGridRows");
-    AdminController controller = Get.find<AdminController>(tag: module.name);
-
     dataGridRows.clear();
     for (var doc in controller.docs) {
       List<DataGridCell> cells = [];
@@ -46,7 +43,6 @@ class SyncfusionDataSource extends DataGridSource {
       }
       dataGridRows.add(SyncfusionDataGridRow(cells: cells, doc: doc));
     }
-    print("buildDataGridRows OK");
     return true;
   }
 
@@ -64,12 +60,18 @@ class SyncfusionDataSource extends DataGridSource {
       ColumnModule? column = getColumnModuleByField(dataGridCell.columnName);
 
       return Container(
-        color: module.backgroundColor != null ? module.backgroundColor!(myRow.doc) : null,
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+        color: column?.field == '_acciones'
+            ? Theme.of(Get.context!).primaryColor.withOpacity(0.1)
+            : module.backgroundColor != null
+                ? module.backgroundColor!(myRow.doc)
+                : null,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
         alignment: Alignment.centerRight,
-        child: DefaultTextStyle(
-            style: TextStyle(color: Theme.of(Get.context!).primaryColorDark),
-            child: column?.type.getListContent(Get.context!, doc, column) ?? SizedBox.shrink()),
+        child: Builder(builder: (context) {
+          return DefaultTextStyle(
+              style: TextStyle(color: Theme.of(context).primaryColorDark),
+              child: column?.type.getListContent(context, doc, column) ?? SizedBox.shrink());
+        }),
       );
     }).toList());
   }

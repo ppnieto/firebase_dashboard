@@ -1,9 +1,6 @@
-import 'package:firebase_dashboard/admin_modules.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/controllers/dashboard.dart';
-import 'package:firebase_dashboard/controllers/detalle.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class FieldTypeText extends FieldType {
   final RegExp? regexp;
@@ -16,10 +13,11 @@ class FieldTypeText extends FieldType {
   final bool tooltip;
   final int maxLines;
   final String? regExpMessage;
+  final TextStyle? style;
   final bool introSendForm;
   final bool autoFocus;
-
-  final TextEditingController controller = TextEditingController();
+  final Widget? trailing;
+  final TextEditingController? textEditingController;
 
   FieldTypeText(
       {this.nullable = true,
@@ -30,15 +28,21 @@ class FieldTypeText extends FieldType {
       this.tooltip = false,
       this.introSendForm = false,
       this.maxLines = 2,
+      this.textEditingController,
       this.regExpMessage = "Formato incorrecto",
       this.autoFocus = false,
       this.ellipsisLength = 0,
+      this.style,
+      this.trailing,
       this.nullWidget});
 
   @override
-  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(
+      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (hasField(_object, column.field)) {
-      String texto = showTextFunction == null ? getField(_object, column.field, "").toString() : showTextFunction!(_object[column.field]);
+      String texto = showTextFunction == null
+          ? getField(_object, column.field, "").toString()
+          : showTextFunction!(_object[column.field]);
       if (this.ellipsisLength > 0 && texto.length >= this.ellipsisLength) {
         return Text(texto);
       } else {
@@ -51,7 +55,7 @@ class FieldTypeText extends FieldType {
                 overflow: TextOverflow.ellipsis,
               ));
         } else {
-          return Text(texto);
+          return Text(texto, style: style);
         }
       }
     }
@@ -59,12 +63,16 @@ class FieldTypeText extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object,
+      Map<String, dynamic> values, ColumnModule column) {
+    TextEditingController controller =
+        textEditingController ?? TextEditingController();
+
     var value = getFieldFromMap(values, column.field, null);
     value = showTextFunction == null ? value : showTextFunction!(value);
 
     controller.text = value ?? "";
-    print('${column.field} => ${controller.text}');
+    //print('${column.field} => ${controller.text}');
     return Focus(
         onFocusChange: (hasFocus) {
           if (!hasFocus) {
@@ -82,7 +90,10 @@ class FieldTypeText extends FieldType {
             decoration: InputDecoration(
                 labelText: column.label,
                 filled: !column.editable,
-                fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor),
+                suffix: trailing,
+                fillColor: column.editable
+                    ? Theme.of(context).canvasColor.withAlpha(1)
+                    : Theme.of(context).disabledColor),
             validator: (value) {
               if (regexp != null) {
                 if (!regexp!.hasMatch(value ?? "")) {
@@ -90,20 +101,12 @@ class FieldTypeText extends FieldType {
                 }
               }
 
-              if (column.mandatory && (value == null || value.isEmpty)) return "Campo obligatorio";
+              if (column.mandatory && (value == null || value.isEmpty))
+                return "Campo obligatorio";
               return null;
             },
-            /*
-            onFieldSubmitted: introSendForm
-                ? (value) async {
-                    Get.log('on field submitted');
-                    DetalleController detalleController = Get.find<DetalleController>(tag: DashboardController.tag);
-                    detalleController.doGuardar();
-                  }
-                : null,
-                */
             onSaved: (val) {
-              print("text onsaved $val");
+              //print("text onsaved $val");
               if (emptyNull) {
                 val = (val ?? "").isEmpty ? null : val;
               }

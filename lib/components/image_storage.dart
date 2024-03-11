@@ -10,15 +10,7 @@ class ImageFromStorage extends StatelessWidget {
   final double? width;
   final Alignment alignment;
 
-  const ImageFromStorage(
-      {Key? key,
-      this.url,
-      this.path,
-      this.fit,
-      this.height,
-      this.width,
-      this.alignment = Alignment.center})
-      : super(key: key);
+  const ImageFromStorage({Key? key, this.url, this.path, this.fit, this.height, this.width, this.alignment = Alignment.center}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,20 +18,13 @@ class ImageFromStorage extends StatelessWidget {
       return FutureBuilder(
           future: DashboardUtils.getUrlFromStoragePath(path!),
           builder: (context, AsyncSnapshot<String> snapshot) {
-            if (!snapshot.hasData)
-              return Center(
-                  child: Container(
-                      width: 60,
-                      height: 60,
-                      child: CircularProgressIndicator()));
+            if (!snapshot.hasData) return Center(child: Container(width: 60, height: 60, child: CircularProgressIndicator()));
+
+            print('load image from ${snapshot.data}');
 
             return CachedNetworkImage(
               placeholder: (context, url) {
-                return Center(
-                    child: Container(
-                        width: 60,
-                        height: 60,
-                        child: CircularProgressIndicator()));
+                return Center(child: Container(width: 60, height: 60, child: CircularProgressIndicator()));
               },
               errorWidget: (context, url, error) => Icon(
                 Icons.error,
@@ -56,20 +41,11 @@ class ImageFromStorage extends StatelessWidget {
       return FutureBuilder(
           future: DashboardUtils.fixUrls([url!]),
           builder: (context, AsyncSnapshot<List<String>> snapshot) {
-            if (!snapshot.hasData)
-              return Center(
-                  child: Container(
-                      width: 60,
-                      height: 60,
-                      child: CircularProgressIndicator()));
+            if (!snapshot.hasData) return Center(child: Container(width: 60, height: 60, child: CircularProgressIndicator()));
 
             return CachedNetworkImage(
               placeholder: (context, url) {
-                return Center(
-                    child: Container(
-                        width: 60,
-                        height: 60,
-                        child: CircularProgressIndicator()));
+                return Center(child: Container(width: 60, height: 60, child: CircularProgressIndicator()));
               },
               imageUrl: snapshot.data!.first,
               fit: fit,

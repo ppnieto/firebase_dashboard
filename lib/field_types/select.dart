@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
+import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 class FieldTypeSelect extends FieldType {
   final String? initialValue;
-  final Map<String, String> options;
+  final Map<dynamic, String> options;
   final Widget? unselected;
   final Function? validate;
   final String? frozenValue;
@@ -18,7 +19,17 @@ class FieldTypeSelect extends FieldType {
   @override
   String getValue(DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
-      String key = _object.get(column.field);
+      var key = _object.get(column.field);
+      bool contains = options.containsKey(key);
+      if (key is Map) {
+        for (var k in options.keys) {
+          if (k is Map) {
+            if (mapEquals(key, k)) {
+              return options[k] ?? "";
+            }
+          }
+        }
+      }
       if (this.options.containsKey(key)) {
         return this.options[key] ?? "";
       } else {
@@ -85,7 +96,7 @@ class FieldTypeSelect extends FieldType {
           );
     } else {
       if (_object.hasFieldAdm(column.field)) {
-        String key = _object.get(column.field);
+        var key = _object.get(column.field);
         if (this.options.containsKey(key)) {
           return Text(this.options[key] ?? "");
         } else {
@@ -101,12 +112,18 @@ class FieldTypeSelect extends FieldType {
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+    var value = getFieldFromMap(values, column.field, null);
+    /*if (_object?.hasFieldAdm(column.field) ?? false) {
+      value = _object?.get(column.field);
+    } else {
+      value = values[column.field].toString();
+    }
+    */
 
     return Container(
         width: 300,
         child: DropdownButtonFormField(
-          value: value == null ? initialValue : value,
+          value: value ?? initialValue,
           isExpanded: true,
           decoration: InputDecoration(
             filled: !column.editable,

@@ -1,14 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/dashboard.dart';
-import 'package:firebase_dashboard/screens/detalle.dart';
+import 'package:firebase_dashboard/services/dashboard.dart';
+import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_dashboard/admin_modules.dart';
-import 'package:get/get.dart';
 
 class FieldTypeSubcollection extends FieldType {
   final String subcollection;
-  final Module module;
+  final DashboardModule module;
   FieldTypeSubcollection({required this.subcollection, required this.module});
 
   @override
@@ -40,8 +38,10 @@ class FieldTypeSubcollection extends FieldType {
                   IconButton(
                     icon: Icon(Icons.add),
                     onPressed: () {
-                      Get.put(AdminController(module: module));
-                      Get.to(() => DetalleScreen(module: module), id: DashboardMainScreen.dashboardKeyId);
+                      //Get.put(AdminController(module: module));
+                      DashboardService.instance.showDetalle(module: module);
+
+                      //Get.to(() => DetalleScreen(module: module), id: DashboardMainScreen.dashboardKeyId);
                     },
                   )
                 ],
@@ -51,8 +51,9 @@ class FieldTypeSubcollection extends FieldType {
                   children: snapshot.data!.docs
                       .map((subelement) => InkWell(
                             onTap: () {
-                              Get.put(AdminController(module: module));
-                              Get.to(() => DetalleScreen(module: module, object: subelement), id: DashboardMainScreen.dashboardKeyId);
+                              //Get.put(AdminController(module: module));
+                              DashboardService.instance.showDetalle(object: subelement, module: module);
+                              //Get.to(() => DetalleScreen(module: module, object: subelement), id: DashboardMainScreen.dashboardKeyId);
                             },
                             child: ListTile(
                               title: Text(subelement.get('nombre')),
