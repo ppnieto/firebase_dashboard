@@ -37,12 +37,9 @@ class FieldTypeText extends FieldType {
       this.nullWidget});
 
   @override
-  getListContent(
-      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (hasField(_object, column.field)) {
-      String texto = showTextFunction == null
-          ? getField(_object, column.field, "").toString()
-          : showTextFunction!(_object[column.field]);
+      String texto = showTextFunction == null ? getField(_object, column.field, "").toString() : showTextFunction!(_object[column.field]);
       if (this.ellipsisLength > 0 && texto.length >= this.ellipsisLength) {
         return Text(texto);
       } else {
@@ -63,16 +60,15 @@ class FieldTypeText extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    TextEditingController controller =
-        textEditingController ?? TextEditingController();
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+    print("text::getEditContent $values");
+    TextEditingController controller = textEditingController ?? TextEditingController();
 
     var value = getFieldFromMap(values, column.field, null);
     value = showTextFunction == null ? value : showTextFunction!(value);
 
     controller.text = value ?? "";
-    //print('${column.field} => ${controller.text}');
+    print('${column.field} => ${controller.text}');
     return Focus(
         onFocusChange: (hasFocus) {
           if (!hasFocus) {
@@ -91,9 +87,7 @@ class FieldTypeText extends FieldType {
                 labelText: column.label,
                 filled: !column.editable,
                 suffix: trailing,
-                fillColor: column.editable
-                    ? Theme.of(context).canvasColor.withAlpha(1)
-                    : Theme.of(context).disabledColor),
+                fillColor: column.editable ? Theme.of(context).canvasColor.withAlpha(1) : Theme.of(context).disabledColor),
             validator: (value) {
               if (regexp != null) {
                 if (!regexp!.hasMatch(value ?? "")) {
@@ -101,8 +95,7 @@ class FieldTypeText extends FieldType {
                 }
               }
 
-              if (column.mandatory && (value == null || value.isEmpty))
-                return "Campo obligatorio";
+              if (column.mandatory && (value == null || value.isEmpty)) return "Campo obligatorio";
               return null;
             },
             onSaved: (val) {

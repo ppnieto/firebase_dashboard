@@ -47,6 +47,7 @@ dependencies:
   anim_search_bar:
   app_bar_with_search_switch:
   cached_network_image:
+  flex_color_scheme:
 
 
   settings_ui:

@@ -1,4 +1,3 @@
-import 'package:example/firebase_options.dart';
 import 'package:example/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dashboard/dashboard.dart';
@@ -7,8 +6,8 @@ import 'package:get/get.dart';
 
 void main() async {
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+      //options: DefaultFirebaseOptions.currentPlatform,
+      );
   runApp(MyApp());
 }
 

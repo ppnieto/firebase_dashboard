@@ -8,7 +8,12 @@ class AdminActionButton extends StatelessWidget {
   final IconData iconData;
   final String? badge;
   final void Function() onClick;
-  const AdminActionButton({super.key, required this.title, required this.iconData, this.badge, required this.onClick});
+  const AdminActionButton(
+      {super.key,
+      required this.title,
+      required this.iconData,
+      this.badge,
+      required this.onClick});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +23,8 @@ class AdminActionButton extends StatelessWidget {
     }
 
     if (AdminController.buttonAction == ButtonAction.Large) {
-      return OutlinedButton.icon(icon: icon, label: Text(title), onPressed: onClick);
+      return OutlinedButton.icon(
+          icon: icon, label: Text(title), onPressed: onClick);
     } else {
       return IconButton(icon: icon, onPressed: onClick, tooltip: title);
     }

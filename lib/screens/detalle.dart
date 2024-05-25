@@ -17,13 +17,17 @@ class DetalleScreen extends StatelessWidget {
   final bool canDelete;
   final DashboardModule module;
 
-  DetalleScreen({Key? key, this.object, required this.module, this.labelWidth = 120, this.showLabel = true, this.canDelete = true}) : super(key: key);
+  // initialData utilizado para inicializar datos en nuevos objetos
+  final Map<String, dynamic>? initialData;
 
+  DetalleScreen({Key? key, this.object, required this.module, this.labelWidth = 120, this.showLabel = true, this.canDelete = true, this.initialData})
+      : super(key: key);
+
+/*
   Future<bool> _onWillPop() async {
     return true;
   }
-
-  createController() => DetalleController(module: module, object: object, canDelete: canDelete, labelWidth: labelWidth, showLabel: showLabel);
+  */
 
   Future<void> debugInfo(BuildContext context) async {
     Get.showSnackbar(GetSnackBar(
@@ -46,71 +50,67 @@ class DetalleScreen extends StatelessWidget {
   @override
   Widget build(context) {
     Get.log('DetalleScreen::build(${object?.reference.path})');
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: GetBuilder<DetalleController>(
-          init: DetalleController(module: module, object: object),
-          builder: (controller) {
-            List<Widget> actions = [];
-            if (object != null && controller.module.getActions != null) {
-              actions = controller.module.getActions!(object!, context);
-            }
-            if (controller.module.debugInfo) {
-              actions.insert(
-                  0,
-                  IconButton(
-                    icon: const Icon(Icons.info),
-                    onPressed: () => debugInfo(context),
-                  ));
-            }
+    return GetBuilder<DetalleController>(
+        init: DetalleController(module: module, object: object, initialData: initialData),
+        builder: (controller) {
+          List<Widget> actions = [];
+          if (object != null && controller.module.getActions != null) {
+            actions = controller.module.getActions!(object!, context);
+          }
+          if (controller.module.debugInfo) {
+            actions.insert(
+                0,
+                IconButton(
+                  icon: const Icon(Icons.info),
+                  onPressed: () => debugInfo(context),
+                ));
+          }
 
-            return Scaffold(
-                appBar: AppBar(
-                  title: Text(controller.module.title + (object == null ? " / nuevo" : " / detalle")),
-                  centerTitle: false,
-                  actionsIconTheme: IconThemeData(
-                      color: /*DashboardMainScreen.dashboardTheme?.iconButtonColor ??*/
-                          Colors.white),
-                  actions: (actions +
-                          [
-                            if (AdminController.buttonLocation == ButtonLocation.ActionBar)
-                              IconButton(
-                                padding: EdgeInsets.all(0),
-                                icon: Icon(FontAwesomeIcons.floppyDisk),
-                                onPressed: () {
-                                  controller.doGuardar(context);
-                                },
-                              ),
-                            if (controller.module.canRemove && object != null && controller.canDelete)
-                              IconButton(
-                                padding: EdgeInsets.all(0),
-                                icon: Icon(Icons.delete),
-                                onPressed: () async {
-                                  // no usamos el AdminController por si es un detalle sin listado
-                                  //AdminController adminController = Modular.get<AdminController>(tag: module.name);
-                                  AdminController adminController = AdminController(module: module);
-                                  adminController.doBorrar(context, object!, () {
-                                    Navigator.of(context).pop();
-                                  });
-                                },
-                              )
-                          ])
-                      .spacing(10),
-                ),
-                bottomNavigationBar: AdminController.buttonLocation == ButtonLocation.Bottom
-                    ? ElevatedButton.icon(onPressed: () => controller.doGuardar(context), icon: Icon(Icons.save), label: Text("Guardar"))
-                        .paddingAll(24)
-                    : null,
-                floatingActionButton: AdminController.buttonLocation == ButtonLocation.Floating
-                    ? FloatingActionButton(
-                        child: Icon(FontAwesomeIcons.floppyDisk),
-                        onPressed: () {
-                          controller.doGuardar(context);
-                        },
-                      )
-                    : null,
-                body: controller.getDetail(context));
-          }),
-    );
+          return Scaffold(
+              appBar: AppBar(
+                title: Text(controller.module.title + (object == null ? " / nuevo" : " / detalle")),
+                centerTitle: false,
+                actionsIconTheme: IconThemeData(
+                    color: /*DashboardMainScreen.dashboardTheme?.iconButtonColor ??*/
+                        Colors.white),
+                actions: (actions +
+                        [
+                          if (AdminController.buttonLocation == ButtonLocation.ActionBar)
+                            IconButton(
+                              padding: EdgeInsets.all(0),
+                              icon: Icon(FontAwesomeIcons.floppyDisk),
+                              onPressed: () {
+                                controller.doGuardar(context);
+                              },
+                            ),
+                          if (controller.module.canRemove && object != null && controller.canDelete)
+                            IconButton(
+                              padding: EdgeInsets.all(0),
+                              icon: Icon(Icons.delete),
+                              onPressed: () async {
+                                // no usamos el AdminController por si es un detalle sin listado
+                                //AdminController adminController = Modular.get<AdminController>(tag: module.name);
+                                AdminController adminController = AdminController(module: module);
+                                adminController.doBorrar(context, object!, () {
+                                  Navigator.of(context).pop();
+                                });
+                              },
+                            )
+                        ])
+                    .spacing(10),
+              ),
+              bottomNavigationBar: AdminController.buttonLocation == ButtonLocation.Bottom
+                  ? ElevatedButton.icon(onPressed: () => controller.doGuardar(context), icon: Icon(Icons.save), label: Text("Guardar")).paddingAll(24)
+                  : null,
+              floatingActionButton: AdminController.buttonLocation == ButtonLocation.Floating
+                  ? FloatingActionButton(
+                      child: Icon(FontAwesomeIcons.floppyDisk),
+                      onPressed: () {
+                        controller.doGuardar(context);
+                      },
+                    )
+                  : null,
+              body: controller.getDetail(context));
+        });
   }
 }

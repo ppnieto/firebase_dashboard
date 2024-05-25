@@ -36,11 +36,14 @@ class DashboardUtils {
     } finally {
       try {
         Navigator.of(context).pop();
-      } catch (e) {}
+      } catch (e) {
+        print("error!!!! $e");
+      }
     }
   }
 
-  static Future<UploadResult?> pickAndUploadImage({required BuildContext context, required String path, Size? resize}) async {
+  static Future<UploadResult?> pickAndUploadImage(
+      {required BuildContext context, required String path, Size? resize}) async {
     const XTypeGroup typeGroup = XTypeGroup(
       label: 'images',
       extensions: <String>['jpg', 'png'],

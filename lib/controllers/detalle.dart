@@ -16,21 +16,17 @@ class DetalleController extends GetxController {
   final DashboardModule module;
   final _formKey = GlobalKey<FormState>();
   final int responsiveDashboardWidth = 1000;
+  final Map<String, dynamic>? initialData;
 
   Map<String, dynamic>? _updateData;
   StreamSubscription<DocumentSnapshot>? changesSubscription;
 
-  DetalleController({this.object, required this.module, this.labelWidth = 120, this.showLabel = true, this.canDelete = true});
+  DetalleController({this.object, required this.module, this.labelWidth = 120, this.showLabel = true, this.canDelete = true, this.initialData});
 
   @override
   void onInit() {
     super.onInit();
-
-    _updateData = object?.data() as Map<String, dynamic>?;
-    if (_updateData == null) {
-      _updateData = {};
-    }
-
+    _updateData = object?.data() as Map<String, dynamic>? ?? initialData ?? {};
     changesSubscription = object?.reference.snapshots().listen((value) {
       _updateData = value.data() as Map<String, dynamic>?;
       update();
@@ -62,12 +58,32 @@ class DetalleController extends GetxController {
             children: [Text(column.label).paddingOnly(left: 5), child],
           ).paddingOnly(top: 5);
         }
+        if (column.helpText != null) {
+          child = Row(
+            children: [
+              Tooltip(
+                  message: column.helpText!,
+                  child: Icon(
+                    Icons.help,
+                    color: Theme.of(context).primaryColor,
+                  )).paddingOnly(right: 5),
+              Expanded(child: child)
+            ],
+          );
+        }
       } else {
         if (column.showLabelOnEdit && showLabel) {
           child = Row(children: [
             ConstrainedBox(constraints: BoxConstraints(minWidth: labelWidth), child: Text(column.label)),
+            if (column.helpText != null)
+              Tooltip(
+                  message: column.helpText!,
+                  child: Icon(
+                    Icons.help,
+                    color: Theme.of(context).primaryColor,
+                  )),
             SizedBox(width: 20),
-            Expanded(child: child)
+            Expanded(child: child),
           ]);
         }
       }

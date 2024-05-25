@@ -3,6 +3,7 @@ import 'package:firebase_dashboard/dashboard.dart';
 class ColumnModule {
   String label;
   String field;
+  String? helpText;
   FieldType type;
   bool editable;
   bool showOnEdit;
@@ -33,5 +34,6 @@ class ColumnModule {
     this.showOnNew = true,
     this.excellable = true,
     this.canSort = true,
+    this.helpText,
   });
 }

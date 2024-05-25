@@ -33,12 +33,10 @@ class FieldTypeRefNumChilds extends FieldType {
 
   @override
   Future<void> preloadData() async {
-    print("preload data");
     if (preloadAllChildren && collection != null) {
       Query col = FirebaseFirestore.instance.collection(collection!);
       QuerySnapshot qs = await col.get();
       allChildren = qs.docs;
-      print("preload data ok");
     }
   }
 

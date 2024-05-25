@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:get/get.dart';
 
 class FieldTypeAutocomplete extends FieldType {
   final String? collection;
@@ -74,44 +75,74 @@ class FieldTypeAutocomplete extends FieldType {
           }).toList();
 
           _typeAheadController.text = values[column.field];
-
-          return Focus(
-              onFocusChange: (hasFocus) {
-                if (!hasFocus) {
-                  updateData(context, column, this._typeAheadController.text);
-                }
+          if (1 == 2) {
+            return Focus(
+                onFocusChange: (hasFocus) {
+                  if (!hasFocus) {
+                    updateData(context, column, this._typeAheadController.text);
+                  }
+                },
+                child: TypeAheadField(
+                  builder: (context, controller, focusNode) {
+                    return TextFormField(
+                        controller: this._typeAheadController,
+                        focusNode: focusNode,
+                        onSaved: (value) {
+                          updateData(context, column, value);
+                        },
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          labelText: column.label,
+                        ));
+                  },
+                  emptyBuilder: (BuildContext context) {
+                    return ListTile(
+                      //leading: Icon(Icons.shopping_cart),
+                      title: Text("No encuentro ninguna marca"),
+                    );
+                  },
+                  suggestionsCallback: (pattern) async {
+                    print('suggestion $pattern');
+                    return List.from(items.where((element) => element.toLowerCase().contains(pattern.toLowerCase())));
+                  },
+                  itemBuilder: (context, suggestion) {
+                    return ListTile(
+                      title: Text(suggestion != null ? suggestion.toString() : ""),
+                    );
+                  },
+                  onSelected: (suggestion) {
+                    this._typeAheadController.text = suggestion.toString();
+                  },
+                ));
+          } else {
+            return Autocomplete(
+              fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
+                return TextFormField(
+                  controller: textEditingController,
+                  focusNode: focusNode,
+                  onFieldSubmitted: (value) {
+                    print('field submitted $value');
+                    updateData(context, column, value);
+                    onFieldSubmitted();
+                  },
+                  validator: (value) {
+                    if (value != null && value.isNotEmpty && items.contains(value) == false) {
+                      return "Valor no válido: $value";
+                    }
+                  },
+                );
               },
-              child: TypeAheadField(
-                builder: (context, controller, focusNode) {
-                  return TextFormField(
-                      controller: this._typeAheadController,
-                      focusNode: focusNode,
-                      onSaved: (value) {
-                        updateData(context, column, value);
-                      },
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        labelText: column.label,
-                      ));
-                },
-                emptyBuilder: (BuildContext context) {
-                  return ListTile(
-                    //leading: Icon(Icons.shopping_cart),
-                    title: Text("No encuentro ninguna marca"),
-                  );
-                },
-                suggestionsCallback: (pattern) async {
-                  return List.from(items.where((element) => element.toLowerCase().contains(pattern.toLowerCase())));
-                },
-                itemBuilder: (context, suggestion) {
-                  return ListTile(
-                    title: Text(suggestion != null ? suggestion.toString() : ""),
-                  );
-                },
-                onSelected: (suggestion) {
-                  this._typeAheadController.text = suggestion.toString();
-                },
-              ));
+              //initialValue: values[column.field],
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                return items.where((String option) {
+                  return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                });
+              },
+              onSelected: (String selection) {
+                updateData(context, column, selection);
+              },
+            );
+          }
         });
   }
 }

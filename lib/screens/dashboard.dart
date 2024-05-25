@@ -44,13 +44,10 @@ class DashboardMainScreen extends StatelessWidget {
           */
           return Scaffold(
             appBar: getAppBar(context, controller),
-            drawer: Padding(
-                padding: EdgeInsets.only(top: 56),
-                child: Drawer(child: DashboardMenuDrawer())),
+            drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: DashboardMenuDrawer())),
             body: Row(
               children: <Widget>[
-                MediaQuery.of(context).size.width < responsiveDashboardWidth ||
-                        !controller.isMenu
+                MediaQuery.of(context).size.width < responsiveDashboardWidth || !controller.isMenu
                     ? Container()
                     : Container(
                         child: Card(
@@ -64,21 +61,17 @@ class DashboardMainScreen extends StatelessWidget {
                         ),
                       ),
                 Theme(
-                  data: Theme.of(context).copyWith(
-                      appBarTheme: Theme.of(context).appBarTheme.copyWith(
-                          backgroundColor:
-                              Theme.of(context).secondaryHeaderColor)),
+                  data: Theme.of(context)
+                      .copyWith(appBarTheme: Theme.of(context).appBarTheme.copyWith(backgroundColor: Theme.of(context).secondaryHeaderColor)),
                   child: Expanded(
                     child: Navigator(
-                      key:
-                          Get.nestedKey(DashboardController.idNestedNavigation),
+                      key: Get.nestedKey(DashboardController.idNestedNavigation),
                       onGenerateRoute: (settings) {
                         for (var page in data.pages) {
                           var pageRoute = getPageRoute(settings, page);
                           if (pageRoute != null) return pageRoute;
                         }
-                        return GetPageRoute(
-                            page: () => const SizedBox.shrink());
+                        return GetPageRoute(page: () => const SizedBox.shrink());
                       },
                     ),
                   ),
@@ -104,15 +97,11 @@ class DashboardMainScreen extends StatelessWidget {
               },
             )
           : null,
-      automaticallyImplyLeading:
-          MediaQuery.of(context).size.width < responsiveDashboardWidth
-              ? true
-              : false,
+      automaticallyImplyLeading: MediaQuery.of(context).size.width < responsiveDashboardWidth ? true : false,
       backgroundColor: Theme.of(context).primaryColorDark,
-      title:
-          Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
+      title: Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
         if (controller.data.title != null)
-          Container(
+          Expanded(
             child: Text(
               controller.data.title!, // + " - " + subtitle,
               style: TextStyle(

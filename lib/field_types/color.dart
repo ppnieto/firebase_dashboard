@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/dashboard.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -8,8 +9,8 @@ class FieldTypeColor extends FieldType {
 
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
-    String color = _object.getFieldAdm(column.field, Colors.grey.toHex());
-    return Container(width: 30, height: 30, color: color.fromHex);
+    String color = _object.getFieldAdm(column.field, Colors.grey.hex);
+    return Container(width: 30, height: 30, color: color.toColor);
   }
 
   @override
@@ -27,10 +28,9 @@ class FieldTypeColor extends FieldType {
                       title: const Text('Pick a color!'),
                       content: SingleChildScrollView(
                         child: ColorPicker(
-                          pickerColor: strColor.fromHex,
+                          pickerColor: strColor.toColor,
                           onColorChanged: (newColor) {
-                            strColor = newColor.toHex(leadingHashSign: false);
-                            updateData(context, column, newColor.toHex(leadingHashSign: false));
+                            updateData(context, column, newColor.hex);
                           },
                         ),
                         // Use Material color picker:
@@ -66,7 +66,7 @@ class FieldTypeColor extends FieldType {
                   },
                 );
               },
-              child: Container(width: 30, height: 30, color: strColor.fromHex));
+              child: Container(width: 30, height: 30, color: strColor.toColor));
         }),
         Spacer(),
       ],
@@ -74,8 +74,9 @@ class FieldTypeColor extends FieldType {
   }
 }
 
+/*
 extension HexColorExt on String {
-  Color get fromHex {
+  Color get fromHex {    
     final buffer = StringBuffer();
     if (this.length == 6 || this.length == 7) {
       buffer.write('ff');
@@ -97,3 +98,4 @@ extension HexColorExt2 on Color {
       '${green.toRadixString(16).padLeft(2, '0')}'
       '${blue.toRadixString(16).padLeft(2, '0')}';
 }
+*/

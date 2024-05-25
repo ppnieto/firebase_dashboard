@@ -46,7 +46,6 @@ class FieldTypeRef extends FieldType {
 
   @override
   Future<void> preloadData() async {
-    print("preload data");
     QuerySnapshot qs = await getQuery().get();
     Iterable<DocumentSnapshot> docs = qs.docs;
     if (doFilter != null) {
@@ -55,7 +54,6 @@ class FieldTypeRef extends FieldType {
     for (var doc in docs) {
       preloadedData[doc.reference.path] = doc.getFieldAdm(refLabel, '');
     }
-    print("preload data ok");
   }
 
   @override
@@ -304,7 +302,7 @@ class FieldTypeRef extends FieldType {
                     isExpanded: true,
                     items: getIfNullable() +
                         list.map((object) {
-                          return DropdownMenuItem<DocumentReference>(value: object.reference, child: Text(object.get(this.refLabel)));
+                          return DropdownMenuItem<DocumentReference>(value: object.reference, child: Text(object.getFieldAdm(this.refLabel, "?")));
                         }).toList(),
                     onChanged: column.editable
                         ? (val) {

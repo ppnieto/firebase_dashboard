@@ -18,6 +18,7 @@ class LoginScreen extends StatelessWidget {
   final bool useGoogle;
   final bool remindCredentials;
   final double desktopLeftWidth;
+  final Widget? registrarButton;
 
   // para depuracion, meter los datos directamente desde fuera
   final String userName;
@@ -39,6 +40,7 @@ class LoginScreen extends StatelessWidget {
       this.imageAsset,
       this.desktopLeftWidth = 400,
       this.remindCredentials = false,
+      this.registrarButton,
       this.useGoogle = true,
       this.userName = "",
       this.password = ""})
@@ -106,9 +108,7 @@ class _LoginMobile extends StatelessWidget {
                   Text(parent.title, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                   SizedBox(height: 50),
                   Text('Usuario'),
-                  SizedBox(
-                    height: 10,
-                  ),
+                  SizedBox(height: 10),
                   TextField(
                     decoration: InputDecoration(suffixIcon: Icon(Icons.person)),
                     textInputAction: TextInputAction.next,
@@ -150,42 +150,41 @@ class _LoginMobile extends StatelessWidget {
                             child: Text("Olvidé mi contraseña", style: TextStyle(color: Theme.of(context).primaryColor)),
                             onPressed: () {
                               TextEditingController emailController = TextEditingController();
-                              /*
-                                    Get.defaultDialog(
-                                      titlePadding: EdgeInsets.all(30),
-                                      contentPadding: EdgeInsets.all(20),
-                                      title: "Introduzca su dirección de email",
-                                      content: Container(
-                                        height: 90,
-                                        child: Column(
-                                          children: [TextField(controller: emailController)],
-                                        ),
-                                      ),
-                                      actions: [
-                                        TextButtonTheme(
-                                            data: TextButtonThemeData(
-                                                style: TextButton.styleFrom(
-                                              foregroundColor: Colors.white,
-                                              padding: EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
-                                              backgroundColor: Theme.of(context).primaryColor,
-                                            )),
-                                            child: TextButton(
-                                                onPressed: () {
-                                                  if (emailController.text.isNotEmpty) {
-                                                    if (parent.onForgotPassword != null) {
-                                                      parent.onForgotPassword!(emailController.text);
-                                                    }
-                                                    Navigator.of(context).pop();
-                                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                                      content: Text(
-                                                          "Si el usuario existe en el sistema se le enviarán las instrucciones por correo electrónico"),
-                                                    ));
-                                                  }
-                                                },
-                                                child: Text("Obtener nueva contraseña", style: TextStyle(color: Colors.white, fontSize: 18))))
-                                      ],
-                                    );
-                                    */
+
+                              Get.defaultDialog(
+                                titlePadding: EdgeInsets.all(30),
+                                contentPadding: EdgeInsets.all(20),
+                                title: "Introduzca su dirección de email",
+                                content: Container(
+                                  height: 90,
+                                  child: Column(
+                                    children: [TextField(controller: emailController)],
+                                  ),
+                                ),
+                                actions: [
+                                  TextButtonTheme(
+                                      data: TextButtonThemeData(
+                                          style: TextButton.styleFrom(
+                                        foregroundColor: Colors.white,
+                                        padding: EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
+                                        backgroundColor: Theme.of(context).primaryColor,
+                                      )),
+                                      child: TextButton(
+                                          onPressed: () {
+                                            if (emailController.text.isNotEmpty) {
+                                              if (parent.onForgotPassword != null) {
+                                                parent.onForgotPassword!(emailController.text);
+                                              }
+                                              Navigator.of(context).pop();
+                                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                content: Text(
+                                                    "Si el usuario existe en el sistema se le enviarán las instrucciones por correo electrónico"),
+                                              ));
+                                            }
+                                          },
+                                          child: Text("Obtener nueva contraseña", style: TextStyle(color: Colors.white, fontSize: 18))))
+                                ],
+                              );
                             },
                           )
                         ])
@@ -212,6 +211,7 @@ class _LoginMobile extends StatelessWidget {
                                   }),
                       )),
                   SizedBox(height: 40),
+                  if (parent.registrarButton != null) parent.registrarButton!,
                   parent.useGoogle
                       ? TextButton.icon(
                           onPressed: () {
