@@ -27,39 +27,28 @@ class DashboardController extends GetxController {
     update();
   }
 
-  Future<void> showScreen(
-      {required BuildContext context,
-      required Menu menu,
-      bool offAll = true}) async {
+  Future<void> showScreen({required BuildContext context, required Menu menu, bool offAll = true}) async {
     Get.log('showScreen ${menu.label} - ${menu.id} - ${menu.route}');
 
     if (menu.route != null) {
       if (offAll) {
-        Get.offAllNamed(menu.route!,
-            id: DashboardController.idNestedNavigation);
+        Get.offAllNamed(menu.route!, id: DashboardController.idNestedNavigation);
       } else {
-        Get.toNamed(menu.route!,
-            id: DashboardController.idNestedNavigation,
-            preventDuplicates: true);
+        Get.toNamed(menu.route!, id: DashboardController.idNestedNavigation, preventDuplicates: true);
       }
     } else if (menu.builder != null) {
       Widget widget = await menu.builder!(context);
       if (offAll) {
         Get.offAll(() => widget, id: DashboardController.idNestedNavigation);
       } else {
-        Get.to(() => widget,
-            id: DashboardController.idNestedNavigation,
-            preventDuplicates: true);
+        Get.to(() => widget, id: DashboardController.idNestedNavigation, preventDuplicates: true);
       }
     } else {
       throw new Exception("Menu ${menu.id} no tiene route o builder");
     }
   }
 
-  void showMenu(
-      {required String menuId,
-      bool offAll = true,
-      required BuildContext context}) {
+  void showMenu({required String menuId, bool offAll = true, required BuildContext context}) {
     Get.log('showMenu ${menuId} ${data.id}');
     MenuBase? menu = findMenu(id: menuId);
     if (menu != null) {

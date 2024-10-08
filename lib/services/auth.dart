@@ -16,6 +16,8 @@ class AuthService extends GetxService {
 
   AppUser? get appUser => _userStack.isNotEmpty ? _userStack.last : null;
 
+  bool get hasUser => _userStack.isNotEmpty;
+
   T getAppUser<T extends AppUser>() {
     return _userStack.last as T;
   }

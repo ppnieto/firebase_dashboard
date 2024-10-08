@@ -35,6 +35,7 @@ dependencies:
   syncfusion_flutter_datagrid: 
   syncfusion_localizations:
 
+  image_picker:
   dropdown_button2: 
   textfield_tags:
   file_selector:

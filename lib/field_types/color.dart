@@ -10,7 +10,7 @@ class FieldTypeColor extends FieldType {
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     String color = _object.getFieldAdm(column.field, Colors.grey.hex);
-    return Container(width: 30, height: 30, color: color.toColor);
+    return Container(width: 30, height: 30, color: color.fromHex);
   }
 
   @override
@@ -28,7 +28,7 @@ class FieldTypeColor extends FieldType {
                       title: const Text('Pick a color!'),
                       content: SingleChildScrollView(
                         child: ColorPicker(
-                          pickerColor: strColor.toColor,
+                          pickerColor: strColor.fromHex,
                           onColorChanged: (newColor) {
                             updateData(context, column, newColor.hex);
                           },
@@ -66,7 +66,7 @@ class FieldTypeColor extends FieldType {
                   },
                 );
               },
-              child: Container(width: 30, height: 30, color: strColor.toColor));
+              child: Container(width: 30, height: 30, color: strColor.fromHex));
         }),
         Spacer(),
       ],
@@ -74,9 +74,8 @@ class FieldTypeColor extends FieldType {
   }
 }
 
-/*
 extension HexColorExt on String {
-  Color get fromHex {    
+  Color get fromHex {
     final buffer = StringBuffer();
     if (this.length == 6 || this.length == 7) {
       buffer.write('ff');
@@ -90,7 +89,7 @@ extension HexColorExt on String {
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 }
-
+/*
 extension HexColorExt2 on Color {
   String toHex({bool leadingHashSign = true}) => '${leadingHashSign ? '#' : ''}'
       '${alpha.toRadixString(16).padLeft(2, '0')}'

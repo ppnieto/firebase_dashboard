@@ -1,9 +1,3 @@
-import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dashboard/classes/column.dart';
-import 'package:flutter/material.dart';
-
 export 'field_types/field_type_base.dart';
 export 'field_types/actions.dart';
 export 'field_types/image_url.dart';
@@ -11,6 +5,7 @@ export 'field_types/location.dart';
 export 'field_types/date.dart';
 export 'field_types/double.dart';
 export 'field_types/multiref.dart';
+export 'field_types/photo.dart';
 export 'field_types/ref.dart';
 export 'field_types/inline_ref.dart';
 export 'field_types/datetime.dart';
@@ -42,6 +37,7 @@ export 'classes/app_user.dart';
 export 'screens/dashboard.dart';
 export 'screens/admin.dart';
 export 'screens/detalle.dart';
+export 'screens/login.dart';
 export 'services/dashboard.dart';
 export 'controllers/dashboard.dart';
 export 'widgets/loading.dart';

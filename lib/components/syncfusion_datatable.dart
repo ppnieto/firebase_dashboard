@@ -27,7 +27,7 @@ class SyncfusionDataTable extends StatelessWidget {
                   filterIconColor: Theme.of(context).primaryColor,
                   sortIconColor: Theme.of(context).primaryColor),
               child: Builder(builder: (context) {
-                AdminController? controller = DashboardUtils.findController<AdminController>(context);
+                AdminController? controller = DashboardUtils.findController<AdminController>(context: context);
                 if (controller == null) {
                   return Text("Error, no encuentro AdminController");
                 }
@@ -86,7 +86,7 @@ class SyncfusionDataTable extends StatelessWidget {
                                   height: 60.0,
                                   width: double.infinity,
                                   decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: Theme.of(context).primaryColor,
                                       border: BorderDirectional(top: BorderSide(width: 1.0, color: Color.fromRGBO(0, 0, 0, 0.26)))),
                                   alignment: Alignment.center,
                                   child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor)));

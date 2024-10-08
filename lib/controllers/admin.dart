@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
+import 'package:syncfusion_flutter_xlsio/src/xlsio/worksheet/excel_data_row.dart';
 
 class AdminController extends GetxController {
   late int pageSize;
@@ -160,7 +161,8 @@ class AdminController extends GetxController {
             builder: (context, object, inList) {
               return Theme(
                   data: Theme.of(context).copyWith(
-                      iconButtonTheme: IconButtonThemeData(style: ButtonStyle(iconColor: MaterialStatePropertyAll(Theme.of(context).primaryColor)))),
+                      iconButtonTheme: IconButtonThemeData(
+                          style: ButtonStyle(iconColor: MaterialStatePropertyAll(Theme.of(context).primaryColor)))),
                   child: ListView(
                     padding: EdgeInsets.only(left: 20),
                     scrollDirection: Axis.horizontal,
@@ -297,7 +299,12 @@ class AdminController extends GetxController {
     update();
   }
 
-  Future<void> _preloadReferences() async => module.columns.forEach((column) => column.type.preloadData());
+  Future<void> _preloadReferences() async {
+    for (var column in module.columns) {
+      await column.type.preloadData();
+    }
+  }
+  //=> module.columns.forEach((column) => column.type.preloadData());
 
   CollectionReference getCollectionReference() {
     if (module.collection != null) {
@@ -410,7 +417,10 @@ class AdminController extends GetxController {
     if (module.deleteDisabled && !deleteEnabled.contains(object.reference.path)) {
       // esto no debe darse
       Get.snackbar("Atención", "No se puede borrar el elemento",
-          snackPosition: SnackPosition.BOTTOM, backgroundColor: Theme.of(context).primaryColor, colorText: Colors.white, margin: EdgeInsets.all(20));
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Theme.of(context).primaryColor,
+          colorText: Colors.white,
+          margin: EdgeInsets.all(20));
       return;
     }
     DashboardUtils.confirm(
@@ -458,7 +468,7 @@ class AdminController extends GetxController {
       final xlsio.Workbook workbook = new xlsio.Workbook();
       final xlsio.Worksheet sheet = workbook.worksheets[0];
 
-      List<xlsio.ExcelDataRow> rows = [];
+      List<ExcelDataRow> rows = [];
 
       List<ColumnModule> columnasExportables = module.columns.where((e) => e.excellable).toList();
 
@@ -474,7 +484,7 @@ class AdminController extends GetxController {
           cells.add(xlsio.ExcelDataCell(value: value, columnHeader: column.label));
         }
 
-        rows.add(xlsio.ExcelDataRow(cells: cells));
+        rows.add(ExcelDataRow(cells: cells));
       }
       if (rows.isNotEmpty) {
         sheet.importData(rows, 1, 1);

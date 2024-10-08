@@ -42,8 +42,7 @@ class DashboardUtils {
     }
   }
 
-  static Future<UploadResult?> pickAndUploadImage(
-      {required BuildContext context, required String path, Size? resize}) async {
+  static Future<UploadResult?> pickAndUploadImage({required BuildContext context, required String path, Size? resize}) async {
     const XTypeGroup typeGroup = XTypeGroup(
       label: 'images',
       extensions: <String>['jpg', 'png'],
@@ -183,9 +182,11 @@ class DashboardUtils {
     return FirebaseStorage.instance.ref(path).getDownloadURL();
   }
 
+/*
   static T serviceLocator<T extends GetxController>(BuildContext context) {
     return Get.find<T>();
   }
+  */
 
 /*
   static T serviceLocator<T extends State>(BuildContext context) {
@@ -214,13 +215,13 @@ class DashboardUtils {
     Get.offAllNamed(route, id: DashboardController.idNestedNavigation);
   }
 
-  static T? findController<T extends GetxController>(BuildContext context) {
+  static T? findController<T extends GetxController>({required BuildContext context, String? tag}) {
     GetBuilderState<T>? state = context.findRootAncestorStateOfType<GetBuilderState<T>>();
     Get.log('findController<${T}> => ${state?.controller}');
     if (state == null) {
       if (Get.isRegistered<T>()) {
         Get.log('   lo encuentro con Get.find');
-        return Get.find<T>();
+        return Get.find<T>(tag: tag);
       }
       debugPrintStack();
     }

@@ -117,6 +117,7 @@ class FieldTypeAutocomplete extends FieldType {
           } else {
             return Autocomplete(
               fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
+                textEditingController.text = value;
                 return TextFormField(
                   controller: textEditingController,
                   focusNode: focusNode,

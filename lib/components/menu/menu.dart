@@ -1,4 +1,5 @@
 import 'package:firebase_dashboard/components/menu/menu_base.dart';
+import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/controllers/dashboard.dart';
 import 'package:firebase_dashboard/controllers/menu.dart';
 import 'package:firebase_dashboard/services/dashboard.dart';
@@ -28,8 +29,10 @@ class Menu extends MenuBase {
           Get.log('onTap menu');
           menuController.currentMenu = this;
 
+          // eliminamos el AdminController (para que cargue el nuevo sin problema)
+
           if (!selected) {
-            DashboardUtils.findController<DashboardController>(context)?.showMenu(menuId: this.id!, context: context);
+            DashboardUtils.findController<DashboardController>(context: context)?.showMenu(menuId: this.id!, context: context);
           }
           ScaffoldState? scaffoldState = context.findAncestorStateOfType<ScaffoldState>();
           if (scaffoldState != null) {

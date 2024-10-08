@@ -14,9 +14,9 @@ class DetalleController extends GetxController {
   final bool showLabel;
   final bool canDelete;
   final DashboardModule module;
-  final _formKey = GlobalKey<FormState>();
   final int responsiveDashboardWidth = 1000;
   final Map<String, dynamic>? initialData;
+  GlobalKey<FormState>? _formKey;
 
   Map<String, dynamic>? _updateData;
   StreamSubscription<DocumentSnapshot>? changesSubscription;
@@ -104,6 +104,7 @@ class DetalleController extends GetxController {
                 child: StreamBuilder(
                     stream: object?.reference.snapshots(),
                     builder: (context, snapshot) {
+                      _formKey = GlobalKey<FormState>();
                       return Builder(
                           builder: (context) => Form(
                               key: _formKey,
@@ -149,9 +150,9 @@ class DetalleController extends GetxController {
 
   doGuardar(BuildContext context) async {
     Get.log("datos validos?");
-    if (_formKey.currentState!.validate()) {
+    if (_formKey != null && _formKey!.currentState!.validate()) {
       Get.log("  si, válidos. Guardamos...");
-      _formKey.currentState!.save();
+      _formKey!.currentState?.save();
 
       // ñapa para guardar el documentref /values/null como nulo!!!
       for (var entry in this._updateData!.entries) {

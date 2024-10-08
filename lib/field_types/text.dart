@@ -61,12 +61,13 @@ class FieldTypeText extends FieldType {
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    print("text::getEditContent $values");
     TextEditingController controller = textEditingController ?? TextEditingController();
 
     var value = getFieldFromMap(values, column.field, null);
     value = showTextFunction == null ? value : showTextFunction!(value);
-
+    if (value != null && value is String == false) {
+      value = value.toString();
+    }
     controller.text = value ?? "";
     print('${column.field} => ${controller.text}');
     return Focus(

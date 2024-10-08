@@ -63,7 +63,7 @@ class DashboardModule {
       this.fitColumns = false,
       //this.sortBy,
       //this.reverseSortBy,
-      this.rowsPerPage = 100,
+      this.rowsPerPage = 300,
       this.canAdd = true,
       this.canEdit = true,
       this.canRemove = true,

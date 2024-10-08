@@ -8,15 +8,12 @@ class FieldTypeBoolean extends FieldType {
 
   FieldTypeBoolean({this.editOnList = false, this.defValue = false});
   @override
-  getListContent(
-      BuildContext  context, DocumentSnapshot _object, ColumnModule column) {
-    var value = getValue(_object, column) ?? false;
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+    var value = getValue(_object, column) ?? defValue;
 
     return Checkbox(
       value: value,
-      onChanged: column.editable && editOnList
-          ? (v) => _object.reference.update({column.field: v})
-          : null,
+      onChanged: column.editable && editOnList ? (v) => _object.reference.update({column.field: v}) : null,
     );
   }
 
@@ -30,20 +27,15 @@ class FieldTypeBoolean extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     {
-      var value =
-          _object == null ? values[column.field] : getValue(_object, column);
-      if (value == null) value = false;
-      return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+      var value = _object == null ? values[column.field] : getValue(_object, column);
+      if (value == null) value = defValue;
+      return StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
         if (Responsive.isMobile(context)) {
           return Row(
             children: [
-              Container(
-                  constraints: BoxConstraints(minWidth: 120),
-                  child: Text(column.label)),
+              Container(constraints: BoxConstraints(minWidth: 120), child: Text(column.label)),
               SizedBox(width: 20),
               Checkbox(
                   value: value ?? false,

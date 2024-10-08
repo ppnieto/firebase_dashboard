@@ -79,16 +79,19 @@ class _LoginMobile extends StatelessWidget {
   _LoginMobile({Key? key, required this.parent}) : super(key: key);
 
   Future<void> doEnter(BuildContext context) async {
-    LoginController controller = DashboardUtils.serviceLocator<LoginController>(context);
-
-    controller.loading = true;
-    controller.setPreferences();
-    await parent.onEntrar(LoginMethod.loginPassword, controller.emailController.text, controller.passwordController.text);
-    controller.loading = false;
+    LoginController? controller = DashboardUtils.findController<LoginController>(context: context);
+    if (controller != null) {
+      controller.loading = true;
+      controller.setPreferences();
+      await parent.onEntrar(LoginMethod.loginPassword, controller.emailController.text, controller.passwordController.text);
+      controller.loading = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    LoginController? loginController = DashboardUtils.findController<LoginController>(context: context);
+    if (loginController == null) return Text("No encuentro LoginController");
     return Center(
         child: Container(
             padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 50.0),
@@ -113,7 +116,7 @@ class _LoginMobile extends StatelessWidget {
                     decoration: InputDecoration(suffixIcon: Icon(Icons.person)),
                     textInputAction: TextInputAction.next,
                     //decoration: InputDecoration(labelText: "email"),
-                    controller: DashboardUtils.serviceLocator<LoginController>(context).emailController,
+                    controller: loginController.emailController,
                   ),
                   SizedBox(height: 20),
                   Text('Contraseña'),
@@ -127,7 +130,7 @@ class _LoginMobile extends StatelessWidget {
                         await doEnter(context);
                       },
                       textInputAction: TextInputAction.send,
-                      controller: DashboardUtils.serviceLocator<LoginController>(context).passwordController),
+                      controller: loginController.passwordController),
                   SizedBox(height: 10),
                   parent.remindCredentials
                       ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -135,9 +138,9 @@ class _LoginMobile extends StatelessWidget {
                           Expanded(
                             child: CheckboxListTile(
                                 title: Text("Recordar credenciales"),
-                                value: DashboardUtils.serviceLocator<LoginController>(context).recordarCredenciales,
+                                value: loginController.recordarCredenciales,
                                 onChanged: (val) {
-                                  DashboardUtils.serviceLocator<LoginController>(context).recordarCredenciales = val ?? false;
+                                  loginController.recordarCredenciales = val ?? false;
                                 }),
                           )
                         ])
@@ -201,10 +204,10 @@ class _LoginMobile extends StatelessWidget {
                       child: Container(
                         height: 60,
                         child: TextButton(
-                            child: DashboardUtils.serviceLocator<LoginController>(context).loading
+                            child: loginController.loading
                                 ? const Center(child: SizedBox(width: 40, height: 40, child: CircularProgressIndicator()))
                                 : Text("Entrar", style: TextStyle(fontSize: 22)),
-                            onPressed: DashboardUtils.serviceLocator<LoginController>(context).loading
+                            onPressed: loginController.loading
                                 ? null
                                 : () async {
                                     await doEnter(context);

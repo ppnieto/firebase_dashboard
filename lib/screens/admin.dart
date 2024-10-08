@@ -33,10 +33,12 @@ class AdminScreen extends StatelessWidget {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   final scrollController = ScrollController();
 
-  void addRecord(BuildContext context, AdminController controller) => DashboardService.instance.showDetalle(module: controller.module);
+  void addRecord(BuildContext context, AdminController controller) =>
+      DashboardService.instance.showDetalle(module: controller.module);
 
   List<Widget> getLeading(BuildContext context, AdminController controller) {
-    bool showColumnSelectorInPopupMenu = module.showColumnSelection && module.compactColumnSelection && !Responsive.isMobile(context);
+    bool showColumnSelectorInPopupMenu =
+        module.showColumnSelection && module.compactColumnSelection && !Responsive.isMobile(context);
     return [
       if (showColumnSelectorInPopupMenu)
         PopupMenuButton(
@@ -61,10 +63,14 @@ class AdminScreen extends StatelessWidget {
             icon: Icon(FontAwesomeIcons.listUl),
             tooltip: "Selección de columnas",
             onPressed: () async {
-              var items = controller.module.columns.where((element) => element.listable).map((ColumnModule columnModule) {
+              var items =
+                  controller.module.columns.where((element) => element.listable).map((ColumnModule columnModule) {
                 return MultiSelectItem(columnModule.field, columnModule.label);
               }).toList();
-              var initialValue = controller.visibleColumns.entries.where((element) => element.value).map<String>((e) => e.key.field).toList();
+              var initialValue = controller.visibleColumns.entries
+                  .where((element) => element.value)
+                  .map<String>((e) => e.key.field)
+                  .toList();
 
               await showDialog(
                 context: context,
@@ -105,8 +111,8 @@ class AdminScreen extends StatelessWidget {
 
   List<Widget> getActions(BuildContext context, AdminController controller) {
     List<Widget> result = [];
-    bool deleteDisabled =
-        module.deleteDisabled && controller.rowsSelected.any((element) => !controller.deleteEnabled.contains(element.reference.path));
+    bool deleteDisabled = module.deleteDisabled &&
+        controller.rowsSelected.any((element) => !controller.deleteEnabled.contains(element.reference.path));
 
     if (module.canRemove) {
       if (controller.rowsSelected.isNotEmpty) {
@@ -137,10 +143,13 @@ class AdminScreen extends StatelessWidget {
                           controller.rowsSelected.clear();
 
                           Get.snackbar("Atención", "Los elementos han sido borrados",
-                              duration: Duration(seconds: 2), snackPosition: SnackPosition.BOTTOM, margin: EdgeInsets.all(20));
+                              duration: Duration(seconds: 2),
+                              snackPosition: SnackPosition.BOTTOM,
+                              margin: EdgeInsets.all(20));
                         },
                         title: "Atención",
-                        description: "¿Está seguro de borrar " + controller.rowsSelected.length.toString() + " elementos?");
+                        description:
+                            "¿Está seguro de borrar " + controller.rowsSelected.length.toString() + " elementos?");
                   }
             //},
 
@@ -226,7 +235,9 @@ class AdminScreen extends StatelessWidget {
 
   PopupMenuItem getPopupMenu(Widget widget) {
     if (widget is IconButton) {
-      return PopupMenuItem(value: widget, child: ListTile(leading: widget.icon, title: widget.tooltip != null ? Text(widget.tooltip!) : null));
+      return PopupMenuItem(
+          value: widget,
+          child: ListTile(leading: widget.icon, title: widget.tooltip != null ? Text(widget.tooltip!) : null));
     } else if (widget is AppBarSearchButton) {
       return PopupMenuItem(value: widget, child: ListTile(leading: const Icon(Icons.search), title: Text("Buscar")));
     } else {
@@ -256,6 +267,7 @@ class AdminScreen extends StatelessWidget {
   Widget build(context) {
     return GetBuilder<AdminController>(
         init: AdminController(module: module, filtroInicial: filtroInicial),
+        tag: module.name,
         global: false,
         builder: (controller) {
           String _title = controller.module.title;
@@ -278,6 +290,7 @@ class AdminScreen extends StatelessWidget {
                     preferredSize: const Size(double.infinity, kToolbarHeight),
                     child: GetBuilder<AdminController>(
                       id: "toolbar",
+                      tag: module.name,
                       init: controller,
                       builder: (controller) {
                         return AppBar(
@@ -297,7 +310,9 @@ class AdminScreen extends StatelessWidget {
             ),
             endDrawer: getSidebar(controller),
             bottomNavigationBar: AdminController.buttonLocation == ButtonLocation.Bottom && module.canAdd
-                ? ElevatedButton.icon(icon: Icon(Icons.add), onPressed: () => addRecord(context, controller), label: Text("Añadir")).paddingAll(24)
+                ? ElevatedButton.icon(
+                        icon: Icon(Icons.add), onPressed: () => addRecord(context, controller), label: Text("Añadir"))
+                    .paddingAll(24)
                 : null,
             floatingActionButton: AdminController.buttonLocation == ButtonLocation.Floating && module.canAdd
                 ? FloatingActionButton(

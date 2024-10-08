@@ -20,7 +20,7 @@ class MenuInfo extends Menu {
         onTap: () {
           Get.log('onTap menu');
           menuController.currentMenu = this;
-          if (!selected) DashboardUtils.findController<DashboardController>(context)?.showScreen(context: context, menu: this);
+          if (!selected) DashboardUtils.findController<DashboardController>(context:context)?.showScreen(context: context, menu: this);
           ScaffoldState? scaffolsState = context.findAncestorStateOfType<ScaffoldState>();
           if (scaffolsState != null) {
             if (scaffolsState.isDrawerOpen) {

@@ -12,7 +12,7 @@ class DashboardMenuDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     print("rebuild dashboard menu drawer");
     DashboardController? dashboardController =
-        DashboardUtils.findController<DashboardController>(context);
+        DashboardUtils.findController<DashboardController>(context:context);
 
     if (dashboardController == null) {
       return Text("No encuentro dashboard controller (last)");
@@ -28,7 +28,7 @@ class DashboardMenuDrawer extends StatelessWidget {
 
             if (menu.role != null) {
               Function? getRolesFunction =
-                  DashboardUtils.findController<DashboardController>(context)
+                  DashboardUtils.findController<DashboardController>(context:context)
                       ?.data
                       .getRolesFunction;
               //Get.log('getRolesFunction: ${getRolesFunction}');

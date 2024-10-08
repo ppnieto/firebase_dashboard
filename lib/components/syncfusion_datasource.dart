@@ -12,8 +12,7 @@ class SyncfusionDataSource extends DataGridSource {
   final AdminController controller;
   List<DataGridRow> dataGridRows = [];
 
-  SyncfusionDataSource(
-      {required this.columns, required this.module, required this.controller});
+  SyncfusionDataSource({required this.columns, required this.module, required this.controller});
 
   @override
   Future<void> handleLoadMoreRows() async {
@@ -39,8 +38,7 @@ class SyncfusionDataSource extends DataGridSource {
           }
           cells.add(DataGridCell(value: value, columnName: column.field));
         } else {
-          throw new Exception(
-              "No encuentro columna para campo ${column.field}");
+          throw new Exception("No encuentro columna para campo ${column.field}");
         }
       }
       dataGridRows.add(SyncfusionDataGridRow(cells: cells, doc: doc));
@@ -51,8 +49,7 @@ class SyncfusionDataSource extends DataGridSource {
   @override
   List<DataGridRow> get rows => dataGridRows;
 
-  ColumnModule? getColumnModuleByField(String field) =>
-      columns.firstWhere((element) => element.field == field);
+  ColumnModule? getColumnModuleByField(String field) => columns.firstWhere((element) => element.field == field);
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
@@ -73,8 +70,7 @@ class SyncfusionDataSource extends DataGridSource {
         child: Builder(builder: (context) {
           return DefaultTextStyle(
               style: TextStyle(color: Theme.of(context).primaryColorDark),
-              child: column?.type.getListContent(context, doc, column) ??
-                  SizedBox.shrink());
+              child: column?.type.getListContent(context, doc, column) ?? SizedBox.shrink());
         }),
       );
     }).toList());
@@ -82,10 +78,7 @@ class SyncfusionDataSource extends DataGridSource {
 
   @override
   Widget? buildTableSummaryCellWidget(
-      GridTableSummaryRow summaryRow,
-      GridSummaryColumn? summaryColumn,
-      RowColumnIndex rowColumnIndex,
-      String summaryValue) {
+      GridTableSummaryRow summaryRow, GridSummaryColumn? summaryColumn, RowColumnIndex rowColumnIndex, String summaryValue) {
     return summaryValue.isEmpty
         ? const SizedBox.shrink()
         : Container(
@@ -103,14 +96,12 @@ class SyncfusionDataSource extends DataGridSource {
 
 class SyncfusionDataGridRow extends DataGridRow {
   final DocumentSnapshot doc;
-  SyncfusionDataGridRow({required List<DataGridCell> cells, required this.doc})
-      : super(cells: cells);
+  SyncfusionDataGridRow({required List<DataGridCell> cells, required this.doc}) : super(cells: cells);
 }
 
 class DashboardDate extends DateTime {
   DashboardDate.now() : super.now();
-  DashboardDate.from(DateTime dt)
-      : super(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second);
+  DashboardDate.from(DateTime dt) : super(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second);
 
   @override
   toString() {

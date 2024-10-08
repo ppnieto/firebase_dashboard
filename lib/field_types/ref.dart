@@ -46,7 +46,8 @@ class FieldTypeRef extends FieldType {
 
   @override
   Future<void> preloadData() async {
-    QuerySnapshot qs = await getQuery().get();
+    Query query = getQuery();
+    QuerySnapshot qs = await query.get();
     Iterable<DocumentSnapshot> docs = qs.docs;
     if (doFilter != null) {
       docs = doFilter!(docs);
@@ -114,7 +115,7 @@ class FieldTypeRef extends FieldType {
           stream: ref.snapshots(),
           builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
             if (!snapshot.hasData) return SizedBox.shrink();
-            if (snapshot.data!.data() != null && snapshot.data!.get(this.refLabel) != null) {
+            if (snapshot.data!.data() != null && snapshot.data!.hasFieldAdm(this.refLabel)) {
               return getListWidget(context, _object, snapshot.data!.get(this.refLabel) ?? "-",
                   style: TextStyle(color: Theme.of(context).primaryColorDark));
             } else

@@ -68,7 +68,7 @@ abstract class FieldType {
 
   updateDataColumnName(BuildContext context, String columnName, value) {
     print("updateData $columnName => $value");
-    DashboardUtils.serviceLocator<DetalleController>(context).updateData(columnName, value);
+    DashboardUtils.findController<DetalleController>(context: context)?.updateData(columnName, value);
   }
 }
 

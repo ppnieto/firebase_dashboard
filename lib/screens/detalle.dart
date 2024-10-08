@@ -49,9 +49,10 @@ class DetalleScreen extends StatelessWidget {
 
   @override
   Widget build(context) {
-    Get.log('DetalleScreen::build(${object?.reference.path})');
+    Get.log('DetalleScreen::build(${object?.reference.path}) / ${module.name}');
     return GetBuilder<DetalleController>(
         init: DetalleController(module: module, object: object, initialData: initialData),
+        tag: module.name,
         builder: (controller) {
           List<Widget> actions = [];
           if (object != null && controller.module.getActions != null) {
