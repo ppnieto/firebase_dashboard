@@ -161,8 +161,7 @@ class AdminController extends GetxController {
             builder: (context, object, inList) {
               return Theme(
                   data: Theme.of(context).copyWith(
-                      iconButtonTheme: IconButtonThemeData(
-                          style: ButtonStyle(iconColor: MaterialStatePropertyAll(Theme.of(context).primaryColor)))),
+                      iconButtonTheme: IconButtonThemeData(style: ButtonStyle(iconColor: MaterialStatePropertyAll(Theme.of(context).primaryColor)))),
                   child: ListView(
                     padding: EdgeInsets.only(left: 20),
                     scrollDirection: Axis.horizontal,
@@ -417,10 +416,7 @@ class AdminController extends GetxController {
     if (module.deleteDisabled && !deleteEnabled.contains(object.reference.path)) {
       // esto no debe darse
       Get.snackbar("Atención", "No se puede borrar el elemento",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Theme.of(context).primaryColor,
-          colorText: Colors.white,
-          margin: EdgeInsets.all(20));
+          snackPosition: SnackPosition.BOTTOM, backgroundColor: Theme.of(context).primaryColor, colorText: Colors.white, margin: EdgeInsets.all(20));
       return;
     }
     DashboardUtils.confirm(

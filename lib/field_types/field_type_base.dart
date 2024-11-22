@@ -121,11 +121,10 @@ extension KeyPath on Map {
 
         return docdata[mapKey][arrayKey];
       } else {
-        if (docdata.containsKey(key)) {
-          return docdata[key];
-        } else {
-          return {};
+        if (!docdata.containsKey(key)) {
+          docdata[key] = {};
         }
+        return docdata[key];
       }
     }
 

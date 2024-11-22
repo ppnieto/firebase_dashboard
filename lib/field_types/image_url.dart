@@ -12,6 +12,7 @@ class FieldTypeImageURL extends FieldType {
   bool clickToOpen;
   String storePath;
   Widget? noImageWidget;
+  Widget? errorImage;
   bool showImageOnEdit;
   TextEditingController textController = TextEditingController();
   TextEditingController pathController = TextEditingController();
@@ -24,20 +25,19 @@ class FieldTypeImageURL extends FieldType {
       required this.storePath,
       this.showImageOnEdit = false,
       this.clickToOpen = false,
-      this.noImageWidget});
+      this.noImageWidget,
+      this.errorImage});
 
   @override
-  getListContent(
-      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     if (_object.hasFieldAdm(column.field)) {
       var value = _object.get(column.field);
-      var url = value is Map
-          ? _object[column.field]['url']
-          : _object.get(column.field);
+      var url = value is Map ? _object[column.field]['url'] : _object.get(column.field);
       Widget image = Image.network(
         url,
         width: this.width,
         height: this.height,
+        errorBuilder: (context, error, stackTrace) => errorImage ?? Icon(Icons.error),
       );
       if (clickToOpen) {
         image = InkWell(
@@ -46,17 +46,14 @@ class FieldTypeImageURL extends FieldType {
               launchUrl(Uri.parse(url));
             });
       }
-      return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0), child: image);
+      return Padding(padding: const EdgeInsets.symmetric(vertical: 2.0), child: image);
     } else {
-      return noImageWidget ??
-          Text("<No hay imagen>", style: TextStyle(color: Colors.red));
+      return noImageWidget ?? Text("<No hay imagen>", style: TextStyle(color: Colors.red));
     }
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
     var value = values[column.field];
     String url = "";
 
@@ -69,9 +66,7 @@ class FieldTypeImageURL extends FieldType {
       pathController.text = "";
     }
 
-    Widget image = url.isNotEmpty
-        ? Image.network(url, height: 300)
-        : const SizedBox.shrink();
+    Widget image = url.isNotEmpty ? Image.network(url, height: 300) : const SizedBox.shrink();
 
     if (url.isNotEmpty && clickToOpen) {
       image = InkWell(
@@ -91,15 +86,13 @@ class FieldTypeImageURL extends FieldType {
                 ),
                 enabled: this.allowURL,
                 onSaved: (val) {
-                  updateData(context, column,
-                      {'url': val, 'path': pathController.text});
+                  updateData(context, column, {'url': val, 'path': pathController.text});
                 })),
         if (showImageOnEdit) image,
         if (allowUpload) SizedBox(width: 20),
         if (allowUpload)
           IconButton(
-            icon:
-                Icon(Icons.upload_file, color: Theme.of(context).primaryColor),
+            icon: Icon(Icons.upload_file, color: Theme.of(context).primaryColor),
             onPressed: () {
               showDialog(
                   context: context,
@@ -122,9 +115,7 @@ class _UploadDialog extends StatefulWidget {
   final String url;
   final ColumnModule column;
 
-  _UploadDialog(
-      {Key? key, required this.parent, required this.url, required this.column})
-      : super(key: key);
+  _UploadDialog({Key? key, required this.parent, required this.url, required this.column}) : super(key: key);
 
   @override
   __UploadDialogState createState() => __UploadDialogState();
@@ -140,8 +131,7 @@ class __UploadDialogState extends State<_UploadDialog> {
   }
 
   void uploadFile() async {
-    var res = await DashboardUtils.pickAndUploadFile(
-        context, widget.parent.storePath);
+    var res = await DashboardUtils.pickAndUploadFile(context, widget.parent.storePath);
     if (res != null) {
       String downloadUrl = await res.reference.getDownloadURL();
       setState(() {
@@ -169,19 +159,13 @@ class __UploadDialogState extends State<_UploadDialog> {
       width: 800,
       height: 700,
       padding: EdgeInsets.all(50),
-      decoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
-          ]),
+      decoration: BoxDecoration(shape: BoxShape.rectangle, color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [
+        BoxShadow(color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
+      ]),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text("Subir imagen",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
+          Text("Subir imagen", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
           SizedBox(height: 20),
           Expanded(
             child: Image.network(this.url),
@@ -194,8 +178,7 @@ class __UploadDialogState extends State<_UploadDialog> {
                   onPressed: () {
                     uploadFile();
                   },
-                  child:
-                      Text("Subir archivo...", style: TextStyle(fontSize: 18))),
+                  child: Text("Subir archivo...", style: TextStyle(fontSize: 18))),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [

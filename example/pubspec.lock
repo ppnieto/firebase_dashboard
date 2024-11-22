@@ -474,6 +474,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      sha256: "9b78450b89f059e96c9ebb355fa6b3df1d6b330436e0b885fb49594c41721398"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.23"
   flutter_spinbox:
     dependency: transitive
     description:
@@ -556,6 +564,70 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
+  image_picker:
+    dependency: transitive
+    description:
+      name: image_picker
+      sha256: "021834d9c0c3de46bf0fe40341fa07168407f694d9b2bb18d532dc1261867f7a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
+  image_picker_android:
+    dependency: transitive
+    description:
+      name: image_picker_android
+      sha256: "8faba09ba361d4b246dc0a17cb4289b3324c2b9f6db7b3d457ee69106a86bd32"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.12+17"
+  image_picker_for_web:
+    dependency: transitive
+    description:
+      name: image_picker_for_web
+      sha256: "717eb042ab08c40767684327be06a5d8dbb341fe791d514e4b92c7bbe1b7bb83"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.6"
+  image_picker_ios:
+    dependency: transitive
+    description:
+      name: image_picker_ios
+      sha256: "4f0568120c6fcc0aaa04511cb9f9f4d29fc3d0139884b1d06be88dcec7641d6b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.12+1"
+  image_picker_linux:
+    dependency: transitive
+    description:
+      name: image_picker_linux
+      sha256: "4ed1d9bb36f7cd60aa6e6cd479779cc56a4cb4e4de8f49d487b1aaad831300fa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1+1"
+  image_picker_macos:
+    dependency: transitive
+    description:
+      name: image_picker_macos
+      sha256: "3f5ad1e8112a9a6111c46d0b57a7be2286a9a07fc6e1976fdf5be2bd31d4ff62"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1+1"
+  image_picker_platform_interface:
+    dependency: transitive
+    description:
+      name: image_picker_platform_interface
+      sha256: "9ec26d410ff46f483c5519c29c02ef0e02e13a543f882b152d4bfd2f06802f80"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.10.0"
+  image_picker_windows:
+    dependency: transitive
+    description:
+      name: image_picker_windows
+      sha256: "6ad07afc4eb1bc25f3a01084d28520496c4a3bb0cb13685435838167c9dcedeb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1+1"
   intl:
     dependency: transitive
     description:
@@ -620,6 +692,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.15.0"
+  mime:
+    dependency: transitive
+    description:
+      name: mime
+      sha256: "41a20518f0cb1256669420fdba0cd90d21561e560ac240f26ef8322e45bb7ed6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   multi_select_flutter:
     dependency: transitive
     description:
@@ -877,58 +957,58 @@ packages:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: "6e67726b85812afc7105725a23620b876ab7f6b04b8410e211330ffb8c2cdbe8"
+      sha256: dde81d3a318d914e26b6882051c486b0f5e4fa13e7bc3661741de78f0397fe64
       url: "https://pub.dev"
     source: hosted
-    version: "26.2.14"
+    version: "27.1.56"
   syncfusion_flutter_datagrid:
     dependency: transitive
     description:
       name: syncfusion_flutter_datagrid
-      sha256: "9b6a6d45e0035f4c099bf97852a16074a2a322859b83ef404a9505c58bcecfff"
+      sha256: "33a34cf12fa9023becdb382661570ec8d2532d863021b078a872e65c681fcef7"
       url: "https://pub.dev"
     source: hosted
-    version: "26.2.14"
+    version: "27.1.56"
   syncfusion_flutter_datagrid_export:
     dependency: transitive
     description:
       name: syncfusion_flutter_datagrid_export
-      sha256: "7c6fd99f9226224f78b75361e3c15ee24e1f3ae3bdef9633ac6f19ec72adf97c"
+      sha256: "2c4cba7820140a71e7722248891a203db7605d71a750c478e89f9c40e21dde1e"
       url: "https://pub.dev"
     source: hosted
-    version: "26.2.14"
+    version: "27.1.56"
   syncfusion_flutter_pdf:
     dependency: transitive
     description:
       name: syncfusion_flutter_pdf
-      sha256: "59a1173dc34a1fac0a41aff7a2bb6f3c1578f1bfd749ea8b24379018434ba5a5"
+      sha256: e834694e75f4c745e5d74d671e3715e02e2adb0310f0d33ce3a3aa4769bb91bc
       url: "https://pub.dev"
     source: hosted
-    version: "26.2.14"
+    version: "27.1.56"
   syncfusion_flutter_xlsio:
     dependency: transitive
     description:
       name: syncfusion_flutter_xlsio
-      sha256: "6250427a781642e22d250b87689d9a09acfd864f0bfbd95642e3e0c52b4e3b46"
+      sha256: "5585cc17a9b71a40fefcde18424e6f6a1b27c340887bfdb86a91e38f086f6e33"
       url: "https://pub.dev"
     source: hosted
-    version: "26.2.14"
+    version: "27.1.56"
   syncfusion_localizations:
     dependency: transitive
     description:
       name: syncfusion_localizations
-      sha256: "99c3586b2502d2bc4b4c8286c83061b8bf2b5c9e4617433b7576f3d1409d099e"
+      sha256: "6dbc2eab1d70fad7b8501c44198bef4d36748cc6860252dfd4c8cfe2f3b10e7b"
       url: "https://pub.dev"
     source: hosted
-    version: "26.2.14"
+    version: "27.1.56"
   syncfusion_officecore:
     dependency: transitive
     description:
       name: syncfusion_officecore
-      sha256: "9ec8c9d9f66bb20440ff7e31c83fed52fb9d55bc4ba32b6cbaea70fa82ca9b41"
+      sha256: b383ee769460f4c32b201fbf88ae9c2af3188378404bd946cf222677439752e4
       url: "https://pub.dev"
     source: hosted
-    version: "26.2.14"
+    version: "27.1.56"
   synchronized:
     dependency: transitive
     description:

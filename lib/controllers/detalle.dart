@@ -181,9 +181,11 @@ class DetalleController extends GetxController {
       if (msgValidation == null) {
         if (doUpdate) {
           if (!isNew) {
+            // primero hacemos pop por si está offline que no se quede y permita pulsarlo muchas veces
+            DashboardService.instance.pop();
+
             object!.reference.set(_updateData!, SetOptions(merge: true)).then((value) {
               if (module.onUpdated != null) module.onUpdated!(isNew, object!.reference);
-              DashboardService.instance.pop();
 
               ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
                 content: Text("Elemento guardado con éxito"),
@@ -203,10 +205,10 @@ class DetalleController extends GetxController {
             } else {
               action = _getCollection().add(_updateData!);
             }
-
-            action.then((value) {
+            // primero hacemos pop por si está offline que no se quede y permita pulsarlo muchas veces
+            DashboardService.instance.pop();
+            await action.then((value) {
               if (module.onUpdated != null) module.onUpdated!(isNew, value);
-              DashboardService.instance.pop();
               ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
                 content: Text("Elemento creado con éxito"),
                 duration: Duration(seconds: 3),

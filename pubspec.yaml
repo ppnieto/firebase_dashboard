@@ -30,11 +30,12 @@ dependencies:
   flutter_tags: 
   flutter_typeahead: 
 
-  syncfusion_flutter_xlsio:
+  #syncfusion_flutter_xlsio:
   syncfusion_flutter_datagrid_export: 
   syncfusion_flutter_datagrid: 
   syncfusion_localizations:
-
+  syncfusion_flutter_xlsio: ^27.1.52
+  
   image_picker:
   dropdown_button2: 
   textfield_tags:

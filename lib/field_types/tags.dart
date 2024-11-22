@@ -9,7 +9,8 @@ class FieldTypeTags extends FieldType {
   final TextStyle listStyle;
   final int maxTagsInList;
 
-  FieldTypeTags({this.hint = "", this.maxTagsInList = 0, this.listStyle = const TextStyle(fontSize: 12, color: Colors.white)});
+  FieldTypeTags(
+      {this.hint = "", this.maxTagsInList = 0, this.listStyle = const TextStyle(fontSize: 12, color: Colors.white)});
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
@@ -70,7 +71,7 @@ class FieldTypeTags extends FieldType {
                   width: 3.0,
                 ),
               ),
-              hintText:  /*_controller.hasTags ? '' :*/ hint,
+              hintText: /*_controller.hasTags ? '' :*/ hint,
               errorText: textFieldTagValues.error,
               prefixIconConstraints: BoxConstraints(maxWidth: _distanceToField * 0.74),
               prefixIcon: textFieldTagValues.tags.isNotEmpty
@@ -178,7 +179,8 @@ class FieldTypeTags extends FieldType {
             spacing: 5.0,
             children: value
                 .map<Widget>((e) => Container(
-                      decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.all(Radius.circular(5))),
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor, borderRadius: BorderRadius.all(Radius.circular(5))),
                       padding: EdgeInsets.all(6),
                       child: Text(e, style: listStyle),
                     ))

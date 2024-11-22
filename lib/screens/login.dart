@@ -19,6 +19,7 @@ class LoginScreen extends StatelessWidget {
   final bool remindCredentials;
   final double desktopLeftWidth;
   final Widget? registrarButton;
+  final Widget? version;
 
   // para depuracion, meter los datos directamente desde fuera
   final String userName;
@@ -43,7 +44,8 @@ class LoginScreen extends StatelessWidget {
       this.registrarButton,
       this.useGoogle = true,
       this.userName = "",
-      this.password = ""})
+      this.password = "",
+      this.version})
       : super(key: key);
 
   Widget getLogo() {
@@ -93,137 +95,145 @@ class _LoginMobile extends StatelessWidget {
     LoginController? loginController = DashboardUtils.findController<LoginController>(context: context);
     if (loginController == null) return Text("No encuentro LoginController");
     return Center(
-        child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 50.0),
-            constraints: BoxConstraints(
-              maxWidth: 500,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            child: ListView(
-                shrinkWrap: true,
-                //crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (!Responsive.isDesktop(context)) parent.getLogo(),
-                  SizedBox(height: 20),
-                  Text(parent.title, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                  SizedBox(height: 50),
-                  Text('Usuario'),
-                  SizedBox(height: 10),
-                  TextField(
-                    decoration: InputDecoration(suffixIcon: Icon(Icons.person)),
-                    textInputAction: TextInputAction.next,
-                    //decoration: InputDecoration(labelText: "email"),
-                    controller: loginController.emailController,
-                  ),
-                  SizedBox(height: 20),
-                  Text('Contraseña'),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  TextFormField(
-                      obscureText: true,
-                      decoration: InputDecoration(suffixIcon: Icon(Icons.lock)),
-                      onFieldSubmitted: (value) async {
-                        await doEnter(context);
-                      },
-                      textInputAction: TextInputAction.send,
-                      controller: loginController.passwordController),
-                  SizedBox(height: 10),
-                  parent.remindCredentials
-                      ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          SizedBox(),
-                          Expanded(
-                            child: CheckboxListTile(
-                                title: Text("Recordar credenciales"),
-                                value: loginController.recordarCredenciales,
-                                onChanged: (val) {
-                                  loginController.recordarCredenciales = val ?? false;
-                                }),
-                          )
-                        ])
-                      : SizedBox.shrink(),
-                  SizedBox(height: 10),
-                  parent.allowReminder
-                      ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          Container(),
-                          TextButton(
-                            child: Text("Olvidé mi contraseña", style: TextStyle(color: Theme.of(context).primaryColor)),
-                            onPressed: () {
-                              TextEditingController emailController = TextEditingController();
-
-                              Get.defaultDialog(
-                                titlePadding: EdgeInsets.all(30),
-                                contentPadding: EdgeInsets.all(20),
-                                title: "Introduzca su dirección de email",
-                                content: Container(
-                                  height: 90,
-                                  child: Column(
-                                    children: [TextField(controller: emailController)],
-                                  ),
-                                ),
-                                actions: [
-                                  TextButtonTheme(
-                                      data: TextButtonThemeData(
-                                          style: TextButton.styleFrom(
-                                        foregroundColor: Colors.white,
-                                        padding: EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
-                                        backgroundColor: Theme.of(context).primaryColor,
-                                      )),
-                                      child: TextButton(
-                                          onPressed: () {
-                                            if (emailController.text.isNotEmpty) {
-                                              if (parent.onForgotPassword != null) {
-                                                parent.onForgotPassword!(emailController.text);
-                                              }
-                                              Navigator.of(context).pop();
-                                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                                content: Text(
-                                                    "Si el usuario existe en el sistema se le enviarán las instrucciones por correo electrónico"),
-                                              ));
-                                            }
-                                          },
-                                          child: Text("Obtener nueva contraseña", style: TextStyle(color: Colors.white, fontSize: 18))))
-                                ],
-                              );
-                            },
-                          )
-                        ])
-                      : SizedBox.shrink(),
-                  SizedBox(height: 40),
-                  TextButtonTheme(
-                      data: TextButtonThemeData(
-                          style: TextButton.styleFrom(
-                        minimumSize: Size(300, 50),
-                        padding: EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
-                        foregroundColor: Theme.of(context).canvasColor,
-                        backgroundColor: Theme.of(context).primaryColor,
-                      )),
-                      child: Container(
-                        height: 60,
-                        child: TextButton(
-                            child: loginController.loading
-                                ? const Center(child: SizedBox(width: 40, height: 40, child: CircularProgressIndicator()))
-                                : Text("Entrar", style: TextStyle(fontSize: 22)),
-                            onPressed: loginController.loading
-                                ? null
-                                : () async {
-                                    await doEnter(context);
-                                  }),
-                      )),
-                  SizedBox(height: 40),
-                  if (parent.registrarButton != null) parent.registrarButton!,
-                  parent.useGoogle
-                      ? TextButton.icon(
+        child: Stack(children: [
+      Container(
+          padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 50.0),
+          constraints: BoxConstraints(
+            maxWidth: 500,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          child: ListView(
+              shrinkWrap: true,
+              //crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!Responsive.isDesktop(context)) parent.getLogo(),
+                SizedBox(height: 20),
+                Text(parent.title, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                SizedBox(height: 50),
+                Text('Usuario'),
+                SizedBox(height: 10),
+                TextField(
+                  decoration: InputDecoration(suffixIcon: Icon(Icons.person)),
+                  textInputAction: TextInputAction.next,
+                  //decoration: InputDecoration(labelText: "email"),
+                  controller: loginController.emailController,
+                ),
+                SizedBox(height: 20),
+                Text('Contraseña'),
+                SizedBox(
+                  height: 10,
+                ),
+                TextFormField(
+                    obscureText: true,
+                    decoration: InputDecoration(suffixIcon: Icon(Icons.lock)),
+                    onFieldSubmitted: (value) async {
+                      await doEnter(context);
+                    },
+                    textInputAction: TextInputAction.send,
+                    controller: loginController.passwordController),
+                SizedBox(height: 10),
+                parent.remindCredentials
+                    ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                        SizedBox(),
+                        Expanded(
+                          child: CheckboxListTile(
+                              title: Text("Recordar credenciales"),
+                              value: loginController.recordarCredenciales,
+                              onChanged: (val) {
+                                loginController.recordarCredenciales = val ?? false;
+                              }),
+                        )
+                      ])
+                    : SizedBox.shrink(),
+                SizedBox(height: 10),
+                parent.allowReminder
+                    ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                        Container(),
+                        TextButton(
+                          child: Text("Olvidé mi contraseña", style: TextStyle(color: Theme.of(context).primaryColor)),
                           onPressed: () {
-                            parent.onEntrar(LoginMethod.google, "", "");
+                            TextEditingController emailController = TextEditingController();
+
+                            Get.defaultDialog(
+                              titlePadding: EdgeInsets.all(30),
+                              contentPadding: EdgeInsets.all(20),
+                              title: "Introduzca su dirección de email",
+                              content: Container(
+                                height: 90,
+                                child: Column(
+                                  children: [TextField(controller: emailController)],
+                                ),
+                              ),
+                              actions: [
+                                TextButtonTheme(
+                                    data: TextButtonThemeData(
+                                        style: TextButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      padding: EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
+                                      backgroundColor: Theme.of(context).primaryColor,
+                                    )),
+                                    child: TextButton(
+                                        onPressed: () {
+                                          if (emailController.text.isNotEmpty) {
+                                            if (parent.onForgotPassword != null) {
+                                              parent.onForgotPassword!(emailController.text);
+                                            }
+                                            Navigator.of(context).pop();
+                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                              content:
+                                                  Text("Si el usuario existe en el sistema se le enviarán las instrucciones por correo electrónico"),
+                                            ));
+                                          }
+                                        },
+                                        child: Text("Obtener nueva contraseña", style: TextStyle(color: Colors.white, fontSize: 18))))
+                              ],
+                            );
                           },
-                          icon: Icon(FontAwesomeIcons.google, color: Theme.of(context).colorScheme.secondary),
-                          label: Text("Entrar usando Google", style: TextStyle(color: Theme.of(context).colorScheme.secondary)))
-                      : SizedBox.shrink(),
-                ])));
+                        )
+                      ])
+                    : SizedBox.shrink(),
+                SizedBox(height: 40),
+                TextButtonTheme(
+                    data: TextButtonThemeData(
+                        style: TextButton.styleFrom(
+                      minimumSize: Size(300, 50),
+                      padding: EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
+                      foregroundColor: Theme.of(context).canvasColor,
+                      backgroundColor: Theme.of(context).primaryColor,
+                    )),
+                    child: Container(
+                      height: 60,
+                      child: TextButton(
+                          child: loginController.loading
+                              ? const Center(child: SizedBox(width: 40, height: 40, child: CircularProgressIndicator()))
+                              : Text("Entrar", style: TextStyle(fontSize: 22)),
+                          onPressed: loginController.loading
+                              ? null
+                              : () async {
+                                  await doEnter(context);
+                                }),
+                    )),
+                SizedBox(height: 40),
+                if (parent.registrarButton != null) parent.registrarButton!,
+                parent.useGoogle
+                    ? TextButton.icon(
+                        onPressed: () {
+                          parent.onEntrar(LoginMethod.google, "", "");
+                        },
+                        icon: Icon(FontAwesomeIcons.google, color: Theme.of(context).colorScheme.secondary),
+                        label: Text("Entrar usando Google", style: TextStyle(color: Theme.of(context).colorScheme.secondary)))
+                    : SizedBox.shrink(),
+              ])),
+      if (parent.version != null)
+        Positioned(
+          right: 20,
+          top: 20,
+          child: parent.version!,
+        ),
+    ]));
   }
 }
 
