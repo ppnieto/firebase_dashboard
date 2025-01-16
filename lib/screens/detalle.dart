@@ -54,6 +54,7 @@ class DetalleScreen extends StatelessWidget {
         init: DetalleController(module: module, object: object, initialData: initialData),
         tag: module.name,
         builder: (controller) {
+          Get.log('DetalleController::build');
           List<Widget> actions = [];
           if (object != null && controller.module.getActions != null) {
             actions = controller.module.getActions!(object!, context);

@@ -219,7 +219,7 @@ class DashboardUtils {
     GetBuilderState<T>? state = context.findRootAncestorStateOfType<GetBuilderState<T>>();
     Get.log('findController<${T}> => ${state?.controller}');
     if (state == null) {
-      if (Get.isRegistered<T>()) {
+      if (Get.isRegistered<T>(tag: tag)) {
         Get.log('   lo encuentro con Get.find');
         return Get.find<T>(tag: tag);
       }

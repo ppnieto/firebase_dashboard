@@ -19,11 +19,13 @@ class FieldTypeDate extends FieldType {
   }
   */
 
+/*
   @override
   updateData(BuildContext context, ColumnModule column, value) {
     print("updateDataOverride ${column.field} => $value");
     updateDataColumnName(context, column.field, value);
   }
+  */
 
   DateTime? getDateTime(DocumentSnapshot object, ColumnModule column) {
     if (object.hasFieldAdm(column.field)) {
@@ -51,11 +53,28 @@ class FieldTypeDate extends FieldType {
 
   @override
   getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    //  var value = values[column.field];
-    final f = new DateFormat(this.format);
-    TextEditingController txt = TextEditingController();
+    Timestamp? value;
+    var v = values.valueFor(keyPath: column.field);
+    if (v != null && v is Timestamp) {
+      value = v;
+    } else {
+      if (_object?.hasFieldAdm(column.field) ?? false) {
+        value = _object?.get(column.field);
+      } else {
+        value = null;
+      }
+    }
+    Get.log('DateTime::getEditContent $value');
+/*
     DateTime dateTime = _object == null ? DateTime.now() : getDateTime(_object, column) ?? DateTime.now();
     txt.text = f.format(dateTime);
+    */
+
+    final f = new DateFormat(this.format);
+    TextEditingController txt = TextEditingController();
+    if (value != null) {
+      txt.text = f.format(value.toDate());
+    }
 
     return Row(children: [
       Expanded(
@@ -68,7 +87,6 @@ class FieldTypeDate extends FieldType {
         controller: txt,
         enabled: column.editable,
         validator: (val) {
-          print("validator $val");
           if (val!.isEmpty && !column.mandatory) {
             return null;
           }
@@ -79,14 +97,11 @@ class FieldTypeDate extends FieldType {
             return "Formato incorrecto";
           }
         },
-        onSaved: (val) {
-          print("onSaved date $val");
-          if (val!.isNotEmpty) {
-            print("1");
+        onChanged: (val) {
+          print("onChanged date $val");
+          if (val.isNotEmpty) {
             var tmp = new DateFormat('dd/MM/yyyy').parse(val, true);
-            print(tmp);
             updateData(context, column, Timestamp.fromDate(tmp));
-            print("ok");
           }
         },
       )),
@@ -99,7 +114,7 @@ class FieldTypeDate extends FieldType {
                 context: context,
                 firstDate: DateTime(2020, 1),
                 lastDate: DateTime(2101),
-                initialDate: dateTime,
+                initialDate: value?.toDate(),
                 builder: (BuildContext context, Widget? child) {
                   return Theme(data: ThemeData(), child: child!);
                 });

@@ -37,6 +37,7 @@ class SyncfusionDataTable extends StatelessWidget {
                     color: Theme.of(context).primaryColor,
                   ));
                 return SfDataGrid(
+                    key: controller.newSfDatagridKey,
                     controller: _controller,
                     isScrollbarAlwaysShown: true,
                     allowColumnsResizing: true,
@@ -87,9 +88,11 @@ class SyncfusionDataTable extends StatelessWidget {
                                   width: double.infinity,
                                   decoration: BoxDecoration(
                                       color: Theme.of(context).primaryColor,
-                                      border: BorderDirectional(top: BorderSide(width: 1.0, color: Color.fromRGBO(0, 0, 0, 0.26)))),
+                                      border: BorderDirectional(
+                                          top: BorderSide(width: 1.0, color: Color.fromRGBO(0, 0, 0, 0.26)))),
                                   alignment: Alignment.center,
-                                  child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor)));
+                                  child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor)));
                             } else {
                               return SizedBox.shrink();
                             }
@@ -107,8 +110,8 @@ class SyncfusionDataTable extends StatelessWidget {
                     },
                     onCellTap: (details) {
                       if (details.rowColumnIndex.rowIndex > 0) {
-                        SyncfusionDataGridRow row =
-                            controller.datagridSource!.effectiveRows[details.rowColumnIndex.rowIndex - 1] as SyncfusionDataGridRow;
+                        SyncfusionDataGridRow row = controller.datagridSource!
+                            .effectiveRows[details.rowColumnIndex.rowIndex - 1] as SyncfusionDataGridRow;
                         DocumentSnapshot doc = row.doc;
 
                         if (module.selectPreEdit) {
@@ -140,7 +143,8 @@ class SyncfusionDataTable extends StatelessWidget {
                                   col.label,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Theme.of(context).primaryColor),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 12, color: Theme.of(context).primaryColor),
                                 ))))
                         .toList());
               }));

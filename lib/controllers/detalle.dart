@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_hub/event_hub.dart';
+import 'package:firebase_dashboard/controllers/event.dart';
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/services/dashboard.dart';
@@ -35,6 +37,8 @@ class DetalleController extends GetxController {
     if (module.onNew != null) {
       module.onNew!(_updateData);
     }
+
+    module.columns.forEach((column) => column.type.module = module);
   }
 
   @override
@@ -45,9 +49,14 @@ class DetalleController extends GetxController {
 
   void updateData(String fieldName, var value) {
     _updateData?.updateValueFor(keyPath: fieldName, value: value);
+    Get.log("DetalleController::updateData $fieldName => $value");
+    if (Get.isRegistered<EventController>()) {
+      EventController.to.fire(DashEvents.onDetalleUpdateData.name, _updateData);
+    }
   }
 
   getEditField(BuildContext context, ColumnModule column) {
+    // añadimos referencia a cada campo de su módulo
     Widget? child = column.type.getEditContent(context, object, _updateData!, column);
 
     if (child != null) {

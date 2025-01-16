@@ -5,8 +5,10 @@ import 'package:firebase_dashboard/controllers/detalle.dart';
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 abstract class FieldType {
+  DashboardModule? module;
   final Map<String, String> preloadedData = {};
   bool async() => false;
 
@@ -67,8 +69,8 @@ abstract class FieldType {
   }
 
   updateDataColumnName(BuildContext context, String columnName, value) {
-    print("updateData $columnName => $value");
-    DashboardUtils.findController<DetalleController>(context: context)?.updateData(columnName, value);
+    Get.log("updateData $columnName => $value (tag ${module?.name})");
+    DashboardUtils.findController<DetalleController>(context: context, tag: module?.name)?.updateData(columnName, value);
   }
 }
 

@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:app_bar_with_search_switch/app_bar_with_search_switch.dart';
+import 'package:event_hub/event_hub.dart';
 import 'package:firebase_dashboard/components/syncfusion_datatable.dart';
 import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/controllers/detalle.dart';
+import 'package:firebase_dashboard/controllers/event.dart';
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:firebase_dashboard/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
@@ -33,12 +38,10 @@ class AdminScreen extends StatelessWidget {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   final scrollController = ScrollController();
 
-  void addRecord(BuildContext context, AdminController controller) =>
-      DashboardService.instance.showDetalle(module: controller.module);
+  void addRecord(BuildContext context, AdminController controller) => DashboardService.instance.showDetalle(module: controller.module);
 
   List<Widget> getLeading(BuildContext context, AdminController controller) {
-    bool showColumnSelectorInPopupMenu =
-        module.showColumnSelection && module.compactColumnSelection && !Responsive.isMobile(context);
+    bool showColumnSelectorInPopupMenu = module.showColumnSelection && module.compactColumnSelection && !Responsive.isMobile(context);
     return [
       if (showColumnSelectorInPopupMenu)
         PopupMenuButton(
@@ -63,14 +66,10 @@ class AdminScreen extends StatelessWidget {
             icon: Icon(FontAwesomeIcons.listUl),
             tooltip: "Selección de columnas",
             onPressed: () async {
-              var items =
-                  controller.module.columns.where((element) => element.listable).map((ColumnModule columnModule) {
+              var items = controller.module.columns.where((element) => element.listable).map((ColumnModule columnModule) {
                 return MultiSelectItem(columnModule.field, columnModule.label);
               }).toList();
-              var initialValue = controller.visibleColumns.entries
-                  .where((element) => element.value)
-                  .map<String>((e) => e.key.field)
-                  .toList();
+              var initialValue = controller.visibleColumns.entries.where((element) => element.value).map<String>((e) => e.key.field).toList();
 
               await showDialog(
                 context: context,
@@ -111,9 +110,84 @@ class AdminScreen extends StatelessWidget {
 
   List<Widget> getActions(BuildContext context, AdminController controller) {
     List<Widget> result = [];
-    bool deleteDisabled = module.deleteDisabled &&
-        controller.rowsSelected.any((element) => !controller.deleteEnabled.contains(element.reference.path));
+    bool deleteDisabled =
+        module.deleteDisabled && controller.rowsSelected.any((element) => !controller.deleteEnabled.contains(element.reference.path));
 
+    if (controller.rowsSelected.isNotEmpty) {
+      result.add(
+        PopupMenuButton(
+          icon: Icon(Icons.edit),
+          tooltip: "Editar campo",
+          itemBuilder: (context) {
+            return controller.module.columns.where((element) => element.editable && element.showOnEdit).map((ColumnModule columnModule) {
+              return PopupMenuItem(
+                  child: ListTile(
+                title: Text(columnModule.label),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  String? subscriptionID;
+                  Map<String, dynamic> updateData = {};
+                  await Get.bottomSheet(GetBuilder<DetalleController>(
+                      init: DetalleController(module: module),
+                      tag: module.name,
+                      builder: (detalleController) {
+                        Get.log('Admin::DetalleController::build $subscriptionID');
+
+                        if (Get.isRegistered<EventController>()) {
+                          if (subscriptionID != null) {
+                            EventController.to.cancelSubscription(subscriptionID!);
+                          }
+                          // simulamos el update que viene de escuchar cualquier escritura sobre el documento
+                          subscriptionID = EventController.to.subscribe(DashEvents.onDetalleUpdateData.name, (data) {
+                            Get.log('EventHub on DashEvents.onDetalleUpdateData $data');
+                            updateData = data;
+                            detalleController.update();
+                          });
+                        }
+
+                        Get.log('getEditContent ${columnModule.type.runtimeType}');
+
+                        Widget? child = columnModule.type.getEditContent(context, null, updateData, columnModule);
+                        final _formKey = GlobalKey<FormState>();
+
+                        Form form = Form(key: _formKey, child: child ?? const SizedBox.shrink());
+                        return Scaffold(
+                          appBar: AppBar(title: Text("Editar campo en múltiples registros")),
+                          body: Container(color: Colors.white, child: form.paddingAll(20)),
+                          bottomNavigationBar: OutlinedButton.icon(
+                                  icon: Icon(Icons.save),
+                                  onPressed: () async {
+                                    if (_formKey.currentState!.validate()) {
+                                      _formKey.currentState!.save();
+                                      controller.rowsSelected.forEach((element) {
+                                        var value = updateData.valueFor(keyPath: columnModule.field);
+                                        Get.log('    update ${columnModule.field} => $value');
+                                        Get.log('          $updateData');
+                                        element.reference.update({columnModule.field: value});
+                                      });
+                                      controller.rowsSelected.clear();
+                                      Get.back();
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                        content: Text("Los elementos han sido modificados"),
+                                        duration: Duration(seconds: 3),
+                                      ));
+                                    }
+                                  },
+                                  label: Text("Guardar"))
+                              .paddingAll(20),
+                        );
+                      }));
+
+                  if (subscriptionID != null) {
+                    EventController.to.cancelSubscription(subscriptionID!);
+                  }
+                },
+              ));
+            }).toList();
+          },
+        ),
+      );
+    }
     if (module.canRemove) {
       if (controller.rowsSelected.isNotEmpty) {
         result.add(IconButton(
@@ -143,13 +217,10 @@ class AdminScreen extends StatelessWidget {
                           controller.rowsSelected.clear();
 
                           Get.snackbar("Atención", "Los elementos han sido borrados",
-                              duration: Duration(seconds: 2),
-                              snackPosition: SnackPosition.BOTTOM,
-                              margin: EdgeInsets.all(20));
+                              duration: Duration(seconds: 2), snackPosition: SnackPosition.BOTTOM, margin: EdgeInsets.all(20));
                         },
                         title: "Atención",
-                        description:
-                            "¿Está seguro de borrar " + controller.rowsSelected.length.toString() + " elementos?");
+                        description: "¿Está seguro de borrar " + controller.rowsSelected.length.toString() + " elementos?");
                   }
             //},
 
@@ -235,9 +306,7 @@ class AdminScreen extends StatelessWidget {
 
   PopupMenuItem getPopupMenu(Widget widget) {
     if (widget is IconButton) {
-      return PopupMenuItem(
-          value: widget,
-          child: ListTile(leading: widget.icon, title: widget.tooltip != null ? Text(widget.tooltip!) : null));
+      return PopupMenuItem(value: widget, child: ListTile(leading: widget.icon, title: widget.tooltip != null ? Text(widget.tooltip!) : null));
     } else if (widget is AppBarSearchButton) {
       return PopupMenuItem(value: widget, child: ListTile(leading: const Icon(Icons.search), title: Text("Buscar")));
     } else {
@@ -310,9 +379,7 @@ class AdminScreen extends StatelessWidget {
             ),
             endDrawer: getSidebar(controller),
             bottomNavigationBar: AdminController.buttonLocation == ButtonLocation.Bottom && module.canAdd
-                ? ElevatedButton.icon(
-                        icon: Icon(Icons.add), onPressed: () => addRecord(context, controller), label: Text("Añadir"))
-                    .paddingAll(24)
+                ? ElevatedButton.icon(icon: Icon(Icons.add), onPressed: () => addRecord(context, controller), label: Text("Añadir")).paddingAll(24)
                 : null,
             floatingActionButton: AdminController.buttonLocation == ButtonLocation.Floating && module.canAdd
                 ? FloatingActionButton(
