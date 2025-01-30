@@ -15,6 +15,7 @@ class ColumnModule {
   bool mandatory;
   double? width;
   bool showLabelOnEdit;
+  bool summarize;
   bool canSort;
   bool visible;
 
@@ -34,6 +35,7 @@ class ColumnModule {
     this.showOnNew = true,
     this.excellable = true,
     this.canSort = true,
+    this.summarize = false,
     this.helpText,
   });
 }

@@ -9,10 +9,10 @@ class FieldTypeAsync extends FieldType {
   FieldTypeAsync({required this.getAsyncValueFunction});
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    if (_object != null) {
-      return getListContent(context, _object, column);
+  getEditContent(BuildContext context, ColumnModule column) {
+    var object = getObject();
+    if (object != null) {
+      return getListContent(context, object, column);
     } else {
       return const SizedBox.shrink();
     }

@@ -46,12 +46,11 @@ class FieldTypeAutocomplete extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+  getEditContent(BuildContext context, ColumnModule column) {
+    var value = getFieldValue(column);
 
     if (value == null) {
       value = initialValue ?? "";
-      //values[column.field] = value;
       SchedulerBinding.instance.addPostFrameCallback((_) {
         updateData(context, column, value);
       });
@@ -74,7 +73,7 @@ class FieldTypeAutocomplete extends FieldType {
             return (e.data() as Map)[refLabel].toString();
           }).toList();
 
-          _typeAheadController.text = values[column.field];
+          _typeAheadController.text = getFieldValue(column);
           if (1 == 2) {
             return Focus(
                 onFocusChange: (hasFocus) {

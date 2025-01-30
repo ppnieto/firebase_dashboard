@@ -52,23 +52,8 @@ class FieldTypeDate extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    Timestamp? value;
-    var v = values.valueFor(keyPath: column.field);
-    if (v != null && v is Timestamp) {
-      value = v;
-    } else {
-      if (_object?.hasFieldAdm(column.field) ?? false) {
-        value = _object?.get(column.field);
-      } else {
-        value = null;
-      }
-    }
-    Get.log('DateTime::getEditContent $value');
-/*
-    DateTime dateTime = _object == null ? DateTime.now() : getDateTime(_object, column) ?? DateTime.now();
-    txt.text = f.format(dateTime);
-    */
+  getEditContent(BuildContext context, ColumnModule column) {
+    Timestamp? value = getFieldValue(column);
 
     final f = new DateFormat(this.format);
     TextEditingController txt = TextEditingController();

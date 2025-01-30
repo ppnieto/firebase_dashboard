@@ -35,18 +35,8 @@ class FieldTypeDateTime extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    Timestamp? value;
-    var v = values.valueFor(keyPath: column.field);
-    if (v != null && v is Timestamp) {
-      value = v;
-    } else {
-      if (_object?.hasFieldAdm(column.field) ?? false) {
-        value = _object?.get(column.field);
-      } else {
-        value = null;
-      }
-    }
+  getEditContent(BuildContext context, ColumnModule column) {
+    Timestamp? value = getFieldValue(column);
     Get.log('DateTime::getEditContent $value');
     var dtp = DateTimePicker(
       enabled: column.editable,

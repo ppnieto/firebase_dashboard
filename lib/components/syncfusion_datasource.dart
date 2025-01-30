@@ -105,7 +105,7 @@ class DashboardDate extends DateTime {
 
   @override
   toString() {
-    final f = new DateFormat('dd/MMyyyy');
+    final f = new DateFormat('dd/MM/yyyy');
     return f.format(this);
   }
 }

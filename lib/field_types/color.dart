@@ -14,8 +14,8 @@ class FieldTypeColor extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    String strColor = _object?.getFieldAdm(column.field, values[column.field] ?? "aaaaaa") ?? "aaaaaa";
+  getEditContent(BuildContext context, ColumnModule column) {
+    String strColor = getFieldValue(column) ??  "aaaaaa";
     return Row(
       children: [
         StatefulBuilder(builder: (context, setStateBuilder) {

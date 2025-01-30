@@ -151,8 +151,9 @@ class FieldTypeRef extends FieldType {
     return query;
   }
 
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+  getEditContent(BuildContext context,  ColumnModule column) {
+    
+    var value = getFieldValue(column);
 
     List<DropdownMenuItem<DocumentReference>> getIfNullable() => [
           DropdownMenuItem<DocumentReference>(
@@ -161,10 +162,11 @@ class FieldTypeRef extends FieldType {
         ];
 
     if (value == null) {
-      value = _object?.getFieldAdm(column.field, null);
+      var object = getObject();
+      value = object?.getFieldAdm(column.field, null);
       if (value == null) {
         value = initialValue ?? nullValue;
-        values[column.field] = value;
+        
         SchedulerBinding.instance.addPostFrameCallback((_) {
           updateData(context, column, value);
         });

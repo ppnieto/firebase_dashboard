@@ -20,9 +20,8 @@ class FieldTypeDouble extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+  getEditContent(BuildContext context,  ColumnModule column) {
+    var value = getFieldValue(column);
     return TextFormField(
         initialValue: value != null ? value.toString() : "",
         enabled: column.editable,

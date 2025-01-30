@@ -37,10 +37,12 @@ abstract class FieldType {
   dynamic getValue(DocumentSnapshot object, ColumnModule column) {
     return object.getFieldAdm(column.field, null);
   }
+  
 
   Future<dynamic> getAsyncValue(DocumentSnapshot object, ColumnModule column) async {
     return getValue(object, column);
   }
+  
 
   Future<void> preloadData() async {}
 
@@ -50,8 +52,36 @@ abstract class FieldType {
 
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) => Text((getField(_object, column.field, '-').toString()));
 
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, ColumnModule column) {
     return Text("No implementado para tipo " + this.toString());
+  }  
+  
+  DocumentSnapshot? getObject() {
+    DocumentSnapshot? object;
+    if (Get.isRegistered<DetalleController>(tag: module?.name)) {
+      return Get.find<DetalleController>(tag: module?.name).object;
+    }    
+    return object;
+  }
+  getFieldValue(ColumnModule columnModule) {
+    Get.log('getFieldValue ${columnModule.field}');
+    var value;
+    if (Get.isRegistered<DetalleController>(tag: module?.name)) {
+      Get.log('   DetalleController is registered');
+      var detalleController = Get.find<DetalleController>(tag: module?.name);    
+      var updatedData = detalleController.updatedData;
+      Get.log('   updateData = $updateData');
+      if (updatedData != null) {
+        value = updatedData.valueFor(keyPath:columnModule.field);
+      } else {
+        DocumentSnapshot? object = getObject();
+        if (object != null) {
+          value = object.get(columnModule.field);
+        }
+      }
+    }
+    Get.log('  => $value');
+    return value;
   }
 
   getCompareValue(DocumentSnapshot _object, ColumnModule column) {

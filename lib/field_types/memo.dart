@@ -22,9 +22,8 @@ class FieldTypeMemo extends FieldType {
           : _getListContent(context, _object, column);
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+  getEditContent(BuildContext context,ColumnModule column) {
+    var value = getFieldValue(column);
     return TextFormField(
         enabled: column.editable,
         initialValue: value,

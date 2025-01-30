@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_dashboard/dashboard.dart';
+import 'package:get/get.dart';
 
 class FieldTypeNumber extends FieldType {
   final double maxValue;
@@ -40,15 +41,10 @@ class FieldTypeNumber extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    var value = getFieldFromMap(values, column.field, null);
+  getEditContent(BuildContext context, ColumnModule column) {
+    
+    var value = getFieldValue(column) ?? defaultValue;
 
-    if (_object == null) value = defaultValue;
-
-    if (_object?.hasFieldAdm(column.field) == false && value != null) {
-      updateData(context, column, value);
-    }
     if (value != null) {
       _controller.text = value.toString();
     } else {
@@ -66,6 +62,7 @@ class FieldTypeNumber extends FieldType {
             fillColor: column.editable
                 ? Theme.of(context).canvasColor.withAlpha(1)
                 : Theme.of(context).disabledColor),
+  
         validator: (value) {
           //print("validator ${column.field} = $value");
           if (column.editable == false) return null;
@@ -95,7 +92,15 @@ class FieldTypeNumber extends FieldType {
           }
           return null;
         },
+        onChanged: (val) {
+          Get.log('Number::onSaved $val');
+          if (!column.editable) return;
+          //val = (val ?? "").isEmpty ? null : val;
+          var valueToSave =  double.parse(val.toString().replaceAll(',', '.'));
+          updateData(context, column, valueToSave);
+        },        
         onSaved: (val) {
+          Get.log('Number::onSaved $val');
           if (!column.editable) return;
           val = (val ?? "").isEmpty ? null : val;
           var valueToSave = val == null

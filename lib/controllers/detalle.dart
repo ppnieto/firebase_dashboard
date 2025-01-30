@@ -20,7 +20,7 @@ class DetalleController extends GetxController {
   final Map<String, dynamic>? initialData;
   GlobalKey<FormState>? _formKey;
 
-  Map<String, dynamic>? _updateData;
+  Map<String, dynamic>? updatedData;
   StreamSubscription<DocumentSnapshot>? changesSubscription;
 
   DetalleController({this.object, required this.module, this.labelWidth = 120, this.showLabel = true, this.canDelete = true, this.initialData});
@@ -28,14 +28,14 @@ class DetalleController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _updateData = object?.data() as Map<String, dynamic>? ?? initialData ?? {};
+    updatedData = object?.data() as Map<String, dynamic>? ?? initialData ?? {};
     changesSubscription = object?.reference.snapshots().listen((value) {
-      _updateData = value.data() as Map<String, dynamic>?;
+      updatedData = value.data() as Map<String, dynamic>?;
       update();
     });
 
     if (module.onNew != null) {
-      module.onNew!(_updateData);
+      module.onNew!(updatedData);
     }
 
     module.columns.forEach((column) => column.type.module = module);
@@ -48,16 +48,17 @@ class DetalleController extends GetxController {
   }
 
   void updateData(String fieldName, var value) {
-    _updateData?.updateValueFor(keyPath: fieldName, value: value);
+    updatedData?.updateValueFor(keyPath: fieldName, value: value);
     Get.log("DetalleController::updateData $fieldName => $value");
     if (Get.isRegistered<EventController>()) {
-      EventController.to.fire(DashEvents.onDetalleUpdateData.name, _updateData);
+      EventController.to.fire(DashEvents.onDetalleUpdateData.name, updatedData);
     }
   }
 
   getEditField(BuildContext context, ColumnModule column) {
     // añadimos referencia a cada campo de su módulo
-    Widget? child = column.type.getEditContent(context, object, _updateData!, column);
+    
+    Widget? child = column.type.getEditContent(context, column);
 
     if (child != null) {
       if (Responsive.isMobile(context)) {
@@ -164,11 +165,11 @@ class DetalleController extends GetxController {
       _formKey!.currentState?.save();
 
       // ñapa para guardar el documentref /values/null como nulo!!!
-      for (var entry in this._updateData!.entries) {
+      for (var entry in this.updatedData!.entries) {
         if (entry.value is DocumentReference) {
           DocumentReference tmp = entry.value;
           if (tmp.path == FieldTypeRef.nullValue.path) {
-            _updateData![entry.key] = null;
+            updatedData![entry.key] = null;
           }
         }
       }
@@ -178,12 +179,12 @@ class DetalleController extends GetxController {
       String? msgValidation;
 
       if (module.validation != null) {
-        msgValidation = await module.validation!(isNew, _updateData!);
+        msgValidation = await module.validation!(isNew, updatedData!);
       }
 
       bool doUpdate = true;
       if (module.onSave != null) {
-        doUpdate = await module.onSave!(isNew, _updateData, object);
+        doUpdate = await module.onSave!(isNew, updatedData, object);
       }
       print("doUpdate $doUpdate. isNew = $isNew");
       //print(_updateData);
@@ -193,7 +194,7 @@ class DetalleController extends GetxController {
             // primero hacemos pop por si está offline que no se quede y permita pulsarlo muchas veces
             DashboardService.instance.pop();
 
-            object!.reference.set(_updateData!, SetOptions(merge: true)).then((value) {
+            object!.reference.set(updatedData!, SetOptions(merge: true)).then((value) {
               if (module.onUpdated != null) module.onUpdated!(isNew, object!.reference);
 
               ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
@@ -207,12 +208,12 @@ class DetalleController extends GetxController {
             });
           } else if (isNew) {
             // si en updateData hay un id, lo usamos
-            String? id = _updateData!['id'] ?? null;
+            String? id = updatedData!['id'] ?? null;
             Future? action;
             if (id != null) {
-              action = _getCollection().doc(id).set(_updateData);
+              action = _getCollection().doc(id).set(updatedData);
             } else {
-              action = _getCollection().add(_updateData!);
+              action = _getCollection().add(updatedData!);
             }
             // primero hacemos pop por si está offline que no se quede y permita pulsarlo muchas veces
             DashboardService.instance.pop();

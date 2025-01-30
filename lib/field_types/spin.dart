@@ -23,13 +23,11 @@ class FieldTypeSpin extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context,  ColumnModule column) {
 //    var value = _object?.getFieldAdm(column.field, defaultValue) ?? values[column.field];
-    var value = getFieldFromMap(values, column.field, null);
+var value = getFieldValue(column) ?? defaultValue;
 
-    if (_object == null) value = defaultValue;
-
-    if (_object?.hasFieldAdm(column.field) == false && value != null) {
+    if (getObject()?.hasFieldAdm(column.field) == false && value != null) {
       updateData(context, column, value);
     }
 

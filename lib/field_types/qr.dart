@@ -17,9 +17,9 @@ class FieldTypeQR extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context,  ColumnModule column) {
     TextEditingController qr = TextEditingController();
-    var value = values[column.field] ?? '';
+    var value = getFieldValue(column) ?? '';
 
     qr.text = value;
     /*

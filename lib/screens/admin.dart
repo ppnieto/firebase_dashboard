@@ -147,7 +147,7 @@ class AdminScreen extends StatelessWidget {
 
                         Get.log('getEditContent ${columnModule.type.runtimeType}');
 
-                        Widget? child = columnModule.type.getEditContent(context, null, updateData, columnModule);
+                        Widget? child = columnModule.type.getEditContent(context, columnModule);
                         final _formKey = GlobalKey<FormState>();
 
                         Form form = Form(key: _formKey, child: child ?? const SizedBox.shrink());

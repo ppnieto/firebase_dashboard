@@ -23,8 +23,9 @@ class FieldTypeLink extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = getFieldFromMap(values, column.field, null);
+  getEditContent(BuildContext context, ColumnModule column) {
+    var value = getFieldValue(column);
+    
     final TextEditingController controller = TextEditingController();
 
     controller.text = value ?? "";

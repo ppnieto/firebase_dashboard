@@ -20,11 +20,12 @@ class FieldTypeSubcollection extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    if (_object == null) return Text("No se puede añadir este contenido en creación");
-    module.collection = _object.reference.collection(subcollection).path;
+  getEditContent(BuildContext context,  ColumnModule column) {
+    var object = getObject();
+    if (object == null) return Text("No se puede añadir este contenido en creación");
+    module.collection = object.reference.collection(subcollection).path;
     return StreamBuilder(
-        stream: _object.reference.collection(subcollection).snapshots(),
+        stream: object.reference.collection(subcollection).snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return SizedBox.shrink();
           return Container(

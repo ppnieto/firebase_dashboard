@@ -12,9 +12,8 @@ class FieldTypeMultiSelect extends FieldType {
   FieldTypeMultiSelect({required this.hint, required this.options});
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+  getEditContent(BuildContext context,  ColumnModule column) {
+    var value = getFieldValue(column);
 
     List<String> valueString = value == null ? [] : List<String>.from(value);
 

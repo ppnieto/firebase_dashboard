@@ -53,8 +53,8 @@ class FieldTypeImageURL extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+  getEditContent(BuildContext context,  ColumnModule column) {
+    var value = getFieldValue(column);
     String url = "";
 
     if (value is Map) {

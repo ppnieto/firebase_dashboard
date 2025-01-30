@@ -15,9 +15,8 @@ class FieldTypeWidget extends FieldType {
   FieldTypeWidget({required this.builder, this.getAsyncValueFunction});
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    return builder(context, _object, false);
+  getEditContent(BuildContext context,  ColumnModule column) {
+    return builder(context, getObject(), false);
   }
 
   @override
@@ -26,12 +25,5 @@ class FieldTypeWidget extends FieldType {
     return builder(context, _object, true);
   }
 
-  @override
-  Future getAsyncValue(DocumentSnapshot<Object?> object, ColumnModule column) {
-    if (getAsyncValueFunction != null) {
-      return getAsyncValueFunction!(object, column);
-    } else {
-      return super.getAsyncValue(object, column);
-    }
-  }
+
 }

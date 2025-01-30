@@ -47,8 +47,8 @@ class FieldTypePhoto extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+  getEditContent(BuildContext context,  ColumnModule column) {
+    var value = getFieldValue(column);
     if (value is Map<String, dynamic>) {
       nameController.text = value['name'] ?? "";
       if (value.containsKey('size')) {

@@ -57,7 +57,7 @@ class SyncfusionDataTable extends StatelessWidget {
                             GridTableSummaryRow(
                                 showSummaryInRow: false,
                                 position: GridTableSummaryRowPosition.bottom,
-                                columns: controller.columns
+                                columns: controller.columns.where((c) => c.summarize)
                                     .map((col) => GridSummaryColumn(
                                           name: col.field,
                                           columnName: col.label,

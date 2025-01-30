@@ -17,12 +17,9 @@ class FieldTypeTagsAutocomplete extends FieldType {
       required this.findSuggestion});
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    var value;
-    if (_object != null && hasField(_object, column.field)) {
-      value = _object.get(column.field);
-    }
+  getEditContent(BuildContext context,  ColumnModule column) {
+    var value = getFieldValue(column);
+    
 
     List<String> valueString = [];
     if (value is String) {
@@ -73,7 +70,7 @@ class FieldTypeTagsAutocomplete extends FieldType {
                 },
               ),
           findSuggestions: (query) async {
-            return await findSuggestion(query, _object);
+            return await findSuggestion(query, getObject());
           });
     });
   }

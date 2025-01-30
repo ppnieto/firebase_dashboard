@@ -60,10 +60,11 @@ class FieldTypeText extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, ColumnModule column) {
     TextEditingController controller = textEditingController ?? TextEditingController();
 
-    var value = getFieldFromMap(values, column.field, null);
+    var value = getFieldValue(column);
+    
     value = showTextFunction == null ? value : showTextFunction!(value);
     if (value != null && value is String == false) {
       value = value.toString();

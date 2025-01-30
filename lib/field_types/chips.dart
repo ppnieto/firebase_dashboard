@@ -10,9 +10,8 @@ class FieldTypeChips extends FieldType {
   FieldTypeChips({this.hint = "", required this.options});
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    var value = values[column.field];
+  getEditContent(BuildContext context,  ColumnModule column) {
+    var value = getFieldValue(column);
     List<String> valueString = [];
     if (value is List) {
       for (var v in value) {

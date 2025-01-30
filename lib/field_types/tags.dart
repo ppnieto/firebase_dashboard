@@ -13,12 +13,11 @@ class FieldTypeTags extends FieldType {
       {this.hint = "", this.maxTagsInList = 0, this.listStyle = const TextStyle(fontSize: 12, color: Colors.white)});
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object, Map<String, dynamic> values, ColumnModule column) {
+  getEditContent(BuildContext context, ColumnModule column) {
     TextfieldTagsController<String> _controller = TextfieldTagsController();
-    var value;
-    if (_object != null && hasField(_object, column.field)) {
-      value = _object.get(column.field);
-    }
+    
+    var value = getFieldValue(column);
+    
 
     List<String> valueString = [];
     if (value is String) {

@@ -78,9 +78,8 @@ class FieldTypeGallery extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    List tmp = values[column.field] ?? [];
+  getEditContent(BuildContext context,  ColumnModule column) {
+    List tmp = getFieldValue(column) ?? [];
     urls = [];
     for (var value in tmp) {
       if (value is String) {

@@ -77,9 +77,9 @@ class FieldTypeMultiref extends FieldType {
   }
 
   @override
-  getEditContent(BuildContext context, DocumentSnapshot? _object,
-      Map<String, dynamic> values, ColumnModule column) {
-    var tmp = values[column.field];
+  getEditContent(BuildContext context,  ColumnModule column) {
+    var tmp = getFieldValue(column);
+    
     List<DocumentReference>? value = [];
     if (tmp is List) {
       for (var obj in tmp) {
@@ -88,15 +88,15 @@ class FieldTypeMultiref extends FieldType {
         }
       }
     }
-
+    var object = getObject();
     return StreamBuilder(
-        stream: _getQuery(_object).snapshots(),
+        stream: _getQuery(object).snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Container();
 
           Iterable<DocumentSnapshot> docs = snapshot.data!.docs;
           if (doFilter != null) {
-            docs = doFilter!(docs, _object);
+            docs = doFilter!(docs, object);
           }
           Map<DocumentReference, DocumentSnapshot> docMap = Map.fromIterable(
             docs,
