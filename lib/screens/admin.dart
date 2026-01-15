@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:app_bar_with_search_switch/app_bar_with_search_switch.dart';
-import 'package:event_hub/event_hub.dart';
+import 'package:firebase_dashboard/classes/dashboard_theme.dart';
+import 'package:firebase_dashboard/classes/events.dart';
 import 'package:firebase_dashboard/components/syncfusion_datatable.dart';
 import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/controllers/detalle.dart';
@@ -110,10 +111,9 @@ class AdminScreen extends StatelessWidget {
 
   List<Widget> getActions(BuildContext context, AdminController controller) {
     List<Widget> result = [];
-    bool deleteDisabled =
-        module.deleteDisabled && controller.rowsSelected.any((element) => !controller.deleteEnabled.contains(element.reference.path));
+    bool deleteDisabled = module.deleteDisabled && controller.rowsSelected.any((element) => !controller.deleteEnabled.contains(element.reference.path));
 
-    if (controller.rowsSelected.isNotEmpty) {
+    if (controller.rowsSelected.length > 1) {
       result.add(
         PopupMenuButton(
           icon: Icon(Icons.edit),
@@ -125,7 +125,7 @@ class AdminScreen extends StatelessWidget {
                 title: Text(columnModule.label),
                 onTap: () async {
                   Navigator.of(context).pop();
-                  String? subscriptionID;
+                  StreamSubscription? subscriptionID;
                   Map<String, dynamic> updateData = {};
                   await Get.bottomSheet(GetBuilder<DetalleController>(
                       init: DetalleController(module: module),
@@ -134,13 +134,11 @@ class AdminScreen extends StatelessWidget {
                         Get.log('Admin::DetalleController::build $subscriptionID');
 
                         if (Get.isRegistered<EventController>()) {
-                          if (subscriptionID != null) {
-                            EventController.to.cancelSubscription(subscriptionID!);
-                          }
+                          subscriptionID?.cancel();
                           // simulamos el update que viene de escuchar cualquier escritura sobre el documento
-                          subscriptionID = EventController.to.subscribe(DashEvents.onDetalleUpdateData.name, (data) {
-                            Get.log('EventHub on DashEvents.onDetalleUpdateData $data');
-                            updateData = data;
+                          subscriptionID = EventController.to.subscribe<DetalleUpdateEvent>((event) {
+                            Get.log('EventHub on DashEvents.onDetalleUpdateData ${event.updateData}');
+                            updateData = event.updateData;
                             detalleController.update();
                           });
                         }
@@ -178,9 +176,7 @@ class AdminScreen extends StatelessWidget {
                         );
                       }));
 
-                  if (subscriptionID != null) {
-                    EventController.to.cancelSubscription(subscriptionID!);
-                  }
+                  subscriptionID?.cancel();
                 },
               ));
             }).toList();
@@ -344,50 +340,60 @@ class AdminScreen extends StatelessWidget {
             _title += " / ${title}";
           }
 
-          return Scaffold(
-            key: _key,
-            appBar: AppBarWithSearchSwitch(
-              onChanged: (text) {
-                controller.globalSearch = text;
-              },
-              onClosed: () {
-                print("on closed search");
-                controller.update(['toolbar']);
-              },
-              appBarBuilder: (context) {
-                return PreferredSize(
-                    preferredSize: const Size(double.infinity, kToolbarHeight),
-                    child: GetBuilder<AdminController>(
-                      id: "toolbar",
-                      tag: module.name,
-                      init: controller,
-                      builder: (controller) {
-                        return AppBar(
-                          title: Text(_title),
-                          actions: processActions(
-                              context,
-                              getActions(context, controller) +
-                                  //<Widget>[] +
-                                  getLeading(context, controller)),
-                        );
-                      },
-                    ));
-              },
-              fieldHintText: "Buscar",
-              tooltipForCloseButton: "Cerrar búsqueda",
-              tooltipForClearButton: "Limpiar",
+          return Theme(
+            data: Theme.of(context).copyWith(
+                iconButtonTheme:
+                    IconButtonThemeData(style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(DashboardThemeController.to.mainScaffoldColor))),
+                floatingActionButtonTheme: FloatingActionButtonThemeData(
+                  backgroundColor: DashboardThemeController.to.floatingButtonBackgroundColor,
+                  foregroundColor: DashboardThemeController.to.floatingButtonColor,
+                )),
+            child: Scaffold(
+              key: _key,
+              appBar: AppBarWithSearchSwitch(
+                onChanged: (text) {
+                  controller.globalSearch = text;
+                },
+                onClosed: () {
+                  print("on closed search");
+                  controller.update(['toolbar']);
+                },
+                appBarBuilder: (context) {
+                  return PreferredSize(
+                      preferredSize: const Size(double.infinity, kToolbarHeight),
+                      child: GetBuilder<AdminController>(
+                        id: "toolbar",
+                        tag: module.name,
+                        init: controller,
+                        builder: (controller) {
+                          return AppBar(
+                            title: Text(_title),
+                            actions: processActions(
+                                context,
+                                getActions(context, controller) +
+                                    //<Widget>[] +
+                                    getLeading(context, controller)),
+                          );
+                        },
+                      ));
+                },
+                fieldHintText: "Buscar",
+                tooltipForCloseButton: "Cerrar búsqueda",
+                tooltipForClearButton: "Limpiar",
+              ),
+              endDrawer: getSidebar(controller),
+              bottomNavigationBar: AdminController.buttonLocation == ButtonLocation.Bottom && module.canAdd
+                  ? ElevatedButton.icon(icon: Icon(Icons.add), onPressed: () => addRecord(context, controller), label: Text("Añadir")).paddingAll(24)
+                  : null,
+              floatingActionButton: AdminController.buttonLocation == ButtonLocation.Floating && module.canAdd
+                  ? FloatingActionButton(
+                      heroTag: "admin_add",
+                      child: Icon(Icons.add),
+                      onPressed: () => addRecord(context, controller),
+                    ).paddingAll(0)
+                  : null,
+              body: SyncfusionDataTable(module: module),
             ),
-            endDrawer: getSidebar(controller),
-            bottomNavigationBar: AdminController.buttonLocation == ButtonLocation.Bottom && module.canAdd
-                ? ElevatedButton.icon(icon: Icon(Icons.add), onPressed: () => addRecord(context, controller), label: Text("Añadir")).paddingAll(24)
-                : null,
-            floatingActionButton: AdminController.buttonLocation == ButtonLocation.Floating && module.canAdd
-                ? FloatingActionButton(
-                    child: Icon(Icons.add),
-                    onPressed: () => addRecord(context, controller),
-                  ).paddingAll(24)
-                : null,
-            body: SyncfusionDataTable(module: module),
           );
         });
   }

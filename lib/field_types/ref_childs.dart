@@ -9,6 +9,11 @@ class FieldTypeRefNumChilds extends FieldType {
   final bool Function(QueryDocumentSnapshot)? addFilter;
   final Function(DocumentSnapshot)? onClick;
   final bool filterByField;
+  final bool isAsync;
+
+  @override
+  bool async() => preloadAllChildren == false && isAsync;
+
 
   Map<String, int> sizes = {};
   bool preloadAllChildren;
@@ -21,6 +26,7 @@ class FieldTypeRefNumChilds extends FieldType {
       this.preloadAllChildren = false,
       this.overrideFieldName,
       this.onClick,
+      this.isAsync = false,
       this.filterByField = true});
 
   Widget _getWidget(String text, DocumentSnapshot object) {
@@ -56,8 +62,23 @@ class FieldTypeRefNumChilds extends FieldType {
     }
   }
 
+
   @override
-  Future getAsyncValue(DocumentSnapshot<Object?> object, ColumnModule column) async {
+  getValue(DocumentSnapshot<Object?> object, ColumnModule column) {
+    if (preloadAllChildren) {
+      print("get async value preloaded");
+      int size = allChildren.length;
+      if (filterByField) {
+        size = allChildren.where((element) => element.get(this.overrideFieldName ?? column.field) == object.reference).length;
+      }
+      return addSize(object, size);
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  Future<dynamic> getAsyncValue(DocumentSnapshot object, ColumnModule column) async {
     if (preloadAllChildren) {
       print("get async value preloaded");
       int size = allChildren.length;
@@ -77,7 +98,6 @@ class FieldTypeRefNumChilds extends FieldType {
       } else {
         AggregateQuerySnapshot qs = await _getCollection(object).count().get();
         int size = qs.count ?? 0;
-        print("size = $size");
         return addSize(object, size);
       }
     }
@@ -86,7 +106,7 @@ class FieldTypeRefNumChilds extends FieldType {
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     print("getListContent (ref childs)");
-    Query col = collection != null ? FirebaseFirestore.instance.collection(collection!) : getCollection!(_object);
+    //Query col = collection != null ? FirebaseFirestore.instance.collection(collection!) : getCollection!(_object);
     if (this.addFilter != null) {
       return FutureBuilder(
         future: _getQuery(_object, column).get(),
@@ -99,10 +119,8 @@ class FieldTypeRefNumChilds extends FieldType {
       );
     } else {
       if (sizes.containsKey(_object.reference.path)) {
-        //print("ya estaba calculado: " + sizes[_object.reference.path].toString());
         return _getWidget(sizes[_object.reference.path].toString(), _object);
       } else {
-        //print("no estaba calculado -> future builder");
         return FutureBuilder(
           future: _getQuery(_object, column).count().get(),
           builder: (context, AsyncSnapshot<AggregateQuerySnapshot> snapshot) {

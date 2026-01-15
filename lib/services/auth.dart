@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dashboard/classes/app_user.dart';
-import 'package:firebase_dashboard/services/event.dart';
+import 'package:firebase_dashboard/classes/events.dart';
+import 'package:firebase_dashboard/controllers/event.dart';
 import 'package:get/get.dart';
 
 class AuthService extends GetxService {
@@ -42,7 +43,7 @@ class AuthService extends GetxService {
       if (user == null) {
         _userStack.clear();
         await onUnserLogged(null);
-        Get.find<EventService>().hub.fire("auth/user/logout");
+        EventController.to.fire(UserLogoutEvent());
       } else {
         await signUser(user.uid);
       }
@@ -53,9 +54,10 @@ class AuthService extends GetxService {
     // comprobamos que no sea el último del stack
     if (_userStack.isEmpty || (_userStack.isNotEmpty && userId != _userStack.last.userDoc?.reference.id)) {
       Get.log('añadimos usuario a la pila ${_userStack.length}');
-      _userStack.add(await appUserFactory(userId));
+      AppUser appUser = await appUserFactory(userId);
+      _userStack.add(appUser);
       await onUnserLogged(_userStack.last);
-      Get.find<EventService>().hub.fire("auth/user/logged", userId);
+      EventController.to.fire(UserLoggedEvent(user: appUser));
     }
   }
 
@@ -71,6 +73,6 @@ class AuthService extends GetxService {
     } else {
       await onUnserLogged(_userStack.last);
     }
-    Get.find<EventService>().hub.fire("auth/user/logout");
+    EventController.to.fire(UserLogoutEvent());
   }
 }

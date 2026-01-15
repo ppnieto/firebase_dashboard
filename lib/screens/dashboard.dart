@@ -1,3 +1,4 @@
+import 'package:firebase_dashboard/classes/dashboard_theme.dart';
 import 'package:firebase_dashboard/components/menu_drawer.dart';
 import 'package:firebase_dashboard/controllers/dashboard.dart';
 import 'package:firebase_dashboard/dashboard.dart';
@@ -42,42 +43,56 @@ class DashboardMainScreen extends StatelessWidget {
             Get.put(controller);
           }
           */
-          return Scaffold(
-            appBar: getAppBar(context, controller),
-            drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: DashboardMenuDrawer())),
-            body: Row(
-              children: <Widget>[
-                MediaQuery.of(context).size.width < responsiveDashboardWidth || !controller.isMenu
-                    ? Container()
-                    : Container(
-                        child: Card(
-                          elevation: 2.0,
-                          child: Container(
-                            margin: EdgeInsets.all(0),
-                            height: MediaQuery.of(context).size.height,
-                            width: 300,
-                            child: DashboardMenuDrawer(),
+
+          return Theme(
+            data: Theme.of(context).copyWith(
+              appBarTheme: AppBarTheme(
+                backgroundColor: DashboardThemeController.to.mainScaffoldBackgroundColor,
+                foregroundColor: DashboardThemeController.to.mainScaffoldColor,
+              ),
+            ),
+            child: Scaffold(
+              appBar: getAppBar(context, controller),
+              drawer: Padding(padding: EdgeInsets.only(top: 56), child: Drawer(child: DashboardMenuDrawer())),
+              body: Row(
+                children: <Widget>[
+                  MediaQuery.of(context).size.width < responsiveDashboardWidth || !controller.isMenu
+                      ? Container()
+                      : Container(
+                          child: Card(
+                            elevation: 2.0,
+                            child: Container(
+                              margin: EdgeInsets.all(0),
+                              height: MediaQuery.of(context).size.height,
+                              width: 300,
+                              child: DashboardMenuDrawer(),
+                            ),
                           ),
                         ),
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                        iconButtonTheme: IconButtonThemeData(
+                            style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(DashboardThemeController.to.secondaryScaffoldColor))),
+                        appBarTheme: AppBarTheme(
+                            backgroundColor: DashboardThemeController.to.secondaryScaffoldBackgroundColor,
+                            foregroundColor: DashboardThemeController.to.secondaryScaffoldColor,
+                            iconTheme: IconThemeData(color: DashboardThemeController.to.secondaryScaffoldColor))),
+                    child: Expanded(
+                      child: Navigator(
+                        key: Get.nestedKey(DashboardController.idNestedNavigation),
+                        onGenerateRoute: (settings) {
+                          for (var page in data.pages) {
+                            var pageRoute = getPageRoute(settings, page);
+                            if (pageRoute != null) return pageRoute;
+                          }
+                          return GetPageRoute(page: () => const SizedBox.shrink());
+                        },
                       ),
-                Theme(
-                  data: Theme.of(context)
-                      .copyWith(appBarTheme: Theme.of(context).appBarTheme.copyWith(backgroundColor: Theme.of(context).secondaryHeaderColor)),
-                  child: Expanded(
-                    child: Navigator(
-                      key: Get.nestedKey(DashboardController.idNestedNavigation),
-                      onGenerateRoute: (settings) {
-                        for (var page in data.pages) {
-                          var pageRoute = getPageRoute(settings, page);
-                          if (pageRoute != null) return pageRoute;
-                        }
-                        return GetPageRoute(page: () => const SizedBox.shrink());
-                      },
                     ),
                   ),
-                ),
-                //controller.isSidebar ? Container(width: sideBarWidth, child: widget.sideBar) : SizedBox.shrink(),
-              ],
+                  //controller.isSidebar ? Container(width: sideBarWidth, child: widget.sideBar) : SizedBox.shrink(),
+                ],
+              ),
             ),
           );
         });
@@ -98,7 +113,7 @@ class DashboardMainScreen extends StatelessWidget {
             )
           : null,
       automaticallyImplyLeading: MediaQuery.of(context).size.width < responsiveDashboardWidth ? true : false,
-      backgroundColor: Theme.of(context).primaryColorDark,
+      //backgroundColor: Theme.of(context).primaryColorDark,
       title: Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
         if (controller.data.title != null)
           Expanded(
@@ -106,7 +121,7 @@ class DashboardMainScreen extends StatelessWidget {
               controller.data.title!, // + " - " + subtitle,
               style: TextStyle(
                 fontSize: 24,
-                color: Colors.white,
+                color: DashboardThemeController.to.mainScaffoldColor,
                 fontWeight: FontWeight.bold,
               ),
             ),

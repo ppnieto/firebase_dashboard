@@ -246,7 +246,7 @@ class __GalleryState extends State<_Gallery> {
                           Container(
                               color: Theme.of(context)
                                   .primaryColor
-                                  .withOpacity(0.6),
+                                  .withValues(alpha:0.6),
                               child: IconButton(
                                 icon: Icon(Icons.delete,
                                     size: 20,
@@ -277,7 +277,7 @@ class __GalleryState extends State<_Gallery> {
                             child: Container(
                                 color: Theme.of(context)
                                     .primaryColor
-                                    .withOpacity(0.6),
+                                    .withValues(alpha:0.6),
                                 child: IconButton(
                                   icon: Icon(
                                     Icons.download,

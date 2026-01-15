@@ -8,12 +8,13 @@ class FieldTypeInlineRef extends FieldTypeRef {
     required String refLabel,
     Function? getFilter,
     dynamic initialValue,
+    super.empty,
     Function? getQueryCollection,
-  }) : super(collection: collection, refLabel: refLabel, getFilter: getFilter, initialValue: initialValue, getQueryCollection: getQueryCollection);
+  }) : super(collection: collection,refLabel: refLabel, getFilter: getFilter, initialValue: initialValue, getQueryCollection: getQueryCollection);
 
   @override
   Widget getListWidget(BuildContext context, DocumentSnapshot _object, String content, {TextStyle? style}) {
-    if (preloadedData.isEmpty) {
+    if (preloadedData.isEmpty) {      
       return StreamBuilder(
         stream: getQuery().snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {

@@ -3,8 +3,7 @@ description: A new Flutter package project.
 version: 0.0.1
 
 environment:
-  sdk: ">=2.17.6 <4.0.0"
-  flutter: ">=1.17.0"
+  sdk: '>=3.2.3 <4.0.0'
 
 dependencies:
   flutter:
@@ -28,13 +27,13 @@ dependencies:
   multi_select_flutter:
   multiselect: any
   flutter_tags: 
-  flutter_typeahead: 
+  #flutter_typeahead: 
 
   #syncfusion_flutter_xlsio:
   syncfusion_flutter_datagrid_export: 
   syncfusion_flutter_datagrid: 
   syncfusion_localizations:
-  syncfusion_flutter_xlsio: ^27.1.52
+  syncfusion_flutter_xlsio: 
   
   image_picker:
   dropdown_button2: 
@@ -54,7 +53,7 @@ dependencies:
 
   settings_ui:
 
-  event_hub:
+  event_bus:
 
 flutter_localizations:
     sdk: flutter

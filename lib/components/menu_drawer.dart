@@ -1,3 +1,4 @@
+import 'package:firebase_dashboard/classes/dashboard_theme.dart';
 import 'package:firebase_dashboard/controllers/dashboard.dart';
 import 'package:firebase_dashboard/controllers/menu.dart';
 import 'package:firebase_dashboard/dashboard.dart';
@@ -22,25 +23,47 @@ class DashboardMenuDrawer extends StatelessWidget {
         init: DashboardMenuController(),
         global: false,
         builder: (controller) {
-          return ListView(
-              children: dashboardController.data.menus.map<Widget>((menu) {
-            bool hasRole = true;
-
-            if (menu.role != null) {
-              Function? getRolesFunction =
-                  DashboardUtils.findController<DashboardController>(context:context)
-                      ?.data
-                      .getRolesFunction;
-              //Get.log('getRolesFunction: ${getRolesFunction}');
-              List<String> roles =
-                  getRolesFunction != null ? getRolesFunction() : [];
-              hasRole = roles.contains(menu.role);
-            }
-            bool visible = menu.visible ?? true;
-            return (hasRole && visible)
-                ? menu.build(context, controller) /* _MenuTile(menu: menu)*/
-                : const SizedBox.shrink();
-          }).toList());
+          return Container(
+            color: DashboardThemeController.to.menuBackgroundColor,
+            child: Theme(
+              data: ThemeData(
+                expansionTileTheme: ExpansionTileThemeData(
+                  textColor: DashboardThemeController.to.menuColor,
+                  collapsedTextColor: DashboardThemeController.to.menuColor,
+                  collapsedIconColor: DashboardThemeController.to.menuColor,
+                  collapsedBackgroundColor: DashboardThemeController.to.menuBackgroundColor,
+                  iconColor: DashboardThemeController.to.menuColor,
+                  backgroundColor: DashboardThemeController.to.menuBackgroundColor,
+                  
+                ),
+                listTileTheme: ListTileThemeData(
+                  textColor: DashboardThemeController.to.menuColor,
+                  iconColor: DashboardThemeController.to.menuColor,
+                  selectedColor: DashboardThemeController.to.menuBackgroundColor,
+                  tileColor: DashboardThemeController.to.menuBackgroundColor,
+                  selectedTileColor: DashboardThemeController.to.menuColor,                  
+                ),
+              ),
+              child: ListView(            
+                  children: dashboardController.data.menus.map<Widget>((menu) {
+                bool hasRole = true;
+              
+                if (menu.role != null) {
+                  Function? getRolesFunction =
+                      DashboardUtils.findController<DashboardController>(context:context)
+                          ?.data
+                          .getRolesFunction;
+                  List<String> roles =
+                      getRolesFunction != null ? getRolesFunction() : [];
+                  hasRole = roles.contains(menu.role);
+                }
+                bool visible = menu.visible ?? true;
+                return (hasRole && visible)
+                    ? menu.build(context, controller) /* _MenuTile(menu: menu)*/
+                    : const SizedBox.shrink();
+              }).toList()),
+            ),
+          );
         });
   }
 }

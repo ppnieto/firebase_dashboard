@@ -1,21 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class FieldTypeBoolean extends FieldType {
   final bool editOnList;
   final bool defValue;
 
   FieldTypeBoolean({this.editOnList = false, this.defValue = false});
+
   @override
   getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
-    var value = getFieldValue(column) ?? defValue;
-
+    var value = getField(_object, column.field, defValue);
+    Get.log('FieldTypeBoolean::getListContent $value');
     return Checkbox(
       value: value,
       onChanged: column.editable && editOnList ? (v) => _object.reference.update({column.field: v}) : null,
     );
   }
+
 /*
   @override
   getValue(DocumentSnapshot<Object?> object, ColumnModule column) {

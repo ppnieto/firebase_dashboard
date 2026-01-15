@@ -1,6 +1,3 @@
-import 'package:example/listado1.dart';
-import 'package:example/listado2.dart';
-import 'package:example/listado3.dart';
 import 'package:example/routes.dart';
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';

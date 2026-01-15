@@ -16,6 +16,7 @@ class AdminController extends GetxController {
   late int pageSize;
   final DashboardModule module;
   final Map<String, dynamic>? filtroInicial;
+  final DataGridController datagridController = DataGridController();
 
   GlobalKey<SfDataGridState>? lastSfDatagridKey;
   GlobalKey<SfDataGridState> get newSfDatagridKey {
@@ -65,7 +66,6 @@ class AdminController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-
     await initAdmin();
   }
 
@@ -166,35 +166,31 @@ class AdminController extends GetxController {
           width: module.actionColumnWidth,
           type: FieldTypeWidget(
             builder: (context, object, inList) {
-              return Theme(
-                  data: Theme.of(context).copyWith(
-                      iconButtonTheme: IconButtonThemeData(
-                          style: ButtonStyle(iconColor: MaterialStatePropertyAll(Theme.of(context).primaryColor)))),
-                  child: ListView(
-                    padding: EdgeInsets.only(left: 20),
-                    scrollDirection: Axis.horizontal,
-                    children: <Widget>[
-                      ...module.getActions != null ? module.getActions!(object!, context) : [],
-                      if (module.canRemove && module.deleteDisabled)
-                        Obx(() => deleteEnabled.contains(object!.reference.path)
-                            ? IconButton(
-                                icon: Icon(Icons.delete),
-                                onPressed: () {
-                                  doBorrar(context, object, () {});
-                                },
-                              )
-                            : const SizedBox.shrink()),
-                      if (module.canRemove && !module.deleteDisabled && module.canRemoveInList)
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          tooltip: "Borrar",
-                          onPressed: () {
-                            doBorrar(context, object!, () {});
-                          },
-                        ),
-                      //SizedBox(width: 15)
-                    ].spacing(5),
-                  ));
+              return ListView(
+                padding: EdgeInsets.only(left: 20),
+                scrollDirection: Axis.horizontal,
+                children: <Widget>[
+                  ...module.getActions != null ? module.getActions!(object!, context) : [],
+                  if (module.canRemove && module.deleteDisabled)
+                    Obx(() => deleteEnabled.contains(object!.reference.path)
+                        ? IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              doBorrar(context, object, () {});
+                            },
+                          )
+                        : const SizedBox.shrink()),
+                  if (module.canRemove && !module.deleteDisabled && module.canRemoveInList)
+                    IconButton(
+                      icon: Icon(Icons.delete),
+                      tooltip: "Borrar",
+                      onPressed: () {
+                        doBorrar(context, object!, () {});
+                      },
+                    ),
+                  //SizedBox(width: 15)
+                ].spacing(5),
+              );
             },
           )));
     }

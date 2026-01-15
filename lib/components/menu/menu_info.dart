@@ -1,4 +1,4 @@
-import 'package:firebase_dashboard/controllers/dashboard.dart';
+import 'package:firebase_dashboard/classes/dashboard_theme.dart';
 import 'package:firebase_dashboard/controllers/menu.dart';
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:firebase_dashboard/util.dart';
@@ -14,7 +14,7 @@ class MenuInfo extends Menu {
   @override
   Widget build(BuildContext context, DashboardMenuController menuController) {
     bool selected = menuController.currentMenu?.id == id;
-    return Container(
+    return Material(
       child: ListTile(
         trailing: info(context),
         onTap: () {
@@ -31,9 +31,7 @@ class MenuInfo extends Menu {
         selected: selected,
         leading: Icon(iconData),
         title: Text(label,
-            style: TextStyle(
-              fontSize: 18,
-            )),
+            style: TextStyle(fontSize: 18)),
       ),
     );
   }

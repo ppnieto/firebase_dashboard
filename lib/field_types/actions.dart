@@ -19,11 +19,11 @@ class FieldTypeActions extends FieldType {
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 4),
         child: ElevatedButton.icon(
-            icon: Icon(action.iconData, color: Colors.white),
+            icon: Icon(action.iconData),
             //color: context != null ? Theme.of(context).primaryColor : Colors.blue,
             label: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(action.title, style: TextStyle(color: Colors.white)),
+              child: Text(action.title),
             ),
             onPressed: () {
               action.onTap(_object, context);

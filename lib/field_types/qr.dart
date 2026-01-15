@@ -40,7 +40,7 @@ class FieldTypeQR extends FieldType {
                 updateData(context, column, val);
               })),
       IconButton(
-          icon: Icon(FontAwesomeIcons.sync),
+          icon: Icon(Icons.sync),
           onPressed: () {
             var uuid = new Uuid(
                 //goptions: GlobalOptions(

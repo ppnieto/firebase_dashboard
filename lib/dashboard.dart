@@ -12,6 +12,7 @@ export 'field_types/datetime.dart';
 export 'field_types/spin.dart';
 export 'field_types/boolean.dart';
 export 'field_types/text.dart';
+export 'field_types/number.dart';
 export 'field_types/ref_childs.dart';
 export 'field_types/defecto.dart';
 export 'field_types/subcollection.dart';

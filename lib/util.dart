@@ -59,11 +59,12 @@ class DashboardUtils {
         }
 
         fileBytes = Uint8List.fromList(img.encodePng(image));
-        return uploadFile(context, path, fileBytes);
+        return uploadFile(context, "$path/${xfile.name}", fileBytes);
       } on Error catch (e) {
         print("error en resize");
       }
     }
+    return null;
   }
 
   static Future<UploadResult?> pickAndUploadFile(BuildContext context, String path) async {

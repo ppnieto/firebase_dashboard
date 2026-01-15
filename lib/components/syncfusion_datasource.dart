@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_dashboard/classes/dashboard_theme.dart';
 import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 class SyncfusionDataSource extends DataGridSource {
   final List<ColumnModule> columns;
@@ -29,6 +30,7 @@ class SyncfusionDataSource extends DataGridSource {
         var value;
         if (columnModule != null) {
           if (columnModule.type.async()) {
+            Get.log('await for async column ${columnModule.field} in row ${doc.reference.id}');
             value = await columnModule.type.getAsyncValue(doc, column);
           } else {
             value = columnModule.type.getValue(doc, column);
@@ -55,30 +57,38 @@ class SyncfusionDataSource extends DataGridSource {
   DataGridRowAdapter? buildRow(DataGridRow row) {
     SyncfusionDataGridRow myRow = row as SyncfusionDataGridRow;
     DocumentSnapshot doc = myRow.doc;
+    bool selected = controller.datagridController.selectedRows.contains(row);          
     return DataGridRowAdapter(
-        cells: row.getCells().map<Widget>((dataGridCell) {
-      ColumnModule? column = getColumnModuleByField(dataGridCell.columnName);
-
-      return Container(
-        color: column?.field == '_acciones'
-            ? Theme.of(Get.context!).primaryColor.withOpacity(0.1)
-            : module.backgroundColor != null
-                ? module.backgroundColor!(myRow.doc)
-                : null,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-        alignment: Alignment.centerRight,
-        child: Builder(builder: (context) {
-          return DefaultTextStyle(
-              style: TextStyle(color: Theme.of(context).primaryColorDark),
-              child: column?.type.getListContent(context, doc, column) ?? SizedBox.shrink());
+      color: selected ? DashboardThemeController.to.dataGridSelectedCellBackgroundColor : DashboardThemeController.to.dataGridCellBackgroundColor,      
+      cells: row.getCells().map<Widget>((dataGridCell) {
+        ColumnModule? column = getColumnModuleByField(dataGridCell.columnName);
+        return Container(
+          color: selected ?  DashboardThemeController.to.dataGridSelectedCellBackgroundColor : null,          
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+          alignment: Alignment.centerRight,
+          child: Builder(builder: (context) {
+            Color contentColor = selected ? DashboardThemeController.to.dataGridSelectedCellColor : DashboardThemeController.to.dataGridCellColor;
+            return Theme(
+              data: ThemeData(
+                iconButtonTheme: IconButtonThemeData(
+                  style: ButtonStyle(
+                    foregroundColor: WidgetStatePropertyAll(contentColor)
+                  )
+                ),
+                iconTheme:IconThemeData(color: selected ? DashboardThemeController.to.dataGridSelectedCellColor : DashboardThemeController.to.dataGridCellColor)
+              ),
+              child: DefaultTextStyle(
+                style: TextStyle(color: contentColor),
+                child: column?.type.getListContent(context, doc, column) ?? SizedBox.shrink(),
+              ),
+            );
         }),
       );
     }).toList());
   }
 
   @override
-  Widget? buildTableSummaryCellWidget(
-      GridTableSummaryRow summaryRow, GridSummaryColumn? summaryColumn, RowColumnIndex rowColumnIndex, String summaryValue) {
+  Widget? buildTableSummaryCellWidget(GridTableSummaryRow summaryRow, GridSummaryColumn? summaryColumn, RowColumnIndex rowColumnIndex, String summaryValue) {
     return summaryValue.isEmpty
         ? const SizedBox.shrink()
         : Container(

@@ -21,7 +21,7 @@ abstract class FieldType {
   }
 
   dynamic getField(DocumentSnapshot object, String fieldName, dynamic defValue) {
-    return getFieldFromMap(object.data() as Map<String, dynamic>, fieldName, defValue);
+    return getFieldFromMap(object.data() as Map<String, dynamic>, fieldName, defValue) ?? defValue;
   }
 
   bool hasField(DocumentSnapshot object, String fieldName) {
@@ -37,12 +37,10 @@ abstract class FieldType {
   dynamic getValue(DocumentSnapshot object, ColumnModule column) {
     return object.getFieldAdm(column.field, null);
   }
-  
 
   Future<dynamic> getAsyncValue(DocumentSnapshot object, ColumnModule column) async {
     return getValue(object, column);
   }
-  
 
   Future<void> preloadData() async {}
 
@@ -54,33 +52,31 @@ abstract class FieldType {
 
   getEditContent(BuildContext context, ColumnModule column) {
     return Text("No implementado para tipo " + this.toString());
-  }  
-  
+  }
+
   DocumentSnapshot? getObject() {
     DocumentSnapshot? object;
     if (Get.isRegistered<DetalleController>(tag: module?.name)) {
       return Get.find<DetalleController>(tag: module?.name).object;
-    }    
+    }
     return object;
   }
+
   getFieldValue(ColumnModule columnModule) {
-    Get.log('getFieldValue ${columnModule.field}');
+    DocumentSnapshot? object = getObject();
     var value;
     if (Get.isRegistered<DetalleController>(tag: module?.name)) {
-      Get.log('   DetalleController is registered');
-      var detalleController = Get.find<DetalleController>(tag: module?.name);    
+      var detalleController = Get.find<DetalleController>(tag: module?.name);
       var updatedData = detalleController.updatedData;
-      Get.log('   updateData = $updateData');
       if (updatedData != null) {
-        value = updatedData.valueFor(keyPath:columnModule.field);
+        value = updatedData.valueFor(keyPath: columnModule.field);
       } else {
-        DocumentSnapshot? object = getObject();
-        if (object != null) {
-          value = object.get(columnModule.field);
+        //DocumentSnapshot? object = getObject();
+        if (object != null && object.exists) {
+          value = object.getFieldAdm(columnModule.field,null);
         }
       }
     }
-    Get.log('  => $value');
     return value;
   }
 
@@ -110,9 +106,16 @@ extension SafeFieldAdmin on DocumentSnapshot {
     return get(fieldName);
   }
 
-  bool hasFieldAdm(String fieldName) {
-    var docdata = this.data();
-    if (docdata is Map) return docdata.valueFor(keyPath: fieldName) != null;
+  bool hasFieldAdm(String fieldName) {    
+    var docdata = this.data();    
+    if (docdata is Map) {
+      var value = docdata.valueFor(keyPath: fieldName);
+      if (value is String) {
+        return value.isNotEmpty;
+      } else {
+        return value != null;      
+      }
+    }
     return false;
   }
 }

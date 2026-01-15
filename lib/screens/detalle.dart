@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_dashboard/classes/dashboard_theme.dart';
 import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/controllers/detalle.dart';
 import 'package:firebase_dashboard/util.dart';
@@ -68,51 +69,61 @@ class DetalleScreen extends StatelessWidget {
                 ));
           }
 
-          return Scaffold(
-              appBar: AppBar(
-                title: Text(controller.module.title + (object == null ? " / nuevo" : " / detalle")),
-                centerTitle: false,
-                actionsIconTheme: IconThemeData(
-                    color: /*DashboardMainScreen.dashboardTheme?.iconButtonColor ??*/
-                        Colors.white),
-                actions: (actions +
-                        [
-                          if (AdminController.buttonLocation == ButtonLocation.ActionBar)
-                            IconButton(
-                              padding: EdgeInsets.all(0),
-                              icon: Icon(FontAwesomeIcons.floppyDisk),
-                              onPressed: () {
-                                controller.doGuardar(context);
-                              },
-                            ),
-                          if (controller.module.canRemove && object != null && controller.canDelete)
-                            IconButton(
-                              padding: EdgeInsets.all(0),
-                              icon: Icon(Icons.delete),
-                              onPressed: () async {
-                                // no usamos el AdminController por si es un detalle sin listado
-                                //AdminController adminController = Modular.get<AdminController>(tag: module.name);
-                                AdminController adminController = AdminController(module: module);
-                                adminController.doBorrar(context, object!, () {
-                                  Navigator.of(context).pop();
-                                });
-                              },
-                            )
-                        ])
-                    .spacing(10),
-              ),
-              bottomNavigationBar: AdminController.buttonLocation == ButtonLocation.Bottom
-                  ? ElevatedButton.icon(onPressed: () => controller.doGuardar(context), icon: Icon(Icons.save), label: Text("Guardar")).paddingAll(24)
-                  : null,
-              floatingActionButton: AdminController.buttonLocation == ButtonLocation.Floating
-                  ? FloatingActionButton(
-                      child: Icon(FontAwesomeIcons.floppyDisk),
-                      onPressed: () {
-                        controller.doGuardar(context);
-                      },
-                    )
-                  : null,
-              body: controller.getDetail(context));
+          return Theme(
+            data: Theme.of(context).copyWith(
+                iconButtonTheme:
+                    IconButtonThemeData(style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(DashboardThemeController.to.secondaryScaffoldColor))),
+                floatingActionButtonTheme: FloatingActionButtonThemeData(
+                  backgroundColor: DashboardThemeController.to.floatingButtonBackgroundColor,
+                  foregroundColor: DashboardThemeController.to.floatingButtonColor,
+                )),
+            child: Scaffold(
+                appBar: AppBar(
+                  title: Text(controller.module.title + (object == null ? " / nuevo" : " / detalle")),
+                  centerTitle: false,
+                  actionsIconTheme: IconThemeData(
+                      color: /*DashboardMainScreen.dashboardTheme?.iconButtonColor ??*/
+                          Colors.white),
+                  actions: (actions +
+                          [
+                            if (AdminController.buttonLocation == ButtonLocation.ActionBar)
+                              IconButton(
+                                padding: EdgeInsets.all(0),
+                                icon: Icon(FontAwesomeIcons.floppyDisk),
+                                onPressed: () {
+                                  controller.doGuardar(context);
+                                },
+                              ),
+                            if (controller.module.canRemove && object != null && controller.canDelete)
+                              IconButton(
+                                padding: EdgeInsets.all(0),
+                                icon: Icon(Icons.delete),
+                                onPressed: () async {
+                                  // no usamos el AdminController por si es un detalle sin listado
+                                  //AdminController adminController = Modular.get<AdminController>(tag: module.name);
+                                  AdminController adminController = AdminController(module: module);
+                                  adminController.doBorrar(context, object!, () {
+                                    Navigator.of(context).pop();
+                                  });
+                                },
+                              )
+                          ])
+                      .spacing(10),
+                ),
+                bottomNavigationBar: AdminController.buttonLocation == ButtonLocation.Bottom
+                    ? ElevatedButton.icon(onPressed: () => controller.doGuardar(context), icon: Icon(Icons.save), label: Text("Guardar")).paddingAll(24)
+                    : null,
+                floatingActionButton: AdminController.buttonLocation == ButtonLocation.Floating
+                    ? FloatingActionButton(
+                        heroTag: "detalle_tag",
+                        child: Icon(FontAwesomeIcons.floppyDisk),
+                        onPressed: () {
+                          controller.doGuardar(context);
+                        },
+                      )
+                    : null,
+                body: controller.getDetail(context)),
+          );
         });
   }
 }

@@ -23,14 +23,12 @@ class Menu extends MenuBase {
   @override
   Widget build(BuildContext context, DashboardMenuController menuController) {
     bool selected = menuController.currentMenu?.id == id;
-    return Container(
+    return Material(
       child: ListTile(
         onTap: () {
-          Get.log('onTap menu');
+          Get.log('onTap menu ($selected)');
           menuController.currentMenu = this;
-
-          // eliminamos el AdminController (para que cargue el nuevo sin problema)
-
+          
           if (!selected) {
             DashboardUtils.findController<DashboardController>(context: context)?.showMenu(menuId: this.id!, context: context);
           }
@@ -44,9 +42,7 @@ class Menu extends MenuBase {
         selected: selected,
         leading: Icon(iconData),
         title: Text(label,
-            style: TextStyle(
-              fontSize: 18,
-            )),
+            style: TextStyle(fontSize: 18)),
       ),
     );
   }

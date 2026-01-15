@@ -53,7 +53,7 @@ class FieldTypeRef extends FieldType {
       docs = doFilter!(docs);
     }
     for (var doc in docs) {
-      preloadedData[doc.reference.path] = doc.getFieldAdm(refLabel, '');
+      preloadedData[doc.reference.path] = doc.getFieldAdm(refLabel, '').toString();
     }
   }
 
@@ -116,14 +116,15 @@ class FieldTypeRef extends FieldType {
           builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
             if (!snapshot.hasData) return SizedBox.shrink();
             if (snapshot.data!.data() != null && snapshot.data!.hasFieldAdm(this.refLabel)) {
-              return getListWidget(context, _object, snapshot.data!.get(this.refLabel) ?? "-",
-                  style: TextStyle(color: Theme.of(context).primaryColorDark));
+              return getListWidget(context, _object, snapshot.data!.get(this.refLabel).toString() ?? "-",
+                  /*style: TextStyle(color: Theme.of(context).primaryColorDark)*/);
             } else
               return getListWidget(context, _object, "<no existe>", style: TextStyle(color: Colors.red));
           },
         );
       }
     } else {
+      //return this.empty ?? getListWidget(context, _object, "!", /*style: TextStyle(color: Colors.red)*/);
       return this.empty ?? getListWidget(context, _object, "<sin asignar>", style: TextStyle(color: Colors.red));
     }
   }

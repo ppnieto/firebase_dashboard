@@ -6,24 +6,28 @@ class FieldTypeWidget extends FieldType {
   @override
   bool async() => this.getAsyncValueFunction != null;
 
-  final Widget? Function(
-      BuildContext context, DocumentSnapshot? object, bool inList) builder;
+  final Widget? Function(BuildContext context, DocumentSnapshot? object, bool inList) builder;
 
-  final Function(DocumentSnapshot<Object?> object, ColumnModule column)?
-      getAsyncValueFunction;
+  final Function(DocumentSnapshot<Object?> object, ColumnModule column)? getAsyncValueFunction;
 
   FieldTypeWidget({required this.builder, this.getAsyncValueFunction});
 
   @override
-  getEditContent(BuildContext context,  ColumnModule column) {
+  getEditContent(BuildContext context, ColumnModule column) {
     return builder(context, getObject(), false);
   }
 
   @override
-  getListContent(
-      BuildContext context, DocumentSnapshot _object, ColumnModule column) {
+  getListContent(BuildContext context, DocumentSnapshot _object, ColumnModule column) {
     return builder(context, _object, true);
   }
 
-
+  @override
+  Future getAsyncValue(DocumentSnapshot<Object?> object, ColumnModule column) {
+    if (getAsyncValueFunction != null) {
+      return getAsyncValueFunction!(object, column);
+    } else {
+      return super.getAsyncValue(object, column);
+    }
+  }
 }

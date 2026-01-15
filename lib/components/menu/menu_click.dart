@@ -12,13 +12,14 @@ class MenuClick extends MenuBase {
 
   @override
   Widget build(BuildContext context, DashboardMenuController menuController) {
-    return Container(
-        child: ListTile(
-      onTap: () {
-        onClick(context);
-      },
-      leading: Icon(iconData),
-      title: Text(label, style: TextStyle(fontSize: 18)),
-    ));
+    return Material(
+      child: ListTile(
+        onTap: () {
+          onClick(context);
+        },
+        leading: Icon(iconData),
+        title: Text(label, style: TextStyle(fontSize: 18)),
+      ),
+    );
   }
 }

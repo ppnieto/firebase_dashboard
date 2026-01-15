@@ -1,6 +1,5 @@
 import 'package:example/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

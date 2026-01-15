@@ -1,4 +1,3 @@
-import 'package:firebase_dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 
 class Listado2Screen extends StatelessWidget {

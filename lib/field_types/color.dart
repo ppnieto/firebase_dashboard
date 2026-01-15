@@ -15,7 +15,7 @@ class FieldTypeColor extends FieldType {
 
   @override
   getEditContent(BuildContext context, ColumnModule column) {
-    String strColor = getFieldValue(column) ??  "aaaaaa";
+    String strColor = getFieldValue(column) ?? "aaaaaa";
     return Row(
       children: [
         StatefulBuilder(builder: (context, setStateBuilder) {
@@ -89,7 +89,7 @@ extension HexColorExt on String {
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 }
-/*
+
 extension HexColorExt2 on Color {
   String toHex({bool leadingHashSign = true}) => '${leadingHashSign ? '#' : ''}'
       '${alpha.toRadixString(16).padLeft(2, '0')}'
@@ -97,4 +97,3 @@ extension HexColorExt2 on Color {
       '${green.toRadixString(16).padLeft(2, '0')}'
       '${blue.toRadixString(16).padLeft(2, '0')}';
 }
-*/

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_dashboard/classes/dashboard_theme.dart';
 import 'package:firebase_dashboard/components/syncfusion_datasource.dart';
 import 'package:firebase_dashboard/controllers/admin.dart';
 import 'package:firebase_dashboard/dashboard.dart';
@@ -12,7 +13,6 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 class SyncfusionDataTable extends StatelessWidget {
   final DashboardModule module;
-  final DataGridController _controller = DataGridController();
 
   SyncfusionDataTable({Key? key, required this.module}) : super(key: key);
 
@@ -22,10 +22,12 @@ class SyncfusionDataTable extends StatelessWidget {
         id: "listado",
         builder: (controller) {
           return SfDataGridTheme(
-              data: SfDataGridThemeData(
-                  headerColor: Theme.of(context).primaryColor.withOpacity(0.3),
-                  filterIconColor: Theme.of(context).primaryColor,
-                  sortIconColor: Theme.of(context).primaryColor),
+              data: SfDataGridThemeData(                
+                headerColor: DashboardThemeController.to.dataGridHeaderBackgroundColor,
+                filterIconColor: DashboardThemeController.to.dataGridHeaderColor,
+                //selectionColor: Theme.of(context).secondaryHeaderColor,
+                //sortIconColor: Theme.of(context).primaryColor,
+              ),
               child: Builder(builder: (context) {
                 AdminController? controller = DashboardUtils.findController<AdminController>(context: context);
                 if (controller == null) {
@@ -36,9 +38,9 @@ class SyncfusionDataTable extends StatelessWidget {
                       child: CircularProgressIndicator(
                     color: Theme.of(context).primaryColor,
                   ));
-                return SfDataGrid(
+                return SfDataGrid(                  
                     key: controller.newSfDatagridKey,
-                    controller: _controller,
+                    controller: controller.datagridController,
                     isScrollbarAlwaysShown: true,
                     allowColumnsResizing: true,
                     allowFiltering: true,
@@ -57,7 +59,8 @@ class SyncfusionDataTable extends StatelessWidget {
                             GridTableSummaryRow(
                                 showSummaryInRow: false,
                                 position: GridTableSummaryRowPosition.bottom,
-                                columns: controller.columns.where((c) => c.summarize)
+                                columns: controller.columns
+                                    .where((c) => c.summarize)
                                     .map((col) => GridSummaryColumn(
                                           name: col.field,
                                           columnName: col.label,
@@ -88,11 +91,9 @@ class SyncfusionDataTable extends StatelessWidget {
                                   width: double.infinity,
                                   decoration: BoxDecoration(
                                       color: Theme.of(context).primaryColor,
-                                      border: BorderDirectional(
-                                          top: BorderSide(width: 1.0, color: Color.fromRGBO(0, 0, 0, 0.26)))),
+                                      border: BorderDirectional(top: BorderSide(width: 1.0, color: Color.fromRGBO(0, 0, 0, 0.26)))),
                                   alignment: Alignment.center,
-                                  child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor)));
+                                  child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor)));
                             } else {
                               return SizedBox.shrink();
                             }
@@ -110,20 +111,19 @@ class SyncfusionDataTable extends StatelessWidget {
                     },
                     onCellTap: (details) {
                       if (details.rowColumnIndex.rowIndex > 0) {
-                        SyncfusionDataGridRow row = controller.datagridSource!
-                            .effectiveRows[details.rowColumnIndex.rowIndex - 1] as SyncfusionDataGridRow;
+                        SyncfusionDataGridRow row = controller.datagridSource!.effectiveRows[details.rowColumnIndex.rowIndex - 1] as SyncfusionDataGridRow;
                         DocumentSnapshot doc = row.doc;
 
                         if (module.selectPreEdit) {
-                          print("selected = ${_controller.selectedIndex} / ${details.rowColumnIndex.rowIndex}");
-                          if (_controller.selectedIndex + 1 == details.rowColumnIndex.rowIndex) {
+                          //print("selected = ${controller.datagridController.selectedIndex} / ${details.rowColumnIndex.rowIndex}");
+                          if (controller.datagridController.selectedIndex + 1 == details.rowColumnIndex.rowIndex) {
                             // click on selected, nos vamos al detalle
                             controller.showDetalleObject(context, doc);
-                            _controller.selectedIndex = -1;
+                            controller.datagridController.selectedIndex = -1;
                           }
                         } else {
                           controller.showDetalleObject(context, doc);
-                          _controller.selectedIndex = -1;
+                          controller.datagridController.selectedIndex = -1;
                         }
                       }
                     },
@@ -143,8 +143,7 @@ class SyncfusionDataTable extends StatelessWidget {
                                   col.label,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 12, color: Theme.of(context).primaryColor),
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: DashboardThemeController.to.dataGridHeaderColor),
                                 ))))
                         .toList());
               }));
